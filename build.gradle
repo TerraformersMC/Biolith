@@ -71,30 +71,32 @@ jar {
     }
 }
 
-publish {
-    onlyIf {
-        checkVersion(archivesBaseName, version)
-    }
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            afterEvaluate {
-                artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-                    builtBy remapMavenJar(MavenPublication)
-                }
-                artifact(sourcesJar) {
-                    builtBy remapSourcesJar(MavenPublication)
-                }
-            }
+allprojects {
+    publish {
+        onlyIf {
+            checkVersion(archivesBaseName, version)
         }
     }
 
-    setupRepositories(repositories)
-}
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                afterEvaluate {
+                    artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
+                        builtBy remapMavenJar(MavenPublication)
+                    }
+                    artifact(sourcesJar) {
+                        builtBy remapSourcesJar(MavenPublication)
+                    }
+                }
+            }
+        }
 
-javadoc.enabled = false
+        setupRepositories(repositories)
+    }
+
+    javadoc.enabled = false
+}
 
 void setupRepositories(RepositoryHandler repositories) {
     //repositories.mavenLocal() // uncomment for testing

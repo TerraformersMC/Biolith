@@ -77,24 +77,16 @@ publish {
     }
 }
 
+// configure the maven publication
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            afterEvaluate {
-                artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-                    builtBy remapMavenJar(MavenPublication)
-                }
-                artifact(sourcesJar) {
-                    builtBy remapSourcesJar(MavenPublication)
-                }
-            }
+            from components.java
         }
     }
 
     setupRepositories(repositories)
 }
-
-javadoc.enabled = false
 
 void setupRepositories(RepositoryHandler repositories) {
     //repositories.mavenLocal() // uncomment for testing
@@ -108,14 +100,6 @@ void setupRepositories(RepositoryHandler repositories) {
             }
         }
     }
-}
-
-task buildBiolith {
-    dependsOn("${it.name}:build")
-}
-
-task publishBiolith {
-        dependsOn("${it.name}:publish")
 }
 
 ext.checkVersion = { archivesBaseName, version ->

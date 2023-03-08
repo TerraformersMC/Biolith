@@ -71,32 +71,30 @@ jar {
     }
 }
 
-allprojects {
-    publish {
-        onlyIf {
-            checkVersion(archivesBaseName, version)
-        }
+publish {
+    onlyIf {
+        checkVersion(archivesBaseName, version)
     }
+}
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                afterEvaluate {
-                    artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
-                        builtBy remapMavenJar(MavenPublication)
-                    }
-                    artifact(sourcesJar) {
-                        builtBy remapSourcesJar(MavenPublication)
-                    }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            afterEvaluate {
+                artifact(file("${project.buildDir}/libs/$archivesBaseName-${version}-maven.jar")) {
+                    builtBy remapMavenJar(MavenPublication)
+                }
+                artifact(sourcesJar) {
+                    builtBy remapSourcesJar(MavenPublication)
                 }
             }
         }
-
-        setupRepositories(repositories)
     }
 
-    javadoc.enabled = false
+    setupRepositories(repositories)
 }
+
+javadoc.enabled = false
 
 void setupRepositories(RepositoryHandler repositories) {
     //repositories.mavenLocal() // uncomment for testing
@@ -110,6 +108,14 @@ void setupRepositories(RepositoryHandler repositories) {
             }
         }
     }
+}
+
+task buildBiolith {
+    dependsOn("${it.name}:build")
+}
+
+task publishBiolith {
+        dependsOn("${it.name}:publish")
 }
 
 ext.checkVersion = { archivesBaseName, version ->

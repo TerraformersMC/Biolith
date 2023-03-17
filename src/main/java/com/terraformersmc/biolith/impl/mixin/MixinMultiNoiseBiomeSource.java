@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl.mixin;
 
 import com.mojang.datafixers.util.Either;
+import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.InterfaceSearchTree;
@@ -36,6 +37,11 @@ public class MixinMultiNoiseBiomeSource {
     // We calculate the vanilla/datapack biome, then we apply any overlays.
     @Inject(method = "getBiome", at = @At("HEAD"), cancellable = true)
     private void biolith$getBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise, CallbackInfoReturnable<RegistryEntry<Biome>> cir) {
+        // TODO: This is a short-term solution to the long-term TerraBlender problem.
+        if (Biolith.DEFER_TO_TERRABLENDER) {
+            return;
+        }
+
         MultiNoiseUtil.NoiseValuePoint noisePoint = noise.sample(x, y, z);
         BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes =
                 ((InterfaceSearchTree<RegistryEntry<Biome>>)(Object) getBiomeEntries().tree)

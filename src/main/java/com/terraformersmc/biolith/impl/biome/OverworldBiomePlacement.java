@@ -88,6 +88,7 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
 
         // Replacement biomes are placed out-of-range so they do not generate except as replacements.
         // This adds the biome to MultiNoiseBiomeSource and BiomeSource so features and structures will place.
+
         replacementRequests.values().stream()
                 .flatMap(requestSet -> requestSet.requests.stream())
                 .map(ReplacementRequest::biome).distinct()
@@ -96,5 +97,10 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
                         parameters.accept(Pair.of(OUT_OF_RANGE, biome));
                     }
                 });
+
+        subBiomeRequests.values().stream()
+                .flatMap(requestSet -> requestSet.requests.stream())
+                .map(SubBiomeRequest::biome).distinct()
+                .forEach(biome -> parameters.accept(Pair.of(OUT_OF_RANGE, biome)));
     }
 }

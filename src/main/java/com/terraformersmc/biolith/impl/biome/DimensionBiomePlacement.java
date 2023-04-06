@@ -149,7 +149,6 @@ public abstract class DimensionBiomePlacement {
             requests.removeIf(request -> request.biome.equals(VANILLA_PLACEHOLDER));
 
             // Calculate biome distribution scale.
-            //
             for (ReplacementRequest request : requests) {
                 total += request.rate;
                 if (request.rate > maxRate) {

@@ -23,7 +23,7 @@ public class NetherBiomePlacement extends DimensionBiomePlacement {
         RegistryEntry<Biome> replacement = original;
         double localNoise = normalize(replacementNoise.sample((double)x / 256D, (double)y / 16D, (double)z / 256D));
 
-        // select
+        // TODO: select
 
         return replacement;
     }

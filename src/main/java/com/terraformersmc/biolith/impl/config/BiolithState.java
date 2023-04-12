@@ -18,6 +18,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@SuppressWarnings("unused")
 public class BiolithState extends PersistentState {
     private final LinkedHashMap<RegistryKey<Biome>, LinkedHashSet<RegistryKey<Biome>>> biomeReplacements = new LinkedHashMap<>(64);
     private final ServerWorld world;

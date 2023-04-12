@@ -21,10 +21,16 @@
   "mixins": [
     "biolith.mixins.json"
   ],
+  "custom": {
+    "loom:injected_interfaces": {
+      "net/minecraft/class_6544\u0024class_6548": ["com/terraformersmc/biolith/impl/biome/InterfaceSearchTree"],
+      "net/minecraft/class_6544\u0024class_6547": ["com/terraformersmc/biolith/impl/compat/InterfaceEntries"]
+    }
+  },
   "depends": {
     "fabricloader": ">=0.14.11",
     "fabric": "*",
-    "minecraft": ">=1.19.4-beta.3 <1.20",
+    "minecraft": ">=1.19.4-beta.3 <1.21",
     "terraform-surfaces-api-v1": "*"
   }
 }

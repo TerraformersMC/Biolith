@@ -11,17 +11,15 @@ public class Biolith implements ModInitializer {
     public static final String MOD_ID = "biolith";
     public static final Logger LOGGER = LogManager.getLogger(MOD_ID);
 
-    public static boolean DEFER_TO_TERRABLENDER;
-
     @Override
     public void onInitialize() {
         // Watch for server events so we can maintain our status data.
         ServerLifecycleEvents.SERVER_STARTING.register(BiomeCoordinator::handleServerStarting);
         ServerLifecycleEvents.SERVER_STOPPED.register(BiomeCoordinator::handleServerStopped);
 
-        // TODO: Temporary TerraBlender compatibility work-around for 1.19.4
-        DEFER_TO_TERRABLENDER = FabricLoader.getInstance().isModLoaded("terrablender");
-
         LOGGER.info("Biolith is loaded!");
+        if (FabricLoader.getInstance().isModLoaded("terrablender")) {
+            LOGGER.info("Enabling Biolith's TerraBlender compatibility layer...");
+        }
     }
 }

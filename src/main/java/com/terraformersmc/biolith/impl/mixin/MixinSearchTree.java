@@ -31,6 +31,7 @@ public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
      * We also find the second-best fit, which can significantly expand the scope of the traversal.
      * Because of this, we needed an implementation with better performance than Mojang's.
      */
+    @Override
     public BiolithFittestNodes<T> biolith$searchTreeGet(MultiNoiseUtil.NoiseValuePoint point, MultiNoiseUtil.NodeDistanceFunction<T> distanceFunction) {
         long[] otherParameters = point.getNoiseValueList();
         MultiNoiseUtil.SearchTree.TreeNode<T> node = firstNode;
@@ -106,13 +107,14 @@ public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
             }
         }
 
-        // Store the second-best (or if none, best) fit we found to use as our search fallback
+        // Store the first- and (if any) second-best fits we found to use as our search fallback
+        previousUltimateNode.set(ultimate);
+        previousPenultimateNode.set(penultimate);
+
         // Return the first- and second-best fit nodes, as well as their fitness (squared n-dimensional distance)
         if (penultimate == null) {
-            previousUltimateNode.set(ultimate);
             return new BiolithFittestNodes<>(ultimate, ultimateDistance);
         } else {
-            previousPenultimateNode.set(penultimate);
             return new BiolithFittestNodes<>(ultimate, ultimateDistance, penultimate, penultimateDistance);
         }
     }

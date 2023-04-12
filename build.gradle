@@ -22,6 +22,11 @@ repositories {
         name = 'TerraformersMC'
         url = 'https://maven.terraformersmc.com/'
     }
+
+    // TerraBlender
+    maven {
+        url = 'https://maven.minecraftforge.net/'
+    }
 }
 
 dependencies {
@@ -35,6 +40,9 @@ dependencies {
 
     // Terraform Surfaces API for OpenSimplexNoise
     include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${project.terraform_surfaces_api_version}"))
+
+    // TerraBlender so we can target it with mixins
+    modImplementation "com.github.glitchfiend:TerraBlender-fabric:${terrablender_version}"
 }
 
 processResources {
@@ -110,7 +118,7 @@ ext.checkVersion = { archivesBaseName, version ->
     try {
         def xml = new URL("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").text
         def metadata = new XmlSlurper().parseText(xml)
-        def versions = metadata.versioning.versions.version*.text();
+        def versions = metadata.versioning.versions.version*.text()
         if (versions.contains(version)) {
             println "$archivesBaseName version $version will not be published; already exists"
             return false

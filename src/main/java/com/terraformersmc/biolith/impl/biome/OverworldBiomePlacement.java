@@ -70,7 +70,7 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
     double getLocalNoise(int x, int y, int z) {
         double localNoise;
 
-        // Three octaves to give some edge fuzz
+        // Four octaves to give some edge fuzz
         localNoise  = replacementNoise.sample((double)(x + seedlets[0]) / 1024D, (double)(z + seedlets[1]) / 1024D);
         localNoise += replacementNoise.sample((double)(x + seedlets[2]) /  256D, (double)(z + seedlets[3]) /  256D) / 8D;
         localNoise += replacementNoise.sample((double)(x + seedlets[4]) /   64D, (double)(z + seedlets[5]) /   64D) / 16D;

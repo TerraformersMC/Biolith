@@ -17,9 +17,9 @@ public class Biolith implements ModInitializer {
         ServerLifecycleEvents.SERVER_STARTING.register(BiomeCoordinator::handleServerStarting);
         ServerLifecycleEvents.SERVER_STOPPED.register(BiomeCoordinator::handleServerStopped);
 
-        LOGGER.info("Biolith is loaded!");
+        LOGGER.info("Biolith is initializing...");
         if (FabricLoader.getInstance().isModLoaded("terrablender")) {
-            LOGGER.info("Enabling Biolith's TerraBlender compatibility layer...");
+            LOGGER.info("Enabling Biolith's TerraBlender compatibility layer.");
         }
     }
 }

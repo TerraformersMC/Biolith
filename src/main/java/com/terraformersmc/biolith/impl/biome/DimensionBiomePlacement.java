@@ -4,7 +4,7 @@ import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.api.biome.SubBiomeMatcher;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.config.BiolithState;
-import com.terraformersmc.terraform.noise.OpenSimplexNoise;
+import com.terraformersmc.terraform.noise.OpenSimplexNoise2;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
@@ -22,7 +22,7 @@ public abstract class DimensionBiomePlacement {
     protected boolean biomesInjected = false;
     protected Registry<Biome> biomeRegistry;
     protected BiolithState state;
-    protected OpenSimplexNoise replacementNoise;
+    protected OpenSimplexNoise2 replacementNoise;
     protected int[] seedlets = new int[8];
     protected Random seedRandom;
     protected final HashMap<RegistryKey<Biome>, ReplacementRequestSet> replacementRequests = new HashMap<>(256);
@@ -41,7 +41,7 @@ public abstract class DimensionBiomePlacement {
             biomeRegistry = registryManager.get(RegistryKeys.BIOME);
         }
         this.state = state;
-        replacementNoise = new OpenSimplexNoise(seed);
+        replacementNoise = new OpenSimplexNoise2(seed);
         seedRandom = new Random(seed);
         replacementRequests.forEach((biomeKey, requestSet) -> requestSet.complete(biomeRegistry));
         subBiomeRequests.forEach((biomeKey, requestSet) -> requestSet.complete(biomeRegistry));
@@ -77,9 +77,10 @@ public abstract class DimensionBiomePlacement {
 
     public abstract void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters);
 
-    // TODO: This is a lazy, stupid, wrong approximation of normalizing simplex values in [-1,1] to unbiased values in [0,1].
+    // Approximation of normalizing K.jpg OpenSimplex2(F) values in [-1,1] to unbiased values in [0,1].
+    // It's pretty close but values dip a bit near the edges and 1% at the +1 edge is a bit high.
     protected double normalize(double value) {
-        return MathHelper.clamp(value * 0.6D + 0.5D, 0D, 1D);
+        return MathHelper.clamp(value * 0.5375D + 0.5D, 0D, 1D);
     }
 
     protected record ReplacementRequest(RegistryKey<Biome> biome, double rate, RegistryEntry<Biome> biomeEntry, double scaled) {

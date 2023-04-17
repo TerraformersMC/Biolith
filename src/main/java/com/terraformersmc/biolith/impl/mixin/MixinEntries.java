@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import terrablender.worldgen.noise.Area;
 
 /**
- * This class provides access to TerraBlender private variables in the noise entries class so Biolith can
+ * This mixin provides access to TerraBlender private variables in the noise entries class so Biolith can
  * provide seamless integration for TerraBlender worlds (using Biolith's tree search in TerraBlender regions).
  */
 @Mixin(MultiNoiseUtil.Entries.class)

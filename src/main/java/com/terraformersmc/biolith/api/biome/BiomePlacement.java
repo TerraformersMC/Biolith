@@ -3,9 +3,34 @@ package com.terraformersmc.biolith.api.biome;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
 @SuppressWarnings("unused")
 public class BiomePlacement {
+    /**
+     * BiomePlacement.addNether()
+     *
+     * Place a Nether biome at the specified mixed noise point.
+     *
+     * @param biome RegistryKey<Biome> - The biome to be placed
+     * @param noisePoint NoiseHypercube - A multi-noise point at which to place the biome
+     */
+    public static void addNether(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
+        BiomeCoordinator.NETHER.addPlacement(biome, noisePoint);
+    }
+
+    /**
+     * BiomePlacement.addOverworld()
+     *
+     * Place an Overworld biome at the specified mixed noise point.
+     *
+     * @param biome RegistryKey<Biome> - The biome to be placed
+     * @param noisePoint NoiseHypercube - A multi-noise point at which to place the biome
+     */
+    public static void addOverworld(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
+        BiomeCoordinator.OVERWORLD.addPlacement(biome, noisePoint);
+    }
+
     /**
      * BiomePlacement.replaceNether()
      *

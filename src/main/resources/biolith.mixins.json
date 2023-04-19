@@ -9,6 +9,7 @@
     "MixinEntries",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
+    "MixinMultiNoiseParameterPresets",
     "MixinSearchTree",
     "MixinServerWorld",
     "MixinSurfaceBuilder",

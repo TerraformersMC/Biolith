@@ -67,7 +67,7 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
         return biomeEntry;
     }
 
-    double getLocalNoise(int x, int y, int z) {
+    private double getLocalNoise(int x, int y, int z) {
         double localNoise;
 
         // Four octaves to give some edge fuzz
@@ -82,9 +82,13 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
         return localNoise;
     }
 
-    // NOTE: biomeRegistry is not yet available when writeBiomeParameters() is called by VanillaBiomeParameters.
+    // NOTE: biomeRegistry is NOT yet available when writeBiomeParameters() is called by VanillaBiomeParameters.
     public void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
         biomesInjected = true;
+
+        // Overworld biomes are added directly to the Overworld parameters list.
+
+        placementRequests.forEach(parameters);
 
         // Replacement biomes are placed out-of-range so they do not generate except as replacements.
         // This adds the biome to MultiNoiseBiomeSource and BiomeSource so features and structures will place.

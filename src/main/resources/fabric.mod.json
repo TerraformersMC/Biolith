@@ -15,6 +15,9 @@
   "entrypoints": {
     "main": [
       "com.terraformersmc.biolith.impl.Biolith"
+    ],
+    "preLaunch": [
+      "com.terraformersmc.biolith.impl.BiolithPreLaunch"
     ]
   },
   "accessWidener": "biolith.accesswidener",

@@ -25,6 +25,7 @@ public abstract class DimensionBiomePlacement {
     protected OpenSimplexNoise2 replacementNoise;
     protected int[] seedlets = new int[8];
     protected Random seedRandom;
+    protected final Collection<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> placementRequests = new HashSet<>(256);
     protected final HashMap<RegistryKey<Biome>, ReplacementRequestSet> replacementRequests = new HashMap<>(256);
     protected final HashMap<RegistryKey<Biome>, SubBiomeRequestSet> subBiomeRequests = new HashMap<>(256);
 
@@ -54,6 +55,14 @@ public abstract class DimensionBiomePlacement {
         seedlets[5] = (int) (seed >> 40 & 0xffL);
         seedlets[6] = (int) (seed >> 48 & 0xffL);
         seedlets[7] = (int) (seed >> 56 & 0xffL);
+    }
+
+    public void addPlacement(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
+        if (biomesInjected) {
+            Biolith.LOGGER.error("Biolith's BiomePlacement.addPlacement() called too late for biome: {}", biome.getValue());
+        } else {
+            placementRequests.add(Pair.of(noisePoint, biome));
+        }
     }
 
     public void addReplacement(RegistryKey<Biome> target, RegistryKey<Biome> biome, double rate) {

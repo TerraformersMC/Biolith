@@ -17,8 +17,9 @@ it and join a monastery.  YOU HAVE BEEN WARNED.
 At this time, aside from any new things I've implemented and forgotten
 to update here, the following features are present:
 
-* Replace an Overworld biome entirely or in part.
-* Add a sub-biome to an Overworld or modded biome.
+* Place an Overworld or Nether biome at a specified noise point.
+* Replace an Overworld or Nether biome entirely or in part.
+* Add a sub-biome to an Overworld or Nether or modded biome.
 
 * Register custom surface rules.
 * Override vanilla surfaces using custom surface builders.
@@ -49,7 +50,7 @@ If you wish to include Biolith in your mod for distribution, wrap the `modImplem
 Finally, set the Biolith version you want in `gradle.properties`:
 
 ```
-biolith_version=0.0.1-alpha.5
+biolith_version=0.0.1-alpha.6
 ```
 
 ## Examples
@@ -58,6 +59,9 @@ A wiki would be nice.  Here's some illegible probably outdated examples instead.
 
 ```java
 public void during_mod_init() {
+    // Place a biome at a specific noise point
+    BiomePlacement.addNether(ModBiomeKeys.LUMINOUS_GROVE, MultiNoiseUtil.createNoiseHypercube(0.35F, 0.3F, 0.0F, 0.0F, 0.0F, 0.0F, 0.225F)); }
+
     // replace a vanilla biome 20% of the time
     BiomePlacement.replaceOverworld(BiomeKeys.FOREST, ModBiomeKeys.AUTUMNAL_WOODS, 0.2D);
 

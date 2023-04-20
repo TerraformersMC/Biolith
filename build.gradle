@@ -92,35 +92,6 @@ publish {
     }
 }
 
-// configure the maven publication
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            groupId = group
-            artifactId = archivesBaseName
-            version = version
-
-            from components.java
-        }
-    }
-
-    setupRepositories(repositories)
-}
-
-void setupRepositories(RepositoryHandler repositories) {
-    //repositories.mavenLocal() // uncomment for testing
-    def ENV = System.getenv()
-    if (ENV.MAVEN_URL) {
-        repositories.maven {
-            url ENV.MAVEN_URL
-            credentials {
-                username ENV.MAVEN_USERNAME
-                password ENV.MAVEN_PASSWORD
-            }
-        }
-    }
-}
-
 ext.checkVersion = { archivesBaseName, version ->
     try {
         def xml = new URL("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").text

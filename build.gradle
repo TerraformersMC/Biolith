@@ -4,14 +4,14 @@ plugins {
     id 'io.github.juuxel.loom-quiltflower' version '1.8.0'
 }
 
+archivesBaseName = project.archive_name
+version = project.mod_version
+group = project.maven_group
+
 apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/2.5/ferry.gradle'
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
-
-archivesBaseName = project.archive_name
-version = project.mod_version
-group = project.maven_group
 
 repositories {
     // Add repositories to retrieve artifacts from in here.
@@ -51,13 +51,14 @@ dependencies {
     annotationProcessor("com.llamalad7.mixinextras:mixinextras-fabric:${project.mixin_extras_version}")
 }
 
-processResources {
-    inputs.property "version", project.version
-
-    filesMatching("fabric.mod.json") {
-        expand "version": project.version
-    }
-}
+// Ferry does this
+//processResources {
+//    inputs.property "version", project.version
+//
+//    filesMatching("fabric.mod.json") {
+//        expand "version": project.version
+//    }
+//}
 
 tasks.withType(JavaCompile).configureEach {
     // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.

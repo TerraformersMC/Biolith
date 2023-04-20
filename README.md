@@ -1,4 +1,4 @@
-![icon](./src/main/resources/assets/biolith/icon.png)
+<p align="center"><a href="https://modrinth.com/mod/biolith"><img height="286" width="286" src="./images/biolith.png" /></a></p>
 
 # Biolith
 A biome placement mod focusing on configurability and consistent
@@ -6,11 +6,9 @@ distribution of modded biomes
 
 ## Warning: EXPERIMENTAL
 
-This mod is an experiment.  It may change at any time.  There is no such
-thing as a stable API.  There are missing features.  It may eat your
-favorite socks.  It may corrupt your favorite world.  Any version you
-find or do not find may be the last version ever made.  I could abandon
-it and join a monastery.  YOU HAVE BEEN WARNED.
+This mod is still somewhat experimental.  APIs will remain unstable until
+the first beta release of Biolith.  Biome selection strategies may change,
+resulting in biomes being placed at different locations in existing worlds.
 
 ## Extent of Current Features
 
@@ -23,6 +21,8 @@ to update here, the following features are present:
 
 * Register custom surface rules.
 * Override vanilla surfaces using custom surface builders.
+
+Biolith 0.0.1 alpha releases are known to be compatible with Fabric Minecraft 1.19.4 and 1.20 snapshots.
 
 ## Releases via Maven
 
@@ -55,7 +55,7 @@ biolith_version=0.0.1-alpha.6
 
 ## Examples
 
-A wiki would be nice.  Here's some illegible probably outdated examples instead.
+A wiki would be nice.  For now, here's some illegible probably outdated examples instead.
 
 ```java
 public void during_mod_init() {

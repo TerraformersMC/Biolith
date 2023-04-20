@@ -50,7 +50,7 @@ If you wish to include Biolith in your mod for distribution, wrap the `modImplem
 Finally, set the Biolith version you want in `gradle.properties`:
 
 ```
-biolith_version=0.0.1-alpha.6
+biolith_version=0.0.1-alpha.8
 ```
 
 ## Examples

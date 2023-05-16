@@ -40,11 +40,11 @@ dependencies {
     // Fabric API. This is technically optional, but you probably want it anyway.
     modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
 
+    // TerraBlender so we can target it with mixins
+    modCompileOnlyApi "com.github.glitchfiend:TerraBlender-fabric:${terrablender_version}"
+
     // Terraform Surfaces API for OpenSimplexNoise
     include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${project.terraform_surfaces_api_version}"))
-
-    // TerraBlender so we can target it with mixins
-    modImplementation "com.github.glitchfiend:TerraBlender-fabric:${terrablender_version}"
 
     // MixinExtras so we can mixin in a more compatible manner
     include(modImplementation("com.llamalad7.mixinextras:mixinextras-fabric:${project.mixin_extras_version}"))

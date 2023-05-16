@@ -10,6 +10,7 @@ import terrablender.worldgen.noise.Area;
  * This mixin provides access to TerraBlender private variables in the noise entries class so Biolith can
  * provide seamless integration for TerraBlender worlds (using Biolith's tree search in TerraBlender regions).
  */
+@SuppressWarnings("unused")
 @Mixin(MultiNoiseUtil.Entries.class)
 public class MixinEntries<T> implements InterfaceEntries<T> {
     private boolean initialized;

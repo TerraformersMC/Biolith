@@ -15,9 +15,6 @@
   "entrypoints": {
     "main": [
       "com.terraformersmc.biolith.impl.Biolith"
-    ],
-    "preLaunch": [
-      "com.terraformersmc.biolith.impl.BiolithPreLaunch"
     ]
   },
   "accessWidener": "biolith.accesswidener",
@@ -41,7 +38,7 @@
   "depends": {
     "fabricloader": ">=0.14.11",
     "fabric": "*",
-    "minecraft": ">=1.19.4-beta.3 <1.21",
+    "minecraft": ">=1.20-beta.2 <1.21",
     "terraform-surfaces-api-v1": "*"
   }
 }

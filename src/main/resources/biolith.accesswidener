@@ -16,4 +16,4 @@ accessible  class   net/minecraft/world/biome/source/util/MultiNoiseUtil$SearchT
 accessible  field   net/minecraft/world/biome/source/util/MultiNoiseUtil$SearchTree$TreeLeafNode value Ljava/lang/Object;
 accessible  class   net/minecraft/world/gen/surfacebuilder/MaterialRules$BlockStateRule
 accessible  class   net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext
-accessible  method  net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext method_39551 ()I
+accessible  method  net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext estimateSurfaceHeight ()I

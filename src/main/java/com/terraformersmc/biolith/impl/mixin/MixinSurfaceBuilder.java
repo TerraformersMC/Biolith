@@ -61,7 +61,7 @@ public class MixinSurfaceBuilder {
 	)
 	public void biolith$injectLateSurfaceBuilders(NoiseConfig noiseConfig, BiomeAccess biomeAccess, Registry<Biome> biomeRegistry, boolean useLegacyRandom, HeightContext heightContext, Chunk chunk, ChunkNoiseSampler chunkNoiseSampler, MaterialRules.MaterialRule materialRule, CallbackInfo ci, BlockPos.Mutable lv, ChunkPos lv2, int i, int j, BlockColumn lv3, MaterialRules.MaterialRuleContext lv4, MaterialRules.BlockStateRule lv5, BlockPos.Mutable lv6, int k, int l, int m, int n, int o, RegistryEntry<Biome> lv7) {
 		Random random = randomDeriver.split(m, o, n);
-		int surfaceMinY = lv4.method_39551();
+		int surfaceMinY = lv4.estimateSurfaceHeight();
 
 		for (BiolithSurfaceBuilder builder : SurfaceBuilderCollector.getBuilders()) {
 			if (builder.filterBiome(lv7)) {

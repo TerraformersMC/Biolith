@@ -13,6 +13,9 @@ public class SurfaceGeneration {
      * Add surface rules to the Overworld.  Rules may optionally be pre-sequenced,
      * or Biolith will sequence rules together grouped by rulesOwner, prior to injection.
      *
+     * For TerraBlender compatibility, it is important the rulesOwner's namespace
+     * should be the identical to the namespace of all biomes to which the rules apply.
+     *
      * @param rulesOwner Identifier - Rules will be grouped by rulesOwner during sequencing
      * @param materialRules MaterialRules.MaterialRule - The rules to be injected
      */
@@ -25,6 +28,9 @@ public class SurfaceGeneration {
      *
      * Add surface rules to The Nether.  Rules may optionally be pre-sequenced,
      * or Biolith will sequence rules together grouped by rulesOwner, prior to injection.
+     *
+     * For TerraBlender compatibility, it is important the rulesOwner's namespace
+     * should be the identical to the namespace of all biomes to which the rules apply.
      *
      * @param rulesOwner Identifier - Rules will be grouped by rulesOwner during sequencing
      * @param materialRules MaterialRules.MaterialRule - The rules to be injected

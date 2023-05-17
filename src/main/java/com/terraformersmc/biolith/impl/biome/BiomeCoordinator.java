@@ -2,15 +2,21 @@ package com.terraformersmc.biolith.impl.biome;
 
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.config.BiolithState;
+import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
+import terrablender.api.SurfaceRuleManager;
+
+import java.util.Map;
 
 public class BiomeCoordinator {
     public static final DimensionBiomePlacement NETHER = new NetherBiomePlacement();
     public static final DimensionBiomePlacement OVERWORLD = new OverworldBiomePlacement();
+    private static boolean registeredWithTerrablender = false;
 
     private static BiolithState END_STATE;
     private static BiolithState NETHER_STATE;
@@ -21,6 +27,10 @@ public class BiomeCoordinator {
 
     public static void handleServerStarting(MinecraftServer server) {
         registryManager = server.getCombinedDynamicRegistries().getCombinedRegistryManager();
+
+        if (Biolith.COMPAT_TERRABLENDER) {
+            registerWithTerrablender();
+        }
 
         if (serverStarted) {
             Biolith.LOGGER.warn("Received notification of server start-up but it should already be running!  O.o");
@@ -58,5 +68,30 @@ public class BiomeCoordinator {
 
     public static @Nullable DynamicRegistryManager.Immutable getRegistryManager() {
         return registryManager;
+    }
+
+    // When TerraBlender is present, it ignores our surface rules in the Overworld and Nether.
+    // To avoid this, we submit a duplicate registration to TerraBlender (but only once).
+    private static void registerWithTerrablender() {
+        if (!registeredWithTerrablender) {
+            Map.of(
+                    SurfaceRuleCollector.OVERWORLD, SurfaceRuleManager.RuleCategory.OVERWORLD,
+                    SurfaceRuleCollector.NETHER,    SurfaceRuleManager.RuleCategory.NETHER
+            ).forEach((biolithRules, terrablenderRuleCategory) -> {
+                if (biolithRules.getRuleCount() > 0) {
+                    for (Identifier ruleOwner : biolithRules.getRuleOwners()) {
+                        if (biolithRules.getRuleCount(ruleOwner) > 0) {
+                            SurfaceRuleManager.addSurfaceRules(
+                                    terrablenderRuleCategory,
+                                    ruleOwner.getNamespace(),
+                                    biolithRules.get(ruleOwner)
+                            );
+                        }
+                    }
+                }
+            });
+
+            registeredWithTerrablender = true;
+        }
     }
 }

@@ -4,10 +4,7 @@ import com.terraformersmc.biolith.impl.Biolith;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.surfacebuilder.MaterialRules;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 
 public class SurfaceRuleCollector {
     public static final SurfaceRuleCollector END = new SurfaceRuleCollector();
@@ -35,13 +32,25 @@ public class SurfaceRuleCollector {
     }
 
     public MaterialRules.MaterialRule[] getAll() {
-        MaterialRules.MaterialRule[] rules = new MaterialRules.MaterialRule[0];
+        MaterialRules.MaterialRule[] rulesType = new MaterialRules.MaterialRule[0];
         return MATERIAL_RULES.keySet().stream()
                 .map(this::get)
-                .toList().toArray(rules);
+                .toList().toArray(rulesType);
+    }
+
+    public Set<Identifier> getRuleOwners() {
+        return MATERIAL_RULES.keySet();
     }
 
     public int getRuleCount() {
         return MATERIAL_RULES.size();
+    }
+
+    public int getRuleCount(Identifier ruleOwner) {
+        if (MATERIAL_RULES.containsKey(ruleOwner)) {
+            return MATERIAL_RULES.get(ruleOwner).size();
+        }
+
+        return 0;
     }
 }

@@ -43,7 +43,9 @@ And add the mod to the dependencies section of `build.gradle`:
 
 ```
 dependencies {
-    modImplementation("com.terraformersmc:biolith:${project.biolith_version}")
+    modImplementation("com.terraformersmc:biolith:${project.biolith_version}") {
+		exclude(group: "com.github.glitchfiend")
+	}
 }
 ```
 

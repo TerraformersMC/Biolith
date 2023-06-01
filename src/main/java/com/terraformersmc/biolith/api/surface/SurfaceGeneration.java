@@ -8,19 +8,18 @@ import net.minecraft.world.gen.surfacebuilder.MaterialRules;
 @SuppressWarnings("unused")
 public class SurfaceGeneration {
     /**
-     * SurfaceGeneration.addOverworldSurfaceRules()
+     * SurfaceGeneration.addEndSurfaceRules()
      *
-     * Add surface rules to the Overworld.  Rules may optionally be pre-sequenced,
+     * Add surface rules to The End.  Rules may optionally be pre-sequenced,
      * or Biolith will sequence rules together grouped by rulesOwner, prior to injection.
      *
-     * For TerraBlender compatibility, it is important the rulesOwner's namespace
-     * should be the identical to the namespace of all biomes to which the rules apply.
+     * Note: The End's only vanilla rule is {@code block(Blocks.END_STONE.getDefaultState()) }
      *
      * @param rulesOwner Identifier - Rules will be grouped by rulesOwner during sequencing
      * @param materialRules MaterialRules.MaterialRule - The rules to be injected
      */
-    public static void addOverworldSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
-        SurfaceRuleCollector.OVERWORLD.add(rulesOwner, materialRules);
+    public static void addEndSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
+        SurfaceRuleCollector.END.add(rulesOwner, materialRules);
     }
 
     /**
@@ -37,6 +36,22 @@ public class SurfaceGeneration {
      */
     public static void addNetherSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
         SurfaceRuleCollector.NETHER.add(rulesOwner, materialRules);
+    }
+
+    /**
+     * SurfaceGeneration.addOverworldSurfaceRules()
+     *
+     * Add surface rules to the Overworld.  Rules may optionally be pre-sequenced,
+     * or Biolith will sequence rules together grouped by rulesOwner, prior to injection.
+     *
+     * For TerraBlender compatibility, it is important the rulesOwner's namespace
+     * should be the identical to the namespace of all biomes to which the rules apply.
+     *
+     * @param rulesOwner Identifier - Rules will be grouped by rulesOwner during sequencing
+     * @param materialRules MaterialRules.MaterialRule - The rules to be injected
+     */
+    public static void addOverworldSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
+        SurfaceRuleCollector.OVERWORLD.add(rulesOwner, materialRules);
     }
 
     /**

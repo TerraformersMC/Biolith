@@ -17,7 +17,7 @@ import java.util.stream.Collectors;
 
 @SuppressWarnings("unused")
 @Mixin(targets = "net/minecraft/world/biome/source/MultiNoiseBiomeSourceParameterList$Preset$1")
-public class MixinMultiNoiseParameterPresets {
+public class MixinMultiNoiseParameterPresetNether {
     @ModifyReturnValue(method = "apply", at = @At("RETURN"))
     private <T> MultiNoiseUtil.Entries<T> biolith$applyNetherPreset(MultiNoiseUtil.Entries<T> original, Function<RegistryKey<Biome>, T> biomeEntryGetter) {
         // Wrapping NETHER.writeBiomeParameters() like this allows us to use the same interface there as we do for OVERWORLD.

@@ -14,6 +14,7 @@ import terrablender.api.SurfaceRuleManager;
 import java.util.Map;
 
 public class BiomeCoordinator {
+    public static final DimensionBiomePlacement END = new EndBiomePlacement();
     public static final DimensionBiomePlacement NETHER = new NetherBiomePlacement();
     public static final DimensionBiomePlacement OVERWORLD = new OverworldBiomePlacement();
     private static boolean registeredWithTerrablender = false;
@@ -45,8 +46,8 @@ public class BiomeCoordinator {
         }
 
         if (DimensionTypes.THE_END.equals(world.getDimensionKey())) {
-            // TODO: Implement support for The End? (Hint: it's not MultiNoise ... yet)
             END_STATE = new BiolithState(world, "end");
+            END.serverReplaced(END_STATE, world.getSeed());
         } else if (DimensionTypes.THE_NETHER.equals(world.getDimensionKey())) {
             NETHER_STATE = new BiolithState(world, "nether");
             NETHER.serverReplaced(NETHER_STATE, world.getSeed());

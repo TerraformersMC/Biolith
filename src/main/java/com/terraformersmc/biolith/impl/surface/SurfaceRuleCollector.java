@@ -24,7 +24,7 @@ public class SurfaceRuleCollector {
 
     public MaterialRules.MaterialRule get(Identifier ruleOwner) {
         if (MATERIAL_RULES.get(ruleOwner).size() > 1) {
-            MaterialRules.MaterialRule[] rules = new MaterialRules.MaterialRule[4];
+            MaterialRules.MaterialRule[] rules = new MaterialRules.MaterialRule[0];
             return MaterialRules.sequence(MATERIAL_RULES.get(ruleOwner).toArray(rules));
         } else {
             return MATERIAL_RULES.get(ruleOwner).get(0);

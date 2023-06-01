@@ -9,10 +9,11 @@
     "MixinEntries",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
-    "MixinMultiNoiseParameterPresets",
+    "MixinMultiNoiseParameterPresetNether",
     "MixinSearchTree",
     "MixinServerWorld",
     "MixinSurfaceBuilder",
+    "MixinTheEndBiomeSource",
     "MixinVanillaBiomeParameters"
   ],
   "injectors": {

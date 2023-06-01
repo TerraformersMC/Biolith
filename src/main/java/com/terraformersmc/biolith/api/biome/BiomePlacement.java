@@ -8,6 +8,18 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 @SuppressWarnings("unused")
 public class BiomePlacement {
     /**
+     * BiomePlacement.addEnd()
+     *
+     * Place an End biome at the specified mixed noise point.
+     *
+     * @param biome RegistryKey<Biome> - The biome to be placed
+     * @param noisePoint NoiseHypercube - A multi-noise point at which to place the biome
+     */
+    public static void addEnd(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
+        BiomeCoordinator.END.addPlacement(biome, noisePoint);
+    }
+
+    /**
      * BiomePlacement.addNether()
      *
      * Place a Nether biome at the specified mixed noise point.
@@ -29,6 +41,33 @@ public class BiomePlacement {
      */
     public static void addOverworld(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
         BiomeCoordinator.OVERWORLD.addPlacement(biome, noisePoint);
+    }
+
+
+    /**
+     * BiomePlacement.replaceEnd()
+     *
+     * Completely replace an End biome with another biome.
+     *
+     * @param target RegistryKey<Biome> - The biome to be replaced
+     * @param biome RegistryKey<Biome> - The replacement biome
+     */
+    public static void replaceEnd(RegistryKey<Biome> target, RegistryKey<Biome> biome) {
+        BiomeCoordinator.END.addReplacement(target, biome, 1.0D);
+    }
+
+    /**
+     * BiomePlacement.replaceEnd()
+     *
+     * Partially replace an End biome with another biome.  The proportion must be a positive number,
+     * and any number above 1.0d will result in complete replacement.
+     *
+     * @param target RegistryKey<Biome> - The biome to be replaced
+     * @param biome RegistryKey<Biome> - The replacement biome
+     * @param proportion double - Approximate fraction of the target biome's volume to replace
+     */
+    public static void replaceEnd(RegistryKey<Biome> target, RegistryKey<Biome> biome, double proportion) {
+        BiomeCoordinator.END.addReplacement(target, biome, proportion);
     }
 
     /**
@@ -83,6 +122,20 @@ public class BiomePlacement {
         BiomeCoordinator.OVERWORLD.addReplacement(target, biome, proportion);
     }
 
+
+    /**
+     * BiomePlacement.addSubEnd()
+     *
+     * Add an End biome which replaces matching regions of another biome.  Replacement will occur for any
+     * location in the target biome where all conditions of the matcher evaluate a successful match.
+     *
+     * @param target RegistryKey<Biome> - The biome to be replaced
+     * @param biome RegistryKey<Biome> - The replacement biome
+     * @param matcher SubBiomeMatcher - Matching criteria for when to replace
+     */
+    public static void addSubEnd(RegistryKey<Biome> target, RegistryKey<Biome> biome, SubBiomeMatcher matcher) {
+        BiomeCoordinator.END.addSubBiome(target, biome, matcher);
+    }
 
     /**
      * BiomePlacement.addSubNether()

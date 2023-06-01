@@ -15,14 +15,16 @@ resulting in biomes being placed at different locations in existing worlds.
 At this time, aside from any new things I've implemented and forgotten
 to update here, the following features are present:
 
-* Place an Overworld or Nether biome at a specified noise point.
-* Replace an Overworld or Nether biome entirely or in part.
-* Add a sub-biome to an Overworld or Nether or modded biome.
+* Place an Overworld, Nether, or End biome at a specified noise point.
+* Replace an Overworld, Nether, or End biome entirely or in part.
+* Add a sub-biome to an Overworld, Nether, End, or modded biome.
+* (End biome placement uses custom noise and is only available in 1.20.)
 
 * Register custom surface rules.
 * Override vanilla surfaces using custom surface builders.
 
-Biolith 0.0.1 alpha releases are known to be compatible with Fabric Minecraft 1.19.4 and 1.20 snapshots.
+Biolith 0.0.z releases are known to be compatible with Fabric and Quilt Minecraft 1.19.4, and TerraBlender.
+Biolith 1.0.z releases are known to be compatible with Fabric and Quilt Minecraft 1.20 (snapshots).
 
 ## Releases via Maven
 
@@ -50,7 +52,7 @@ If you wish to include Biolith in your mod for distribution, wrap the `modImplem
 Finally, set the Biolith version you want in `gradle.properties`:
 
 ```
-biolith_version=0.0.1-alpha.8
+biolith_version=1.0.0-alpha.3
 ```
 
 ## Examples

@@ -24,7 +24,7 @@ to update here, the following features are present:
 * Override vanilla surfaces using custom surface builders.
 
 Biolith 0.0.z releases are known to be compatible with Fabric and Quilt Minecraft 1.19.4, and TerraBlender.
-Biolith 1.0.z releases are known to be compatible with Fabric and Quilt Minecraft 1.20 (snapshots).
+Biolith 1.0.z releases are known to be compatible with Fabric and Quilt Minecraft 1.20.
 
 ## Releases via Maven
 
@@ -54,8 +54,10 @@ If you wish to include Biolith in your mod for distribution, wrap the `modImplem
 Finally, set the Biolith version you want in `gradle.properties`:
 
 ```
-biolith_version=1.0.0-alpha.3
+biolith_version=1.0.0-alpha.4
 ```
+
+For convenience, [Biolith can also be downloaded from Modrinth](https://modrinth.com/mod/biolith).
 
 ## Examples
 

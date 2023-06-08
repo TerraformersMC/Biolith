@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl.mixin;
 
 import com.mojang.datafixers.util.Pair;
+import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
@@ -17,6 +18,11 @@ import java.util.function.Consumer;
 public class MixinVanillaBiomeParameters {
     @Inject(method = "writeOverworldBiomeParameters", at = @At("TAIL"))
     private void biolith$injectOverworldBiomes(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters, CallbackInfo ci) {
+        if (Biolith.COMPAT_DATAGEN) {
+            // During datagen we have to avoid adding registry keys.
+            return;
+        }
+
         BiomeCoordinator.OVERWORLD.writeBiomeParameters(parameters);
     }
 }

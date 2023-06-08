@@ -3,6 +3,7 @@ package com.terraformersmc.biolith.impl.mixin;
 import com.google.common.collect.Streams;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.mojang.datafixers.util.Pair;
+import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
@@ -20,6 +21,11 @@ import java.util.stream.Collectors;
 public class MixinMultiNoiseParameterPresetNether {
     @ModifyReturnValue(method = "apply", at = @At("RETURN"))
     private <T> MultiNoiseUtil.Entries<T> biolith$applyNetherPreset(MultiNoiseUtil.Entries<T> original, Function<RegistryKey<Biome>, T> biomeEntryGetter) {
+        if (Biolith.COMPAT_DATAGEN) {
+            // During datagen we have to avoid adding biome registry keys.
+            return original;
+        }
+
         // Wrapping NETHER.writeBiomeParameters() like this allows us to use the same interface there as we do for OVERWORLD.
         // So it looks kind of silly here, but it works fine and makes the code in the main biome placement classes alike.
         List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameterList = new ArrayList<>(64);

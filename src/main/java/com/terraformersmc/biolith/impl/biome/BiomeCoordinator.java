@@ -3,7 +3,9 @@ package com.terraformersmc.biolith.impl.biome;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
+import net.minecraft.registry.CombinedDynamicRegistries;
 import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.ServerDynamicRegistryType;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
@@ -26,8 +28,19 @@ public class BiomeCoordinator {
     private static boolean serverStarted = false;
     protected static DynamicRegistryManager.Immutable registryManager;
 
+    public static void setRegistryManager(CombinedDynamicRegistries<ServerDynamicRegistryType> combinedDynamicRegistries) {
+        // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer so we can set this really early.
+        registryManager = combinedDynamicRegistries.getCombinedRegistryManager();
+    }
+
+    public static @Nullable DynamicRegistryManager.Immutable getRegistryManager() {
+        return registryManager;
+    }
+
     public static void handleServerStarting(MinecraftServer server) {
-        registryManager = server.getCombinedDynamicRegistries().getCombinedRegistryManager();
+        if (registryManager == null) {
+            registryManager = server.getCombinedDynamicRegistries().getCombinedRegistryManager();
+        }
 
         if (Biolith.COMPAT_TERRABLENDER) {
             registerWithTerrablender();
@@ -65,10 +78,6 @@ public class BiomeCoordinator {
         END_STATE = null;
         NETHER_STATE = null;
         OVERWORLD_STATE = null;
-    }
-
-    public static @Nullable DynamicRegistryManager.Immutable getRegistryManager() {
-        return registryManager;
     }
 
     // When TerraBlender is present, it ignores our surface rules in the Overworld and Nether.

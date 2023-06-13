@@ -5,16 +5,16 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "com.terraformersmc.biolith.impl.mixin.BiolithMixinPlugin",
   "mixins": [
+    "MixinBiomeSource",
     "MixinChunkGeneratorSettings",
+    "MixinDimensionOptions",
     "MixinEntries",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
-    "MixinMultiNoiseParameterPresetNether",
     "MixinSearchTree",
     "MixinServerWorld",
     "MixinSurfaceBuilder",
-    "MixinTheEndBiomeSource",
-    "MixinVanillaBiomeParameters"
+    "MixinTheEndBiomeSource"
   ],
   "injectors": {
     "defaultRequire": 1,

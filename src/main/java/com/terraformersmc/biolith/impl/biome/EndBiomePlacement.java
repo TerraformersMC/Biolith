@@ -3,6 +3,7 @@ package com.terraformersmc.biolith.impl.biome;
 import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.terraform.noise.OpenSimplexNoise2;
+import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
@@ -107,6 +108,33 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
         return localNoise;
     }
 
+    public void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters) {
+        biomesInjected = true;
+        RegistryEntryLookup<Biome> biomeEntryGetter = getBiomeLookup();
+
+        // End biomes are merged during construction of the End Biome stream.
+
+        placementRequests.forEach(pair -> parameters.accept(pair.mapSecond(biomeEntryGetter::getOrThrow)));
+
+        // Replacement biomes are placed out-of-range so they do not generate except as replacements.
+        // This adds the biome to TheEndBiomeSource and BiomeSource so features and structures will place.
+
+        replacementRequests.values().stream()
+                .flatMap(requestSet -> requestSet.requests.stream())
+                .map(ReplacementRequest::biome).distinct()
+                .forEach(biome -> {
+                    if (!biome.equals(VANILLA_PLACEHOLDER)) {
+                        parameters.accept(Pair.of(OUT_OF_RANGE, biomeEntryGetter.getOrThrow(biome)));
+                    }
+                });
+
+        subBiomeRequests.values().stream()
+                .flatMap(requestSet -> requestSet.requests.stream())
+                .map(SubBiomeRequest::biome).distinct()
+                .forEach(biome -> parameters.accept(Pair.of(OUT_OF_RANGE, biomeEntryGetter.getOrThrow(biome))));
+    }
+
+    // TODO: Deprecated for clean-up in the mixins -- Review and remove from all DimensionBiomePlacements?
     // NOTE: biomeRegistry IS already available when biomeStream() is called to init BiomeSource.biomes.
     public void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
         assert biomeRegistry != null;

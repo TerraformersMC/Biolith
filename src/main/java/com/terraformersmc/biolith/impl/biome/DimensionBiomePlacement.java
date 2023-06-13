@@ -5,10 +5,7 @@ import com.terraformersmc.biolith.api.biome.SubBiomeMatcher;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.terraform.noise.OpenSimplexNoise2;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.Registry;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
@@ -57,6 +54,19 @@ public abstract class DimensionBiomePlacement {
         seedlets[7] = (int) (seed >> 56 & 0xffL);
     }
 
+    protected RegistryEntryLookup<Biome> getBiomeLookup() {
+        if (biomeRegistry != null) {
+            return biomeRegistry.getReadOnlyWrapper();
+        }
+
+        DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
+        if (registryManager == null) {
+            throw new IllegalStateException("BiomeSource created while RegistryManager is null!");
+        }
+
+        return registryManager.getWrapperOrThrow(RegistryKeys.BIOME);
+    }
+
     public void addPlacement(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
         if (biomesInjected) {
             Biolith.LOGGER.error("Biolith's BiomePlacement.addPlacement() called too late for biome: {}", biome.getValue());
@@ -83,6 +93,8 @@ public abstract class DimensionBiomePlacement {
 
 
     public abstract RegistryEntry<Biome> getReplacement(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes);
+
+    public abstract void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters);
 
     public abstract void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters);
 

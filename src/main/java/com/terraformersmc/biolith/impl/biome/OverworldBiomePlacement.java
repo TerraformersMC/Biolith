@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl.biome;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
@@ -82,6 +83,33 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
         return localNoise;
     }
 
+    public void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters) {
+        biomesInjected = true;
+        RegistryEntryLookup<Biome> biomeEntryGetter = getBiomeLookup();
+
+        // Overworld biomes are added directly to the Overworld parameters list.
+
+        placementRequests.forEach(pair -> parameters.accept(pair.mapSecond(biomeEntryGetter::getOrThrow)));
+
+        // Replacement biomes are placed out-of-range so they do not generate except as replacements.
+        // This adds the biome to MultiNoiseBiomeSource and BiomeSource so features and structures will place.
+
+        replacementRequests.values().stream()
+                .flatMap(requestSet -> requestSet.requests.stream())
+                .map(ReplacementRequest::biome).distinct()
+                .forEach(biome -> {
+                    if (!biome.equals(VANILLA_PLACEHOLDER)) {
+                        parameters.accept(Pair.of(OUT_OF_RANGE, biomeEntryGetter.getOrThrow(biome)));
+                    }
+                });
+
+        subBiomeRequests.values().stream()
+                .flatMap(requestSet -> requestSet.requests.stream())
+                .map(SubBiomeRequest::biome).distinct()
+                .forEach(biome -> parameters.accept(Pair.of(OUT_OF_RANGE, biomeEntryGetter.getOrThrow(biome))));
+    }
+
+    // TODO: Unused since 1.0.0-alpha.5 -- Review and remove from all DimensionBiomePlacements?
     // NOTE: biomeRegistry is NOT yet available when writeBiomeParameters() is called by VanillaBiomeParameters.
     public void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
         biomesInjected = true;

@@ -1,12 +1,20 @@
 package com.terraformersmc.biolith.impl.mixin;
 
 import com.google.common.collect.Streams;
+import com.mojang.datafixers.DataFixer;
+import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
+import net.minecraft.registry.CombinedDynamicRegistries;
 import net.minecraft.registry.Registry;
 import net.minecraft.registry.RegistryKey;
+import net.minecraft.registry.ServerDynamicRegistryType;
+import net.minecraft.resource.ResourcePackManager;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.SaveLoader;
 import net.minecraft.server.WorldGenerationProgressListener;
+import net.minecraft.server.WorldGenerationProgressListenerFactory;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.util.ApiServices;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.dimension.DimensionTypes;
@@ -15,6 +23,8 @@ import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 import net.minecraft.world.gen.surfacebuilder.MaterialRules;
 import net.minecraft.world.level.ServerWorldProperties;
+import net.minecraft.world.level.storage.LevelStorage;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -23,6 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
+import java.net.Proxy;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -31,7 +42,22 @@ import java.util.stream.Stream;
 public abstract class MixinMinecraftServer {
     @Shadow
     @Final
+    private CombinedDynamicRegistries<ServerDynamicRegistryType> combinedDynamicRegistries;
+
+    @Shadow
+    @Final
     private Map<RegistryKey<World>, ServerWorld> worlds;
+
+    @Inject(method = "<init>", at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/server/MinecraftServer;combinedDynamicRegistries:Lnet/minecraft/registry/CombinedDynamicRegistries;",
+            opcode = Opcodes.PUTFIELD,
+            ordinal = 0,
+            shift = At.Shift.AFTER))
+    private void biolith$earlyCaptureRegistries(Thread serverThread, LevelStorage.Session session, ResourcePackManager dataPackManager, SaveLoader saveLoader, Proxy proxy, DataFixer dataFixer, ApiServices apiServices, WorldGenerationProgressListenerFactory worldGenerationProgressListenerFactory, CallbackInfo ci) {
+        // We need the registries really early in case TerraBlender calls us before the Fabric server start event.
+        BiomeCoordinator.setRegistryManager(combinedDynamicRegistries);
+    }
 
     @Inject(method = "createWorlds", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
     private void biolith$prependSurfaceRules(WorldGenerationProgressListener worldGenerationProgressListener, CallbackInfo ci, ServerWorldProperties serverWorldProperties, boolean isDebug, Registry<DimensionOptions> dimensionOptionsRegistry) {

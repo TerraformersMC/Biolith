@@ -11,6 +11,7 @@
     "MixinEntries",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
+    "MixinSaveLoader",
     "MixinSearchTree",
     "MixinServerWorld",
     "MixinSurfaceBuilder",

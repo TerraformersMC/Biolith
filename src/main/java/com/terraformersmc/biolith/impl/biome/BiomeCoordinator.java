@@ -29,7 +29,7 @@ public class BiomeCoordinator {
     protected static DynamicRegistryManager.Immutable registryManager;
 
     public static void setRegistryManager(CombinedDynamicRegistries<ServerDynamicRegistryType> combinedDynamicRegistries) {
-        // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer so we can set this really early.
+        // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer and MixinServerLoad so we can set this really early.
         registryManager = combinedDynamicRegistries.getCombinedRegistryManager();
     }
 

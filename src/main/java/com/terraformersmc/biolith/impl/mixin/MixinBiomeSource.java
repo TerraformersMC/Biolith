@@ -1,5 +1,6 @@
 package com.terraformersmc.biolith.impl.mixin;
 
+import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.InterfaceBiomeSource;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.source.BiomeSource;
@@ -19,7 +20,7 @@ public class MixinBiomeSource implements InterfaceBiomeSource {
     @Override
     public void biolith$setDimensionType(RegistryEntry<DimensionType> dimensionTypeEntry) {
         if (biolith$dimensionTypeEntry != null) {
-            throw new IllegalStateException("Dimension Type already set: " + biolith$dimensionTypeEntry);
+            Biolith.LOGGER.warn("Dimension Type already set: " + biolith$dimensionTypeEntry);
         }
 
         biolith$dimensionTypeEntry = dimensionTypeEntry;

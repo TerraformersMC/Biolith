@@ -64,7 +64,9 @@ public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
             if (node instanceof MultiNoiseUtil.SearchTree.TreeBranchNode<T> branchNode) {
                 stack[stackDepth] = new SimpleArrayIterator<>(branchNode.subTree);
             } else if (node instanceof MultiNoiseUtil.SearchTree.TreeLeafNode<T> leafNode) {
-                Biolith.LOGGER.warn("Only one biome is available in MultiNoiseBiomeSource!");
+                // TODO:  Turns out this is actually a thing.  Consider the implications.
+                //        Maybe implement some system to warn exactly once.
+                //Biolith.LOGGER.warn("Only one biome is available in MultiNoiseBiomeSource!");
                 return new BiolithFittestNodes<>(leafNode, distanceFunction.getDistance(leafNode, otherParameters));
             } else {
                 // This should not occur; it would imply there are no biomes available

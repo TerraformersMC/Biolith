@@ -19,8 +19,11 @@ public class MixinBiomeSource implements InterfaceBiomeSource {
 
     @Override
     public void biolith$setDimensionType(RegistryEntry<DimensionType> dimensionTypeEntry) {
-        if (biolith$dimensionTypeEntry != null) {
-            Biolith.LOGGER.warn("Dimension Type already set: " + biolith$dimensionTypeEntry);
+        if (biolith$dimensionTypeEntry != null &&
+                biolith$dimensionTypeEntry.hasKeyAndValue() && dimensionTypeEntry.hasKeyAndValue() &&
+                !biolith$dimensionTypeEntry.getKey().orElseThrow().equals(dimensionTypeEntry.getKey().orElseThrow())) {
+            Biolith.LOGGER.warn("Dimension Type modified: from '{}' to '{}'",
+                    biolith$dimensionTypeEntry.getKey().orElseThrow(), dimensionTypeEntry.getKey().orElseThrow());
         }
 
         biolith$dimensionTypeEntry = dimensionTypeEntry;

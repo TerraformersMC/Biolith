@@ -78,7 +78,7 @@ public class NetherBiomePlacement extends DimensionBiomePlacement {
 
     public void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters) {
         biomesInjected = true;
-        RegistryEntryLookup<Biome> biomeEntryGetter = getBiomeLookup();
+        RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
 
         // Nether biomes are merged during construction of the Nether parameters list.
 
@@ -103,9 +103,7 @@ public class NetherBiomePlacement extends DimensionBiomePlacement {
     }
 
     // TODO: Unused since 1.0.0-alpha.5 -- Review and remove from all DimensionBiomePlacements?
-    // NOTE: biomeRegistry IS already available when writeBiomeParameters() is called by MultiNoiseBiomeSourceParameterList.
     public void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
-        assert biomeRegistry != null;
         biomesInjected = true;
 
         // Nether biomes are merged during construction of the Nether parameters list.

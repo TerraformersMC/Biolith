@@ -17,7 +17,6 @@ import java.util.function.Consumer;
 
 public abstract class DimensionBiomePlacement {
     protected boolean biomesInjected = false;
-    protected Registry<Biome> biomeRegistry;
     protected BiolithState state;
     protected OpenSimplexNoise2 replacementNoise;
     protected int[] seedlets = new int[8];
@@ -32,17 +31,11 @@ public abstract class DimensionBiomePlacement {
     public static final RegistryKey<Biome> VANILLA_PLACEHOLDER = RegistryKey.of(RegistryKeys.BIOME, Identifier.of(Biolith.MOD_ID, "vanilla"));
 
     protected void serverReplaced(BiolithState state, long seed) {
-        DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
-        if (registryManager == null) {
-            throw new IllegalStateException("Registry manager is null during biome replacement setup!");
-        } else {
-            biomeRegistry = registryManager.get(RegistryKeys.BIOME);
-        }
         this.state = state;
-        replacementNoise = new OpenSimplexNoise2(seed);
-        seedRandom = new Random(seed);
-        replacementRequests.forEach((biomeKey, requestSet) -> requestSet.complete(biomeRegistry));
-        subBiomeRequests.forEach((biomeKey, requestSet) -> requestSet.complete(biomeRegistry));
+        this.replacementNoise = new OpenSimplexNoise2(seed);
+        this.seedRandom = new Random(seed);
+        this.replacementRequests.forEach((biomeKey, requestSet) -> requestSet.complete(BiomeCoordinator.getBiomeLookupOrThrow()));
+        this.subBiomeRequests.forEach((biomeKey, requestSet) -> requestSet.complete(BiomeCoordinator.getBiomeLookupOrThrow()));
 
         seedlets[0] = (int) (seed       & 0xffL);
         seedlets[1] = (int) (seed >>  8 & 0xffL);
@@ -52,19 +45,6 @@ public abstract class DimensionBiomePlacement {
         seedlets[5] = (int) (seed >> 40 & 0xffL);
         seedlets[6] = (int) (seed >> 48 & 0xffL);
         seedlets[7] = (int) (seed >> 56 & 0xffL);
-    }
-
-    protected RegistryEntryLookup<Biome> getBiomeLookup() {
-        if (biomeRegistry != null) {
-            return biomeRegistry.getReadOnlyWrapper();
-        }
-
-        DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
-        if (registryManager == null) {
-            throw new IllegalStateException("BiomeSource created while RegistryManager is null!");
-        }
-
-        return registryManager.getWrapperOrThrow(RegistryKeys.BIOME);
     }
 
     public void addPlacement(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
@@ -127,13 +107,13 @@ public abstract class DimensionBiomePlacement {
             return biome.hashCode();
         }
 
-        ReplacementRequest complete(Registry<Biome> biomeRegistry, double scaled) {
+        ReplacementRequest complete(RegistryEntryLookup<Biome> biomeEntryGetter, double scaled) {
             // Requests must be re-completed after every server restart in case the biome registry has changed.
             // But don't mess with the place-holder; it's always complete and re-completing it will crash.
             if (this.biome.equals(VANILLA_PLACEHOLDER)) {
                 return this;
             } else {
-                return new ReplacementRequest(biome, rate, biomeRegistry.getEntry(biomeRegistry.getOrThrow(biome)), scaled);
+                return new ReplacementRequest(biome, rate, biomeEntryGetter.getOrThrow(biome), scaled);
             }
         }
     }
@@ -158,7 +138,7 @@ public abstract class DimensionBiomePlacement {
             }
         }
 
-        void complete(Registry<Biome> biomeRegistry) {
+        void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
             double maxRate = 0D;
             double total = 0D;
             double vanilla;
@@ -192,7 +172,7 @@ public abstract class DimensionBiomePlacement {
 
             // Finalize the request list and store it in state order.
             requests = requests.stream()
-                    .map(request -> request.complete(biomeRegistry, request.rate / scale))
+                    .map(request -> request.complete(biomeEntryGetter, request.rate / scale))
                     .sorted(Comparator.comparingInt(request -> sortOrder.indexOf(request.biome)))
                     .toList();
         }
@@ -218,9 +198,9 @@ public abstract class DimensionBiomePlacement {
             return biome.hashCode();
         }
 
-        SubBiomeRequest complete(Registry<Biome> biomeRegistry) {
+        SubBiomeRequest complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
             // Requests must be re-completed after every server restart in case the biome registry has changed.
-            return new SubBiomeRequest(biome, matcher, biomeRegistry.getEntry(biomeRegistry.getOrThrow(biome)));
+            return new SubBiomeRequest(biome, matcher, biomeEntryGetter.getOrThrow(biome));
         }
     }
 
@@ -244,13 +224,13 @@ public abstract class DimensionBiomePlacement {
             }
         }
 
-        void complete(Registry<Biome> biomeRegistry) {
+        void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
             // Re-open the list for modification.
             requests = new ArrayList<>(requests);
 
             // Finalize the request list and store it in a somewhat stable order.
             requests = requests.stream()
-                    .map(request -> request.complete(biomeRegistry))
+                    .map(request -> request.complete(biomeEntryGetter))
                     .sorted(Comparator.comparing(request -> request.biome.getValue()))
                     .toList();
         }

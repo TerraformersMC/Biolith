@@ -32,10 +32,11 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     protected void serverReplaced(BiolithState state, long seed) {
         super.serverReplaced(state, seed);
 
-        nodeSmallEndIslands = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseSmallEndIslands, biomeRegistry.getEntry(BiomeKeys.SMALL_END_ISLANDS).orElseThrow());
-        nodeEndBarrens      = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndBarrens,      biomeRegistry.getEntry(BiomeKeys.END_BARRENS).orElseThrow());
-        nodeEndMidlands     = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndMidlands,     biomeRegistry.getEntry(BiomeKeys.END_MIDLANDS).orElseThrow());
-        nodeEndHighlands    = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndHighlands,    biomeRegistry.getEntry(BiomeKeys.END_HIGHLANDS).orElseThrow());
+        RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
+        nodeSmallEndIslands = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseSmallEndIslands, biomeEntryGetter.getOrThrow(BiomeKeys.SMALL_END_ISLANDS));
+        nodeEndBarrens      = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndBarrens,      biomeEntryGetter.getOrThrow(BiomeKeys.END_BARRENS));
+        nodeEndMidlands     = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndMidlands,     biomeEntryGetter.getOrThrow(BiomeKeys.END_MIDLANDS));
+        nodeEndHighlands    = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndHighlands,    biomeEntryGetter.getOrThrow(BiomeKeys.END_HIGHLANDS));
 
         humidityNoise    = new OpenSimplexNoise2(seedlets[7]);
         temperatureNoise = new OpenSimplexNoise2(seedlets[5]);
@@ -110,7 +111,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
 
     public void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters) {
         biomesInjected = true;
-        RegistryEntryLookup<Biome> biomeEntryGetter = getBiomeLookup();
+        RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
 
         // End biomes are merged during construction of the End Biome stream.
 
@@ -135,9 +136,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     }
 
     // TODO: Deprecated for clean-up in the mixins -- Review and remove from all DimensionBiomePlacements?
-    // NOTE: biomeRegistry IS already available when biomeStream() is called to init BiomeSource.biomes.
     public void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
-        assert biomeRegistry != null;
         biomesInjected = true;
 
         // End biomes are merged during construction of the End Biome stream.

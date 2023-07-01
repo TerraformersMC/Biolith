@@ -3,17 +3,17 @@ package com.terraformersmc.biolith.impl.biome;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
-import net.minecraft.registry.CombinedDynamicRegistries;
-import net.minecraft.registry.DynamicRegistryManager;
-import net.minecraft.registry.ServerDynamicRegistryType;
+import net.minecraft.registry.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
 import terrablender.api.SurfaceRuleManager;
 
 import java.util.Map;
+import java.util.Optional;
 
 public class BiomeCoordinator {
     public static final DimensionBiomePlacement END = new EndBiomePlacement();
@@ -35,6 +35,19 @@ public class BiomeCoordinator {
 
     public static @Nullable DynamicRegistryManager.Immutable getRegistryManager() {
         return registryManager;
+    }
+
+    public static Optional<RegistryWrapper.Impl<Biome>> getBiomeLookup() {
+        DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
+        if (registryManager == null) {
+            return Optional.empty();
+        }
+
+        return registryManager.getOptionalWrapper(RegistryKeys.BIOME);
+    }
+
+    public static RegistryEntryLookup<Biome> getBiomeLookupOrThrow() {
+        return getBiomeLookup().orElseThrow();
     }
 
     public static void handleServerStarting(MinecraftServer server) {

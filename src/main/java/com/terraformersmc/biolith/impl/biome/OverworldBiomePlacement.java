@@ -85,7 +85,7 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
 
     public void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters) {
         biomesInjected = true;
-        RegistryEntryLookup<Biome> biomeEntryGetter = getBiomeLookup();
+        RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
 
         // Overworld biomes are added directly to the Overworld parameters list.
 
@@ -110,7 +110,6 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
     }
 
     // TODO: Unused since 1.0.0-alpha.5 -- Review and remove from all DimensionBiomePlacements?
-    // NOTE: biomeRegistry is NOT yet available when writeBiomeParameters() is called by VanillaBiomeParameters.
     public void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
         biomesInjected = true;
 

@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl.config;
 
 import com.terraformersmc.biolith.impl.Biolith;
+import net.minecraft.datafixer.DataFixTypes;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
@@ -49,7 +50,7 @@ public class BiolithState extends PersistentState {
         NbtCompound nbtState = null;
 
         try {
-            nbt = world.getPersistentStateManager().readNbt(stateId, STATE_VERSION);
+            nbt = world.getPersistentStateManager().readNbt(stateId, DataFixTypes.LEVEL, STATE_VERSION);
         } catch (IOException e) {
             Biolith.LOGGER.debug("No saved state found for {}; starting anew...", stateId);
         }

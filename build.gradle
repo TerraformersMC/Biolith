@@ -47,8 +47,7 @@ dependencies {
     include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${project.terraform_surfaces_api_version}"))
 
     // MixinExtras so we can mixin in a more compatible manner
-    include(modImplementation("com.llamalad7.mixinextras:mixinextras-fabric:${project.mixin_extras_version}"))
-    annotationProcessor("com.llamalad7.mixinextras:mixinextras-fabric:${project.mixin_extras_version}")
+    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
 }
 
 // Ferry does this

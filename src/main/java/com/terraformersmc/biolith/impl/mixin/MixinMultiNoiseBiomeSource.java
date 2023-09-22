@@ -44,7 +44,7 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
         synchronized (this) {
             // Only compute this once, since our version is more expensive than Mojang's.
             if (biolith$biomeEntries == null) {
-                // Mojang does the exact same cast in on the return of this operation.
+                // Mojang does the exact same cast on the return of this operation.
                 //noinspection unchecked
                 MultiNoiseUtil.Entries<RegistryEntry<Biome>> originalEntries =
                         (MultiNoiseUtil.Entries<RegistryEntry<Biome>>) original.call(instance, leftMap, rightMap);

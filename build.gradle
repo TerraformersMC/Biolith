@@ -94,6 +94,8 @@ publish {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            from components.java
+
             // Exclude TerraBlender from maven deps so Loom does not load it during builds
             // and tests of other projects using our API (unless they configure it to).
             pom.withXml {

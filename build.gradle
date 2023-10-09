@@ -8,7 +8,7 @@ archivesBaseName = project.archive_name
 version = project.mod_version
 group = project.maven_group
 
-apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/2.6/ferry.gradle'
+apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry.gradle'
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17
@@ -50,14 +50,13 @@ dependencies {
     include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
 }
 
-// Ferry does this
-//processResources {
-//    inputs.property "version", project.version
-//
-//    filesMatching("fabric.mod.json") {
-//        expand "version": project.version
-//    }
-//}
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
 
 tasks.withType(JavaCompile).configureEach {
     // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.

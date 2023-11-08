@@ -8,7 +8,7 @@ archivesBaseName = project.archive_name
 version = project.mod_version
 group = project.maven_group
 
-apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry.gradle'
+apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
 
 sourceCompatibility = JavaVersion.VERSION_17
 targetCompatibility = JavaVersion.VERSION_17

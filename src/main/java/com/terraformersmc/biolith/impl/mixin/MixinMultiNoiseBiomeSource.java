@@ -4,9 +4,11 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
+import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
-import com.terraformersmc.biolith.impl.compat.InterfaceEntries;
+import com.terraformersmc.biolith.impl.compat.TerraBlenderCompat;
+import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
@@ -14,12 +16,12 @@ import net.minecraft.world.biome.source.MultiNoiseBiomeSource;
 import net.minecraft.world.biome.source.MultiNoiseBiomeSourceParameterList;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.minecraft.world.dimension.DimensionTypes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import terrablender.worldgen.IExtendedParameterList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,6 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
     @Shadow
     protected abstract MultiNoiseUtil.Entries<RegistryEntry<Biome>> getBiomeEntries();
 
-    @Shadow @Final private Either<MultiNoiseUtil.Entries<RegistryEntry<Biome>>, RegistryEntry<MultiNoiseBiomeSourceParameterList>> biomeEntries;
     private MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$biomeEntries;
 
     // Inject noise points the first time somebody requests them.
@@ -76,24 +77,19 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
     @Inject(method = "getBiome", at = @At("HEAD"), cancellable = true)
     private void biolith$getBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise, CallbackInfoReturnable<RegistryEntry<Biome>> cir) {
         MultiNoiseUtil.NoiseValuePoint noisePoint = noise.sample(x, y, z);
-        MultiNoiseUtil.SearchTree<RegistryEntry<Biome>> searchTree = null;
-        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes;
+        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = null;
 
-        // Use the correct TerraBlender search tree if available.
-        if (getBiomeEntries() instanceof InterfaceEntries) {
-            // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
-            //noinspection unchecked
-            searchTree = getBiomeEntries().biolith$getuniqueTree(x, y, z);
-        }
-        // Load original search tree if none were provided by TerraBlender.
-        if (searchTree == null) {
-            searchTree = getBiomeEntries().tree;
+        // Find the biome via TerraBlender if available.
+        if (Biolith.COMPAT_TERRABLENDER && getBiomeEntries() instanceof IExtendedParameterList<?> extendedEntries) {
+            fittestNodes = TerraBlenderCompat.getBiome(x, y, z, noisePoint, extendedEntries);
         }
 
-        // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
-        //noinspection unchecked
-        fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+        // Find the biome via Vanilla (including datapacks) if none was provided by TerraBlender.
+        if (fittestNodes == null) {
+            fittestNodes = VanillaCompat.getBiome(noisePoint, getBiomeEntries());
+        }
 
+        // Apply biome overlays.
         if (biolith$getDimensionType().matchesKey(DimensionTypes.OVERWORLD)) {
             cir.setReturnValue(BiomeCoordinator.OVERWORLD.getReplacement(x, y, z, noisePoint, fittestNodes));
         } else if (biolith$getDimensionType().matchesKey(DimensionTypes.THE_NETHER)) {

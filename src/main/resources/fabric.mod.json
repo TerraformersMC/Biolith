@@ -28,8 +28,7 @@
   "custom": {
     "loom:injected_interfaces": {
       "net/minecraft/class_1966": ["com/terraformersmc/biolith/impl/biome/InterfaceBiomeSource"],
-      "net/minecraft/class_6544\u0024class_6548": ["com/terraformersmc/biolith/impl/biome/InterfaceSearchTree"],
-      "net/minecraft/class_6544\u0024class_6547": ["com/terraformersmc/biolith/impl/compat/InterfaceEntries"]
+      "net/minecraft/class_6544\u0024class_6548": ["com/terraformersmc/biolith/impl/biome/InterfaceSearchTree"]
     },
     "modmenu": {
       "badges": [
@@ -45,5 +44,8 @@
     "fabric": "*",
     "minecraft": ">=1.20 <1.21",
     "terraform-surfaces-api-v1": "*"
+  },
+  "breaks": {
+    "terrablender": "<3.0.0"
   }
 }

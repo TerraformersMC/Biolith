@@ -8,6 +8,7 @@
     "MixinBiomeSource",
     "MixinChunkGeneratorSettings",
     "MixinDimensionOptions",
+    "MixinFapiTheEndBiomeData",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
     "MixinSaveLoader",

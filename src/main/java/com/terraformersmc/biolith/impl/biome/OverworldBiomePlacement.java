@@ -6,69 +6,11 @@ import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import org.joml.Vector2f;
 
 import java.util.function.Consumer;
 
 public class OverworldBiomePlacement extends DimensionBiomePlacement {
-    /*
-     * TODO: from the original plan but never implemented ... consider?
-     * Removed biomes become "holes" that fall through to the underlying vanilla biome.  Added biomes will crowd others,
-     * causing the most movement for those closest to them (the former newest additions).
-     */
-
-    /*
-     * Known conditions in the getReplacement functions, validated by MixinMultiNoiseBiomeSource:
-     * - original != null
-     * - original.hasKeyAndValue()
-     */
-
-    @Override
-    public RegistryEntry<Biome> getReplacement(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
-        RegistryEntry<Biome> biomeEntry = fittestNodes.ultimate().value;
-        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
-
-        double localNoise = -1D;
-        Vector2f localRange = null;
-
-        // select phase one -- direct replacements
-        if (replacementRequests.containsKey(biomeKey)) {
-            double locus = 0D;
-            localNoise = getLocalNoise(x, y, z);
-
-            for (ReplacementRequest request : replacementRequests.get(biomeKey).requests) {
-                locus += request.scaled();
-                if (locus > localNoise) {
-
-                    localRange = new Vector2f((float) (locus - request.scaled()), (float) (locus > 0.9999f ? 1f : locus));
-                    if (!request.biome().equals(VANILLA_PLACEHOLDER)) {
-                        biomeEntry = request.biomeEntry();
-                        biomeKey = request.biome();
-                    }
-                    break;
-                }
-            }
-        }
-
-        // select phase two -- sub-biome replacements
-        if (subBiomeRequests.containsKey(biomeKey)) {
-            if (localNoise < 0D) {
-                localNoise = getLocalNoise(x, y, z);
-            }
-
-            for (SubBiomeRequest subRequest : subBiomeRequests.get(biomeKey).requests) {
-                if (subRequest.matcher().matches(fittestNodes, noisePoint, localRange, (float) localNoise)) {
-                    biomeEntry = subRequest.biomeEntry();
-                    biomeKey = subRequest.biome();
-                    break;
-                }
-            }
-        }
-
-        return biomeEntry;
-    }
-
-    private double getLocalNoise(int x, int y, int z) {
+    protected double getLocalNoise(int x, int y, int z) {
         double localNoise;
 
         // Four octaves to give some edge fuzz

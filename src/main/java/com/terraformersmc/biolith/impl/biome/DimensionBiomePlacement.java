@@ -11,6 +11,9 @@ import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import org.jetbrains.annotations.Nullable;
+import org.joml.Vector2f;
+import org.joml.Vector2fc;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -72,11 +75,61 @@ public abstract class DimensionBiomePlacement {
     }
 
 
-    public abstract RegistryEntry<Biome> getReplacement(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes);
+    /*
+     * TODO: from the original plan but never implemented ... consider?
+     * Removed biomes become "holes" that fall through to the underlying vanilla biome.  Added biomes will crowd others,
+     * causing the most movement for those closest to them (the former newest additions).
+     */
+
+    /*
+     * Known conditions in the getReplacement functions, validated by MixinMultiNoiseBiomeSource:
+     * - original != null
+     * - original.hasKeyAndValue()
+     */
+
+    public RegistryEntry<Biome> getReplacement(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
+        RegistryEntry<Biome> biomeEntry = fittestNodes.ultimate().value;
+        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
+
+        double localNoise = -1D;
+        Vector2f localRange = null;
+
+        // select phase one -- direct replacements
+        if (replacementRequests.containsKey(biomeKey)) {
+            localNoise = getLocalNoise(x, y, z);
+            ReplacementRequest request = replacementRequests.get(biomeKey).selectReplacement(localNoise);
+
+            if (request != null) {
+                localRange = request.range();
+
+                if (!request.biome().equals(VANILLA_PLACEHOLDER)) {
+                    biomeEntry = request.biomeEntry();
+                    biomeKey = request.biome();
+                }
+            }
+        }
+
+        // select phase two -- sub-biome replacements
+        if (subBiomeRequests.containsKey(biomeKey)) {
+            if (localNoise < 0D) {
+                localNoise = getLocalNoise(x, y, z);
+            }
+            SubBiomeRequest request = subBiomeRequests.get(biomeKey).selectSubBiome(fittestNodes, noisePoint, localRange, localNoise);
+
+            if (request != null) {
+                biomeEntry = request.biomeEntry();
+                biomeKey = request.biome();
+            }
+        }
+
+        return biomeEntry;
+    }
 
     public abstract void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters);
 
     public abstract void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters);
+
+    protected abstract double getLocalNoise(int x, int y, int z);
 
     // Approximation of normalizing K.jpg OpenSimplex2(F) values in [-1,1] to unbiased values in [0,1].
     // It's pretty close but values dip a bit near the edges and 1% at the +1 edge is a bit high.
@@ -84,13 +137,17 @@ public abstract class DimensionBiomePlacement {
         return MathHelper.clamp(value * 0.5375D + 0.5D, 0D, 1D);
     }
 
-    protected record ReplacementRequest(RegistryKey<Biome> biome, double rate, RegistryEntry<Biome> biomeEntry, double scaled) {
+    protected record ReplacementRequest(RegistryKey<Biome> biome, double rate, RegistryEntry<Biome> biomeEntry, double start, double end) {
         public ReplacementRequest {
             rate = MathHelper.clamp(rate, 0D, 1D);
         }
 
         static ReplacementRequest of(RegistryKey<Biome> biome, double rate) {
-            return new ReplacementRequest(biome, rate, null, rate);
+            return new ReplacementRequest(biome, rate, null, 0D, 0D);
+        }
+
+        public Vector2f range() {
+            return new Vector2f((float) start, end > 0.9999D ? 1f : (float) end);
         }
 
         @Override
@@ -107,13 +164,13 @@ public abstract class DimensionBiomePlacement {
             return biome.hashCode();
         }
 
-        ReplacementRequest complete(RegistryEntryLookup<Biome> biomeEntryGetter, double scaled) {
+        ReplacementRequest complete(RegistryEntryLookup<Biome> biomeEntryGetter, double start, double end) {
             // Requests must be re-completed after every server restart in case the biome registry has changed.
-            // But don't mess with the place-holder; it's always complete and re-completing it will crash.
+            // But don't try to resolve the place-holder; it has no registry entry and will crash.
             if (this.biome.equals(VANILLA_PLACEHOLDER)) {
-                return this;
+                return new ReplacementRequest(biome, rate, null, start, end);
             } else {
-                return new ReplacementRequest(biome, rate, biomeEntryGetter.getOrThrow(biome), scaled);
+                return new ReplacementRequest(biome, rate, biomeEntryGetter.getOrThrow(biome), start, end);
             }
         }
     }
@@ -138,43 +195,59 @@ public abstract class DimensionBiomePlacement {
             }
         }
 
+        public @Nullable ReplacementRequest selectReplacement(double localNoise) {
+            for (ReplacementRequest request : requests) {
+                if (request.end > localNoise) {
+                    return request;
+                }
+            }
+
+            return null;
+        }
+
         void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
             double maxRate = 0D;
-            double total = 0D;
+            double locus;
             double vanilla;
             double scale;
 
-            // Re-open the list for modification.
+            // Re-open the request list for modification.
             requests = new ArrayList<>(requests);
 
             // If an integrated server restarts, we need to clear out the previous vanilla place-holder.
             requests.removeIf(request -> request.biome.equals(VANILLA_PLACEHOLDER));
 
             // Calculate biome distribution scale.
+            locus = 0D;
             for (ReplacementRequest request : requests) {
-                total += request.rate;
+                locus += request.rate;
                 if (request.rate > maxRate) {
                     maxRate = request.rate;
                 }
             }
             vanilla = MathHelper.clamp(1D - maxRate, 0D, 1D);
-            scale = total + vanilla;
+            scale = locus + vanilla;
 
             // Add a special request with a place-holder for the vanilla biome, if/when it still generates.
             if (vanilla > 0D) {
-                requests.add(new ReplacementRequest(VANILLA_PLACEHOLDER, vanilla, null, vanilla / scale));
+                requests.add(ReplacementRequest.of(VANILLA_PLACEHOLDER, vanilla));
             }
 
-            // Update saved state with any additions and fetch the new order.
+            // Update saved state with any additions and sort the requests in the new state order.
             Collections.shuffle(requests, seedRandom);
             state.addBiomeReplacements(target, requests.stream().map(ReplacementRequest::biome));
             List<RegistryKey<Biome>> sortOrder = state.getBiomeReplacements(target).toList();
+            requests.sort(Comparator.comparingInt(request -> sortOrder.indexOf(request.biome)));
 
-            // Finalize the request list and store it in state order.
-            requests = requests.stream()
-                    .map(request -> request.complete(biomeEntryGetter, request.rate / scale))
-                    .sorted(Comparator.comparingInt(request -> sortOrder.indexOf(request.biome)))
-                    .toList();
+            // Finalize the request list.
+            locus = 0D;
+            for (int i = 0; i < requests.size(); ++i) {
+                ReplacementRequest request = requests.get(i);
+                requests.set(i, request.complete(biomeEntryGetter, locus, locus += request.rate / scale));
+            }
+
+            // Store the finalized immutable request list.
+            requests = List.copyOf(requests);
         }
     }
 
@@ -222,6 +295,16 @@ public abstract class DimensionBiomePlacement {
             } else {
                 requests.add(request);
             }
+        }
+
+        public @Nullable SubBiomeRequest selectSubBiome(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Vector2fc localRange, double localNoise) {
+            for (SubBiomeRequest request : requests) {
+                if (request.matcher().matches(fittestNodes, DimensionBiomePlacement.this , noisePoint, localRange, (float) localNoise)) {
+                    return request;
+                }
+            }
+
+            return null;
         }
 
         void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {

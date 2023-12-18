@@ -9,7 +9,6 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import org.joml.Vector2f;
 
 import java.util.function.Consumer;
 
@@ -43,65 +42,14 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
         weirdnessNoise   = new OpenSimplexNoise2(seedlets[3]);
     }
 
-    /*
-     * Known conditions in the getReplacement functions, validated by MixinMultiNoiseBiomeSource:
-     * - original != null
-     * - original.hasKeyAndValue()
-     */
-
-    @Override
-    public RegistryEntry<Biome> getReplacement(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
-        RegistryEntry<Biome> biomeEntry = fittestNodes.ultimate().value;
-        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
-
-        double localNoise = -1D;
-        Vector2f localRange = null;
-
-        // select phase one -- direct replacements
-        if (replacementRequests.containsKey(biomeKey)) {
-            double locus = 0D;
-            localNoise = getLocalNoise(x, y, z);
-
-            for (ReplacementRequest request : replacementRequests.get(biomeKey).requests) {
-                locus += request.scaled();
-                if (locus > localNoise) {
-
-                    localRange = new Vector2f((float) (locus - request.scaled()), (float) (locus > 0.9999f ? 1f : locus));
-                    if (!request.biome().equals(VANILLA_PLACEHOLDER)) {
-                        biomeEntry = request.biomeEntry();
-                        biomeKey = request.biome();
-                    }
-                    break;
-                }
-            }
-        }
-
-        // select phase two -- sub-biome replacements
-        if (subBiomeRequests.containsKey(biomeKey)) {
-            if (localNoise < 0D) {
-                localNoise = getLocalNoise(x, y, z);
-            }
-
-            for (SubBiomeRequest subRequest : subBiomeRequests.get(biomeKey).requests) {
-                if (subRequest.matcher().matches(fittestNodes, noisePoint, localRange, (float) localNoise)) {
-                    biomeEntry = subRequest.biomeEntry();
-                    biomeKey = subRequest.biome();
-                    break;
-                }
-            }
-        }
-
-        return biomeEntry;
-    }
-
-    private double getLocalNoise(int x, int y, int z) {
+    protected double getLocalNoise(int x, int y, int z) {
         double localNoise;
 
         // Four octaves to give some edge fuzz
-        localNoise  = replacementNoise.sample((double)(x + seedlets[0]) / 1024D, (double)(z + seedlets[1]) / 1024D);
-        localNoise += replacementNoise.sample((double)(x + seedlets[2]) /  512D, (double)(z + seedlets[3]) /  512D) / 4D;
-        localNoise += replacementNoise.sample((double)(x + seedlets[4]) /  256D, (double)(z + seedlets[5]) /  256D) / 16D;
-        localNoise += replacementNoise.sample((double)(x + seedlets[6]) /  128D, (double)(z + seedlets[7]) /  128D) / 32D;
+        localNoise  = replacementNoise.sample((double)(x + seedlets[0]) / 256D, (double)(z + seedlets[1]) / 256D);
+        localNoise += replacementNoise.sample((double)(x + seedlets[2]) /  64D, (double)(z + seedlets[3]) /  64D) / 4D;
+        localNoise += replacementNoise.sample((double)(x + seedlets[4]) /  16D, (double)(z + seedlets[5]) /  16D) / 16D;
+        localNoise += replacementNoise.sample((double)(x + seedlets[6]) /   4D, (double)(z + seedlets[7]) /   4D) / 32D;
 
         // Scale the result back to amplitude 1 and then normalize
         localNoise = normalize(localNoise / 1.3125D);

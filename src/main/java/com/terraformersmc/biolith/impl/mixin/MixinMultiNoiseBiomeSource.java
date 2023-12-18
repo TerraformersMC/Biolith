@@ -21,7 +21,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import terrablender.worldgen.IExtendedParameterList;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -80,8 +79,8 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
         BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = null;
 
         // Find the biome via TerraBlender if available.
-        if (Biolith.COMPAT_TERRABLENDER && getBiomeEntries() instanceof IExtendedParameterList<?> extendedEntries) {
-            fittestNodes = TerraBlenderCompat.getBiome(x, y, z, noisePoint, extendedEntries);
+        if (Biolith.COMPAT_TERRABLENDER) {
+            fittestNodes = TerraBlenderCompat.getBiome(x, y, z, noisePoint, getBiomeEntries());
         }
 
         // Find the biome via Vanilla (including datapacks) if none was provided by TerraBlender.

@@ -11,8 +11,14 @@ import terrablender.worldgen.IExtendedParameterList;
 public class TerraBlenderCompat {
     @SuppressWarnings("unchecked")
     // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
-    public static @Nullable BiolithFittestNodes<RegistryEntry<Biome>> getBiome(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, IExtendedParameterList<?> entries) {
+    public static @Nullable BiolithFittestNodes<RegistryEntry<Biome>> getBiome(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries) {
         BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes;
+
+        // We have to hide this cast from the mixin; otherwise without TerraBlender it will crash during transformation...
+        if (!(biomeEntries instanceof IExtendedParameterList<?> entries)) {
+            // This method always terminates if the cast fails, so the pattern variable above remains in scope below.
+            return null;
+        }
 
         // Fall back to Vanilla if TerraBlender thinks it is not ready.
         if (!entries.isInitialized()) {

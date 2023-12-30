@@ -32,7 +32,7 @@ dependencies {
     shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
 
     // TerraBlender so we can target it with mixins
-    modCompileOnlyApi "com.github.glitchfiend:TerraBlender-fabric:${rootProject.terrablender_version}"
+    modCompileOnly "com.github.glitchfiend:TerraBlender-fabric:${rootProject.terrablender_version}"
 
     // Terraform Surfaces API for OpenSimplexNoise
     //include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
@@ -78,6 +78,9 @@ publish {
     onlyIf {
         checkVersion(archivesBaseName, version)
     }
+
+    curseforge_game_versions = "${rootProject.curseforge_game_versions}, Fabric, Quilt"
+    modrinth_mod_loaders = "fabric, quilt"
 }
 
 publishing {

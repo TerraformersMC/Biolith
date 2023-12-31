@@ -28,10 +28,10 @@ dependencies {
     // Remove the next line if you don't want to depend on the API
     //modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive false }
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }
 
-    // TerraBlender so we can target it with mixins
+    // TerraBlender so we can use its API
     modCompileOnly "com.github.glitchfiend:TerraBlender-fabric:${rootProject.terrablender_version}"
 
     // Terraform Surfaces API for OpenSimplexNoise

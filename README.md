@@ -4,10 +4,9 @@
 A biome placement mod focusing on configurability and consistent
 distribution of modded biomes
 
-## Warning: EXPERIMENTAL
+## Warning: SOMEWHAT EXPERIMENTAL
 
-This mod is still somewhat experimental.  APIs will remain unstable until
-the first beta release of Biolith.  Biome selection strategies may change,
+This mod is still somewhat experimental.  Biome selection strategies may change,
 resulting in biomes being placed at different locations in existing worlds.
 
 ## Extent of Current Features
@@ -15,18 +14,24 @@ resulting in biomes being placed at different locations in existing worlds.
 At this time, aside from any new things I've implemented and forgotten
 to update here, the following features are present:
 
+* From v1.2.0-alpha.1, Biolith supports all four major mod loaders!
+
 * Place an Overworld, Nether, or End biome at a specified noise point.
 * Replace an Overworld, Nether, or End biome entirely or in part.
 * Add a sub-biome to an Overworld, Nether, End, or modded biome.
-* (End biome placement uses custom noise and is only available in 1.20.)
+* (End biome placement uses custom noise and is only available in 1.20+.)
 
 * Register custom surface rules.
 * Override vanilla surfaces using custom surface builders.
 
-Biolith 0.0.z releases are known to be compatible with Fabric and Quilt Minecraft 1.19.4, and TerraBlender.
-Biolith 1.0.z releases are known to be compatible with Fabric and Quilt Minecraft 1.20.
+* Fully compatible with TerraBlender and Fabric Biome API biomes.
+* Somewhat compatible with BClib (biome placement may be modified by BClib).
 
 ## Releases via Maven
+
+The instructions below are for Biolith 1.2.0 for Minecraft 1.20.4+.  If you
+are using earlier versions of Biolith, only Fabric/Quilt is supported, and
+the artifact ID is just `biolith`.
 
 Much like Terraform API, add the Terraformers maven repository to your `build.gradle`:
 
@@ -39,11 +44,12 @@ repositories {
 }
 ```
 
-And add the mod to the dependencies section of `build.gradle`:
+And add the Biolith version for your loader (fabric, forge, or neoforge)
+to the dependencies section of `build.gradle`:
 
 ```
 dependencies {
-    modImplementation("com.terraformersmc:biolith:${project.biolith_version}") {
+    modImplementation("com.terraformersmc:biolith-fabric:${project.biolith_version}") {
 		exclude(group: "com.github.glitchfiend")
 	}
 }
@@ -54,34 +60,14 @@ If you wish to include Biolith in your mod for distribution, wrap the `modImplem
 Finally, set the Biolith version you want in `gradle.properties`:
 
 ```
-biolith_version=1.0.0-alpha.4
+biolith_version=1.2.0-alpha.2
 ```
 
 For convenience, [Biolith can also be downloaded from Modrinth](https://modrinth.com/mod/biolith).
 
 ## Examples
 
-A wiki would be nice.  For now, here's some illegible probably outdated examples instead.
-
-```java
-public void during_mod_init() {
-    // Place a biome at a specific noise point
-    BiomePlacement.addNether(ModBiomeKeys.LUMINOUS_GROVE, MultiNoiseUtil.createNoiseHypercube(0.35F, 0.3F, 0.0F, 0.0F, 0.0F, 0.0F, 0.225F)); }
-
-    // replace a vanilla biome 20% of the time
-    BiomePlacement.replaceOverworld(BiomeKeys.FOREST, ModBiomeKeys.AUTUMNAL_WOODS, 0.2D);
-
-    // add an edge sub-biome
-    BiomePlacement.addSubOverworld(BiomeKeys.DESERT, ModBiomeKeys.OASIS, SubBiomeMatcher.of(SubBiomeMatcher.NEAR_BORDER));
-
-    // add a sub-biome based on noise
-    BiomePlacement.addSubOverworld(ModBiomeKeys.LUSH_DESERT, ModBiomeKeys.OASIS, SubBiomeMatcher.of(SubBiomeMatcher.Criterion.ofMax(SubBiomeMatcher.CriterionTargets.PEAKS_VALLEYS, SubBiomeMatcher.CriterionTypes.DISTANCE, 0.2f)));
-
-    // register surface rule(s)
-    SurfaceGeneration.addOverworldSurfaceRules(Identifier.of(Mod.MOD_ID, "surface_rules"), modSurfaceRules);
-
-    // use surface builders
-    // See the javadocs for this; surface builders are a complicated topic.
-    // See also: [Terrestria's surface builders](https://github.com/TerraformersMC/Terrestria/tree/1.19.3/worldgen/src/main/java/com/terraformersmc/terrestria/surfacebuilders)
-}
-```
+Check out [Biolith Examples](https://github.com/gniftygnome/biolith-examples)
+for a complete multi-loader biome placement implementation using Biolith,
+with examples of some of Biolith's capabilities.  I will add more examples
+over time.

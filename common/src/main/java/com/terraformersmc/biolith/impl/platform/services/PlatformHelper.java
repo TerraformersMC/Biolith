@@ -1,6 +1,14 @@
 package com.terraformersmc.biolith.impl.platform.services;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompat;
+import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.server.command.CommandManager;
+import net.minecraft.server.command.ServerCommandSource;
+import org.apache.commons.lang3.function.TriFunction;
+
+import java.nio.file.Path;
 
 public interface PlatformHelper {
     /**
@@ -35,9 +43,23 @@ public interface PlatformHelper {
     }
 
     /**
+     * Gets the filesystem {@link Path} of the game config storage.
+     *
+     * @return The path of the platform's instance configuration directory.
+     */
+    Path getConfigDir();
+
+    /**
      * Gets the current platform's implementation of TerraBlenderCompat.
      *
      * @return The platform's implementation of TerraBlenderCompat.
      */
     TerraBlenderCompat getTerraBlenderCompat();
+
+    /**
+     * Registers a command registration callback with the platform's event system.
+     *
+     * @param callback {@code (dispatcher, registryAccess, environment) -> { dispatcher.register(COMMANDS) } }
+     */
+    void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<ServerCommandSource>, CommandRegistryAccess, CommandManager.RegistrationEnvironment, LiteralCommandNode<ServerCommandSource>> callback);
 }

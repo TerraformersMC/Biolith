@@ -3,6 +3,7 @@ package com.terraformersmc.biolith.impl.biome;
 import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.api.biome.SubBiomeMatcher;
 import com.terraformersmc.biolith.impl.Biolith;
+import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.noise.OpenSimplexNoise2;
 import net.minecraft.registry.*;
@@ -22,6 +23,7 @@ public abstract class DimensionBiomePlacement {
     protected boolean biomesInjected = false;
     protected BiolithState state;
     protected OpenSimplexNoise2 replacementNoise;
+    protected double[] scale;
     protected int[] seedlets = new int[8];
     protected Random seedRandom;
     protected final Collection<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> placementRequests = new HashSet<>(256);
@@ -125,11 +127,63 @@ public abstract class DimensionBiomePlacement {
         return biomeEntry;
     }
 
+    /*
+     * This function is used by BiolithDescribeCommand to peek under the hood of getReplacement();
+     * it is not performance-sensitive like the above function which it imitates.
+     */
+    public BiolithDescribeCommand.DescribeBiomeData getBiomeData(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
+        RegistryEntry<Biome> biomeEntry = fittestNodes.ultimate().value;
+        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
+        double localNoise = getLocalNoise(x, y, z);
+
+        ReplacementRequest lowerRequest = null;
+        ReplacementRequest replacementRequest = null;
+        ReplacementRequest higherRequest = null;
+        SubBiomeRequest subBiomeRequest = null;
+
+        if (replacementRequests.containsKey(biomeKey)) {
+            for (ReplacementRequest request : replacementRequests.get(biomeKey).requests) {
+                if (request.end > localNoise) {
+                    if (replacementRequest == null) {
+                        replacementRequest = request;
+                    } else {
+                        higherRequest = request;
+                        break;
+                    }
+                } else {
+                    lowerRequest = request;
+                }
+            }
+        }
+
+        if (subBiomeRequests.containsKey(biomeKey)) {
+            if (replacementRequest == null) {
+                subBiomeRequest = subBiomeRequests.get(biomeKey).
+                        selectSubBiome(fittestNodes, noisePoint, null, localNoise);
+            } else {
+                subBiomeRequest = subBiomeRequests.get(replacementRequest.biome()).
+                        selectSubBiome(fittestNodes, noisePoint, replacementRequest.range(), localNoise);
+            }
+        }
+
+        // Don't leak the vanilla placeholder.  Nulls mean there is no data.
+        return new BiolithDescribeCommand.DescribeBiomeData(
+                replacementRequest == null ? null : replacementRequest.range(),
+                replacementRequest == null ? null : replacementRequest.biome().equals(VANILLA_PLACEHOLDER) ?
+                        fittestNodes.ultimate().value.getKey().orElseThrow() : replacementRequest.biome(),
+                lowerRequest       == null ? null : lowerRequest.biome().equals(VANILLA_PLACEHOLDER) ?
+                        fittestNodes.ultimate().value.getKey().orElseThrow() : lowerRequest.biome(),
+                higherRequest      == null ? null : higherRequest.biome().equals(VANILLA_PLACEHOLDER) ?
+                        fittestNodes.ultimate().value.getKey().orElseThrow() : higherRequest.biome(),
+                subBiomeRequest    == null || subBiomeRequest.biome().equals(VANILLA_PLACEHOLDER) ? null :
+                        subBiomeRequest.biome());
+    }
+
     public abstract void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters);
 
     public abstract void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters);
 
-    protected abstract double getLocalNoise(int x, int y, int z);
+    public abstract double getLocalNoise(int x, int y, int z);
 
     // Approximation of normalizing K.jpg OpenSimplex2(F) values in [-1,1] to unbiased values in [0,1].
     // It's pretty close but values dip a bit near the edges and 1% at the +1 edge is a bit high.

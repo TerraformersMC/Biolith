@@ -1,0 +1,21 @@
+{
+  "modmenu.descriptionTranslation.biolith":       "Terraformers' world generation utilities",
+
+  "biolith.command.describe.header":              "biome values",
+  "biolith.command.describe.biome.vanilla":       "Vanilla/data biome: ",
+  "biolith.command.describe.biome.terrablender":  "TerraBlender biome: ",
+  "biolith.command.describe.biome.replacement":   "Replacement biome: ",
+  "biolith.command.describe.biome.sub":           "Sub-biome selected: ",
+  "biolith.command.describe.biome.nearest":       "nearest: ",
+  "biolith.command.describe.biome.none":          "(none)",
+  "biolith.command.describe.biome.scale":         "scale",
+  "biolith.command.describe.nonPlayer":           "Caller is non-player; please provide an entity or position.",
+  "biolith.command.describe.notOurs":             "Target dimension is not modified by Biolith.",
+  "biolith.command.help":                         "Command options:\n  §9/biolith help§r - Biolith command info\n  §9/biolith describe§r - Biome and noise info",
+  "biolith.command.help.missing":                 "§eThere is no help for the specified command.",
+  "biolith.command.help.describe":                "§9/biolith describe [at (<entity>|<position>)]§r - Information about noise and biome selection",
+  "biolith.command.hint":                         "§6(Try \"§9/biolith help§6\" for command info...)",
+  "biolith.world.minecraft.the_end":              "The End",
+  "biolith.world.minecraft.the_nether":           "The Nether",
+  "biolith.world.minecraft.overworld":            "Overworld"
+}

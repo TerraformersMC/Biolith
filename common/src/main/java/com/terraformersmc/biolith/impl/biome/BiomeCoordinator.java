@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl.biome;
 
 import com.terraformersmc.biolith.impl.Biolith;
+import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.platform.Services;
 import net.minecraft.registry.*;
@@ -54,7 +55,7 @@ public class BiomeCoordinator {
 
         // When TerraBlender is present, it ignores our surface rules in the Overworld and Nether.
         // To avoid this, we submit a duplicate registration to TerraBlender (but only once).
-        if (Biolith.COMPAT_TERRABLENDER && !registeredWithTerrablender) {
+        if (BiolithCompat.COMPAT_TERRABLENDER && !registeredWithTerrablender) {
             Services.PLATFORM.getTerraBlenderCompat().registerSurfaceRules();
             registeredWithTerrablender = true;
         }

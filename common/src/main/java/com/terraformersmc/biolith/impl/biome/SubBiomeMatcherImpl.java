@@ -130,7 +130,7 @@ public class SubBiomeMatcherImpl extends SubBiomeMatcher {
         return true;
     }
 
-    protected static long pvFromWeirdness(long weirdness) {
+    public static long pvFromWeirdness(long weirdness) {
         /*
          * This is an approximation (more accurate) of:
          *     return MultiNoiseUtil.toLong(DensityFunctions.getPeaksValleysNoise(MultiNoiseUtil.toFloat(weirdness)));

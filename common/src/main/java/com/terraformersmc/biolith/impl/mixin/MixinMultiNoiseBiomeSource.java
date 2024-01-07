@@ -4,9 +4,9 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
-import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
+import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import com.terraformersmc.biolith.impl.platform.Services;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -79,7 +79,7 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
         BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = null;
 
         // Find the biome via TerraBlender if available.
-        if (Biolith.COMPAT_TERRABLENDER) {
+        if (BiolithCompat.COMPAT_TERRABLENDER) {
             fittestNodes = Services.PLATFORM.getTerraBlenderCompat().getBiome(x, y, z, noisePoint, getBiomeEntries());
         }
 
@@ -96,5 +96,10 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
         } else {
             cir.setReturnValue(fittestNodes.ultimate().value);
         }
+    }
+
+    @Override
+    public MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
+        return biolith$biomeEntries;
     }
 }

@@ -69,6 +69,19 @@ public class BiolithDescribeCommand {
         }
         MultiNoiseUtil.MultiNoiseSampler noise = world.getChunkManager().getNoiseConfig().getMultiNoiseSampler();
 
+        // Describe Modern Beta worldgen if it's active.
+        if (BiolithCompat.COMPAT_MODERN_BETA) {
+            int mbStatus = Services.PLATFORM.describeModernBeta(context, biomeX, biomeY, biomeZ, world, biomeSource, biomeEntries, noise);
+            if (mbStatus != 0) {
+                /*
+                 * mbStatus == 0 means Modern Beta although present is not generating this world
+                 * Other values are the return value from our MB compat describe functionality
+                 * (meaning, for better or worse, describe is done)
+                 */
+                return mbStatus;
+            }
+        }
+
         /*
          * Gather data
          */
@@ -214,7 +227,7 @@ public class BiolithDescribeCommand {
         return 1;
     }
 
-    private static MutableText textFromFittestNodes(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
+    public static MutableText textFromFittestNodes(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
         MutableText text = textFromBiome(fittestNodes.ultimate());
 
         if (fittestNodes.penultimate() != null) {
@@ -227,15 +240,15 @@ public class BiolithDescribeCommand {
         return text;
     }
 
-     private static MutableText textFromBiome(MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> leafNode) {
+    public static MutableText textFromBiome(MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> leafNode) {
         return textFromBiome(leafNode.value.getKey().orElseThrow());
     }
 
-    private static MutableText textFromBiome(RegistryEntry<Biome> biome) {
+    public static MutableText textFromBiome(RegistryEntry<Biome> biome) {
         return textFromBiome(biome.getKey().orElseThrow());
     }
 
-    private static MutableText textFromBiome(RegistryKey<Biome> biome) {
+    public static MutableText textFromBiome(RegistryKey<Biome> biome) {
         return Text.translatable(biome.getValue().toTranslationKey("biome"));
     }
 

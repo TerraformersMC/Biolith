@@ -179,6 +179,25 @@ public abstract class DimensionBiomePlacement {
                         subBiomeRequest.biome());
     }
 
+    // For Modern Beta and any other similar direct-only schemes.
+    public RegistryEntry<Biome> getDirectReplacement(int x, int y, int z, RegistryEntry<Biome> biomeEntry) {
+        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
+
+        // select phase one -- direct replacements
+        if (replacementRequests.containsKey(biomeKey)) {
+            ReplacementRequest request = replacementRequests.get(biomeKey).selectReplacement(getLocalNoise(x, y, z));
+
+            if (request != null) {
+
+                if (!request.biome().equals(VANILLA_PLACEHOLDER)) {
+                    biomeEntry = request.biomeEntry();
+                }
+            }
+        }
+
+        return biomeEntry;
+    }
+
     public abstract void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters);
 
     public abstract void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters);

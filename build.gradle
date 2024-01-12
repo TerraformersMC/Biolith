@@ -37,6 +37,18 @@ allprojects {
         maven {
             url = 'https://maven.minecraftforge.net/'
         }
+
+        // for Modern Beta
+        exclusiveContent {
+            forRepository {
+                maven {
+                    url "https://cursemaven.com"
+                }
+            }
+            filter {
+                includeGroup "curse.maven"
+            }
+        }
     }
 
     tasks.withType(JavaCompile).configureEach {

@@ -4,6 +4,7 @@
   "biolith.command.describe.header":              "biome values",
   "biolith.command.describe.biome.vanilla":       "Vanilla/data biome: ",
   "biolith.command.describe.biome.terrablender":  "TerraBlender biome: ",
+  "biolith.command.describe.biome.modern_beta":   "Modern Beta biome: ",
   "biolith.command.describe.biome.replacement":   "Replacement biome: ",
   "biolith.command.describe.biome.sub":           "Sub-biome selected: ",
   "biolith.command.describe.biome.nearest":       "nearest: ",

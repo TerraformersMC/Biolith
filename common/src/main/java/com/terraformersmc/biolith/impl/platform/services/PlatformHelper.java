@@ -1,11 +1,17 @@
 package com.terraformersmc.biolith.impl.platform.services;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompat;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.source.BiomeSource;
+import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.nio.file.Path;
@@ -48,6 +54,22 @@ public interface PlatformHelper {
      * @return The path of the platform's instance configuration directory.
      */
     Path getConfigDir();
+
+    /**
+     * Sends the biolith describe output for Modern Beta biome sources.
+     *
+     * @param context Command context
+     * @param biomeX Biome X position
+     * @param biomeY Biome Y position
+     * @param biomeZ Biome Z position
+     * @param world ServerWorld containing the position
+     * @param biomeSource Relevant biome source
+     * @param biomeEntries Biome entries if any
+     * @return 0 to pass; otherwise the command return value
+     */
+    default int describeModernBeta(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
+        return 0;
+    }
 
     /**
      * Gets the current platform's implementation of TerraBlenderCompat.

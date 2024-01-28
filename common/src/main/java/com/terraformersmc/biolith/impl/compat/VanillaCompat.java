@@ -1,10 +1,15 @@
 package com.terraformersmc.biolith.impl.compat;
 
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.math.ChunkSectionPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
+import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.world.gen.densityfunction.DensityFunction;
 
 public class VanillaCompat {
     @SuppressWarnings("unchecked")
@@ -54,6 +59,33 @@ public class VanillaCompat {
         }
 
         return fittestNodes;
+    }
+
+    // This is a smoothed version of vanilla's End biome placement.
+    public static RegistryEntry<Biome> getOriginalEndBiome(int biomeX, int biomeY, int biomeZ, MultiNoiseUtil.MultiNoiseSampler noise) {
+        RegistryEntry<Biome> biomeEntry;
+
+        int x = BiomeCoords.toBlock(biomeX);
+        int y = BiomeCoords.toBlock(biomeY);
+        int z = BiomeCoords.toBlock(biomeZ);
+
+        if (MathHelper.square((long) ChunkSectionPos.getSectionCoord(x)) +
+                MathHelper.square((long) ChunkSectionPos.getSectionCoord(z)) <= 4096L) {
+            biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.THE_END);
+        } else {
+            double erosion = noise.erosion().sample(new DensityFunction.UnblendedNoisePos(x, y, z));
+            if (erosion > 0.25) {
+                biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_HIGHLANDS);
+            } else if (erosion >= -0.0625) {
+                biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_MIDLANDS);
+            } else if (erosion < -0.21875) {
+                biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.SMALL_END_ISLANDS);
+            } else {
+                biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_BARRENS);
+            }
+        }
+
+        return biomeEntry;
     }
 
     private static MultiNoiseUtil.NoiseHypercube createNoiseHypercube(MultiNoiseUtil.ParameterRange... parameters) {

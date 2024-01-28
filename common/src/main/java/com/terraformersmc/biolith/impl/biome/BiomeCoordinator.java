@@ -14,9 +14,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 
 public class BiomeCoordinator {
-    public static final DimensionBiomePlacement END = new EndBiomePlacement();
-    public static final DimensionBiomePlacement NETHER = new NetherBiomePlacement();
-    public static final DimensionBiomePlacement OVERWORLD = new OverworldBiomePlacement();
+    public static final EndBiomePlacement END = new EndBiomePlacement();
+    public static final NetherBiomePlacement NETHER = new NetherBiomePlacement();
+    public static final OverworldBiomePlacement OVERWORLD = new OverworldBiomePlacement();
     private static boolean registeredWithTerrablender = false;
 
     private static BiolithState END_STATE;

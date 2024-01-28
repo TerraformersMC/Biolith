@@ -15,7 +15,8 @@ public class BiolithFabricMixinConfigPlugin implements IMixinConfigPlugin {
     private static final Supplier<Boolean> TRUE = () -> true;
 
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            "com.terraformersmc.biolith.impl.mixin.MixinMBBiomeSource", () -> FabricLoader.getInstance().isModLoaded("modern_beta")
+            "com.terraformersmc.biolith.impl.mixin.MixinMBBiomeSource", () -> FabricLoader.getInstance().isModLoaded("modern_beta"),
+            "com.terraformersmc.biolith.impl.mixin.MixinTBTheEndBiomeSource", () -> FabricLoader.getInstance().isModLoaded("terrablender")
     );
 
     @Override
@@ -27,7 +28,6 @@ public class BiolithFabricMixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
-
     }
 
     @Override
@@ -37,7 +37,6 @@ public class BiolithFabricMixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public void acceptTargets(Set<String> myTargets, Set<String> otherTargets) {
-
     }
 
     @Override
@@ -47,11 +46,9 @@ public class BiolithFabricMixinConfigPlugin implements IMixinConfigPlugin {
 
     @Override
     public void preApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
     }
 
     @Override
     public void postApply(String targetClassName, ClassNode targetClass, String mixinClassName, IMixinInfo mixinInfo) {
-
     }
 }

@@ -3,10 +3,7 @@ package com.terraformersmc.biolith.impl.commands;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.terraformersmc.biolith.impl.Biolith;
-import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
-import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
-import com.terraformersmc.biolith.impl.biome.EndBiomePlacement;
-import com.terraformersmc.biolith.impl.biome.SubBiomeMatcherImpl;
+import com.terraformersmc.biolith.impl.biome.*;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import com.terraformersmc.biolith.impl.platform.Services;
@@ -20,15 +17,11 @@ import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.minecraft.world.dimension.DimensionTypes;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2f;
 
@@ -120,32 +113,21 @@ public class BiolithDescribeCommand {
             replacementScale = Biolith.getConfigManager().getGeneralConfig().getNetherReplacementScale();
             describeBiomeData = BiomeCoordinator.NETHER.getBiomeData(biomeX, biomeY, biomeZ, noisePoint, fittestNodes);
         } else if (world.getDimensionEntry().matchesKey(DimensionTypes.THE_END)) {
-            RegistryEntry<Biome> original;
-
-            // We can't call the unadulterated End getBiome, so fake up something similar.
-            // TODO: Try harder to find some way to get this from vanilla instead.
-            if (MathHelper.square(ChunkSectionPos.getSectionCoord(pos.getX())) +
-                    MathHelper.square(ChunkSectionPos.getSectionCoord(pos.getZ())) <= 4096L) {
-                original = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.THE_END);
-            } else {
-                double erosion = noise.erosion().sample(
-                        new DensityFunction.UnblendedNoisePos(
-                                (ChunkSectionPos.getSectionCoord(pos.getX()) * 2 + 1) * 8,
-                                pos.getY(),
-                                (ChunkSectionPos.getSectionCoord(pos.getZ()) * 2 + 1) * 8));
-                if (erosion > 0.25) {
-                    original = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_HIGHLANDS);
-                } else if (erosion >= -0.0625) {
-                    original = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_MIDLANDS);
-                } else if (erosion < -0.21875) {
-                    original = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.SMALL_END_ISLANDS);
-                } else {
-                    original = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_BARRENS);
-                }
+            RegistryEntry<Biome> original = VanillaCompat.getOriginalEndBiome(biomeX, biomeY, biomeZ, noise);
+            noisePoint = BiomeCoordinator.END.sampleEndNoise(biomeX, biomeY, biomeZ, noise, original);
+            vanillaFittestNodes = new BiolithFittestNodes<>(
+                    new MultiNoiseUtil.SearchTree.TreeLeafNode<>(DimensionBiomePlacement.OUT_OF_RANGE,
+                            VanillaCompat.getOriginalEndBiome(biomeX, biomeY, biomeZ, noise)), 0L);
+            if (BiolithCompat.COMPAT_TERRABLENDER) {
+                biomeSource.biolith$setBypass(true);
+                fittestNodes = terrablenderFittestNodes = new BiolithFittestNodes<>(
+                        new MultiNoiseUtil.SearchTree.TreeLeafNode<>(DimensionBiomePlacement.OUT_OF_RANGE,
+                                biomeSource.getBiome(biomeX, biomeY, biomeZ, noise)), 0L);
+                biomeSource.biolith$setBypass(false);
             }
-
-            noisePoint = ((EndBiomePlacement) BiomeCoordinator.END).sampleEndNoise(biomeX, biomeY, biomeZ, noise, original);
-            fittestNodes = vanillaFittestNodes = VanillaCompat.getEndBiome(noisePoint, biomeEntries, original);
+            if (fittestNodes == null) {
+                fittestNodes = vanillaFittestNodes;
+            }
             replacementNoise = BiomeCoordinator.END.getLocalNoise(biomeX, biomeY, biomeZ);
             replacementScale = Biolith.getConfigManager().getGeneralConfig().getEndReplacementScale();
             describeBiomeData = BiomeCoordinator.END.getBiomeData(biomeX, biomeY, biomeZ, noisePoint, fittestNodes);

@@ -15,4 +15,11 @@ public interface InterfaceBiomeSource {
     default @Nullable MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
         return null;
     }
+
+    default boolean biolith$getBypass() {
+        return false;
+    }
+
+    default void biolith$setBypass(boolean value) {
+    }
 }

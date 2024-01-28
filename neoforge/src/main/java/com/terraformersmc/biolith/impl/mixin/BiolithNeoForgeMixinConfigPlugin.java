@@ -1,8 +1,7 @@
 package com.terraformersmc.biolith.impl.mixin;
 
 import com.google.common.collect.ImmutableMap;
-import com.llamalad7.mixinextras.MixinExtrasBootstrap;
-import net.minecraftforge.fml.ModList;
+import net.neoforged.fml.ModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -12,7 +11,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-public class BiolithForgeMixinConfigPlugin implements IMixinConfigPlugin {
+public class BiolithNeoForgeMixinConfigPlugin implements IMixinConfigPlugin {
     private static final Supplier<Boolean> TRUE = () -> true;
 
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
@@ -24,13 +23,11 @@ public class BiolithForgeMixinConfigPlugin implements IMixinConfigPlugin {
         return CONDITIONS.getOrDefault(mixinClassName, TRUE).get();
     }
 
+    // Boilerplate
+
     @Override
     public void onLoad(String mixinPackage) {
-        // Work-around for ME auto-apply issue on Forge
-        MixinExtrasBootstrap.init();
     }
-
-    // Boilerplate
 
     @Override
     public String getRefMapperConfig() {

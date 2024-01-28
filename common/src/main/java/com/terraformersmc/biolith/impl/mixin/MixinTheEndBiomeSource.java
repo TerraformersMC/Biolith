@@ -2,6 +2,8 @@ package com.terraformersmc.biolith.impl.mixin;
 
 import com.google.common.collect.Streams;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.impl.biome.*;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
@@ -9,9 +11,11 @@ import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.TheEndBiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.world.gen.densityfunction.DensityFunction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -21,7 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-@Mixin(value = TheEndBiomeSource.class, priority = 900)
+@Mixin(TheEndBiomeSource.class)
 public abstract class MixinTheEndBiomeSource extends BiomeSource {
     private static RegistryEntryLookup<Biome> biolith$biomeLookup;
     private static MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$biomeEntries;
@@ -68,20 +72,31 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
             ).distinct();
     }
 
-    @Inject(method = "getBiome", at = @At("RETURN"), cancellable = true)
-    private void biolith$getBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise, CallbackInfoReturnable<RegistryEntry<Biome>> cir) {
+    @ModifyReturnValue(method = "getBiome", at = @At("RETURN"))
+    @SuppressWarnings("unused")
+    private RegistryEntry<Biome> biolith$getBiome(RegistryEntry<Biome> original, int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise) {
         // For the End we go to some lengths to mock up a multi-noise placement regime.
         // Still, we try to let other mods do whatever they do to place things in the End too.
-        RegistryEntry<Biome> original = cir.getReturnValue();
 
         // Fake up a noise point for sub biome placement.
-        MultiNoiseUtil.NoiseValuePoint noisePoint = ((EndBiomePlacement) BiomeCoordinator.END).sampleEndNoise(x, y, z, noise, original);
+        MultiNoiseUtil.NoiseValuePoint noisePoint = BiomeCoordinator.END.sampleEndNoise(x, y, z, noise, original);
 
         // Select noise biome
         BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, biolith$biomeEntries, original);
 
         // Process any replacements or sub-biomes.
-        cir.setReturnValue(BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes));
+        return BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes);
+    }
+
+    @WrapOperation(method = "getBiome",
+            at = @At(
+                    value = "NEW",
+                    target = "net/minecraft/world/gen/densityfunction/DensityFunction$UnblendedNoisePos"
+            )
+    )
+    @SuppressWarnings("unused")
+    private DensityFunction.UnblendedNoisePos biolith$smoothEndNoise(int blockX, int blockY, int blockZ, Operation<DensityFunction.UnblendedNoisePos> original, int x, int y, int z) {
+        return (new DensityFunction.UnblendedNoisePos(BiomeCoords.toBlock(x), BiomeCoords.toBlock(y), BiomeCoords.toBlock(z)));
     }
 
     @Override

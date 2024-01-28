@@ -126,6 +126,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
                 .forEach(biome -> parameters.accept(Pair.of(OUT_OF_RANGE, biome)));
     }
 
+    // TODO: This should be replaced with a more robust noise implementation, perhaps also more similar to vanilla.
     public MultiNoiseUtil.NoiseValuePoint sampleEndNoise(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler originalNoise, RegistryEntry<Biome> originalBiome) {
         double erosion = originalNoise.erosion().sample(new DensityFunction.UnblendedNoisePos(
                 (ChunkSectionPos.getSectionCoord(BiomeCoords.toBlock(x)) * 2 + 1) * 8,

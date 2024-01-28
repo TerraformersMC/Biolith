@@ -1,17 +1,18 @@
 {
-    "required": true,
-    "minVersion": "0.8",
-    "package": "com.terraformersmc.biolith.impl.mixin",
-    "compatibilityLevel": "JAVA_17",
-    "plugin": "com.terraformersmc.biolith.impl.mixin.BiolithForgeMixinConfigPlugin",
-    "mixins": [
-    ],
-    "client": [
-    ],
-    "server": [
-    ],
-    "injectors": {
-        "defaultRequire": 1,
-        "maxShiftBy": 2
-    }
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.terraformersmc.biolith.impl.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "plugin": "com.terraformersmc.biolith.impl.mixin.BiolithForgeMixinConfigPlugin",
+  "mixins": [
+    "MixinTBTheEndBiomeSource"
+  ],
+  "client": [
+  ],
+  "server": [
+  ],
+  "injectors": {
+    "defaultRequire": 1,
+    "maxShiftBy": 2
+  }
 }

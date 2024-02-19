@@ -8,6 +8,7 @@ import net.minecraft.registry.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
 
@@ -68,21 +69,27 @@ public class BiomeCoordinator {
     }
 
     public static void handleWorldStarting(ServerWorld world) {
+        Optional<RegistryKey<DimensionType>> dimensionKey = world.getDimensionEntry().getKey();
+
         if (!serverStarted) {
             Biolith.LOGGER.error("New world '{}' created when server is not running!", world.getRegistryKey().getValue());
         }
 
-        if (DimensionTypes.THE_END.equals(world.getDimensionKey())) {
-            END_STATE = new BiolithState(world, "end");
-            END.serverReplaced(END_STATE, world.getSeed());
-        } else if (DimensionTypes.THE_NETHER.equals(world.getDimensionKey())) {
-            NETHER_STATE = new BiolithState(world, "nether");
-            NETHER.serverReplaced(NETHER_STATE, world.getSeed());
-        } else if (DimensionTypes.OVERWORLD.equals(world.getDimensionKey())) {
-            OVERWORLD_STATE = new BiolithState(world, "overworld");
-            OVERWORLD.serverReplaced(OVERWORLD_STATE, world.getSeed());
+        if (dimensionKey.isPresent()) {
+            if (DimensionTypes.THE_END.equals(dimensionKey.get())) {
+                END_STATE = new BiolithState(world, "end");
+                END.serverReplaced(END_STATE, world.getSeed());
+            } else if (DimensionTypes.THE_NETHER.equals(dimensionKey.get())) {
+                NETHER_STATE = new BiolithState(world, "nether");
+                NETHER.serverReplaced(NETHER_STATE, world.getSeed());
+            } else if (DimensionTypes.OVERWORLD.equals(dimensionKey.get())) {
+                OVERWORLD_STATE = new BiolithState(world, "overworld");
+                OVERWORLD.serverReplaced(OVERWORLD_STATE, world.getSeed());
+            } else {
+                Biolith.LOGGER.info("Ignoring world '{}'; unknown dimension type: {}", world.getRegistryKey().getValue(), dimensionKey.get().getValue());
+            }
         } else {
-            Biolith.LOGGER.info("Ignoring world '{}'; unknown dimension type: {}", world.getRegistryKey().getValue(), world.getDimensionKey().getValue());
+            Biolith.LOGGER.info("Ignoring world '{}'; world has no associated dimension", world.getRegistryKey().getValue());
         }
     }
 

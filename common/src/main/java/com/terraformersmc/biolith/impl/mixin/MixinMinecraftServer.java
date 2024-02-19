@@ -11,6 +11,7 @@ import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.dimension.DimensionOptions;
+import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
 import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
@@ -28,6 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @Mixin(MinecraftServer.class)
@@ -57,19 +59,22 @@ public abstract class MixinMinecraftServer {
         for (World world : worlds.values()) {
             DimensionOptions dimensionOptions = null;
             SurfaceRuleCollector surfaceRuleCollector = null;
+            Optional<RegistryKey<DimensionType>> dimensionKey = world.getDimensionEntry().getKey();
 
-            // TODO: Consider whether we need to guard against modifying the same ChunkGeneratorSettings more than once...
-            if (DimensionTypes.OVERWORLD.equals(world.getDimensionKey())) {
-                dimensionOptions = dimensionOptionsRegistry.get(DimensionOptions.OVERWORLD);
-                surfaceRuleCollector = SurfaceRuleCollector.OVERWORLD;
-            } else if (DimensionTypes.THE_NETHER.equals(world.getDimensionKey())) {
-                dimensionOptions = dimensionOptionsRegistry.get(DimensionOptions.NETHER);
-                surfaceRuleCollector = SurfaceRuleCollector.NETHER;
-            } else if (DimensionTypes.THE_END.equals(world.getDimensionKey())) {
-                dimensionOptions = dimensionOptionsRegistry.get(DimensionOptions.END);
-                surfaceRuleCollector = SurfaceRuleCollector.END;
+            if (dimensionKey.isPresent()) {
+                if (DimensionTypes.OVERWORLD.equals(dimensionKey.get())) {
+                    dimensionOptions = dimensionOptionsRegistry.get(DimensionOptions.OVERWORLD);
+                    surfaceRuleCollector = SurfaceRuleCollector.OVERWORLD;
+                } else if (DimensionTypes.THE_NETHER.equals(dimensionKey.get())) {
+                    dimensionOptions = dimensionOptionsRegistry.get(DimensionOptions.NETHER);
+                    surfaceRuleCollector = SurfaceRuleCollector.NETHER;
+                } else if (DimensionTypes.THE_END.equals(dimensionKey.get())) {
+                    dimensionOptions = dimensionOptionsRegistry.get(DimensionOptions.END);
+                    surfaceRuleCollector = SurfaceRuleCollector.END;
+                }
             }
 
+            // TODO: Consider whether we need to guard against modifying the same ChunkGeneratorSettings more than once...
             if (dimensionOptions != null && surfaceRuleCollector.getRuleCount() > 0) {
                 ChunkGenerator chunkGenerator = dimensionOptions.chunkGenerator();
                 //ChunkGenerator chunkGenerator = ((ServerChunkManager) world.getChunkManager()).threadedAnvilChunkStorage.chunkGenerator;

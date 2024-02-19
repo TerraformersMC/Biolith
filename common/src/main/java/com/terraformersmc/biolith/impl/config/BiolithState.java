@@ -7,6 +7,7 @@ import net.minecraft.nbt.NbtList;
 import net.minecraft.nbt.NbtString;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
+import net.minecraft.registry.RegistryWrapper;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.PersistentState;
@@ -26,11 +27,6 @@ public class BiolithState extends PersistentState {
 
     private final String stateId;
     private static final int STATE_VERSION = 0;
-
-    public BiolithState(ServerWorld world) {
-        // All the 'the_'s annoy me so I don't use this one.  :P
-        this(world, world.getDimensionKey().getValue().getPath());
-    }
 
     public BiolithState(ServerWorld serverWorld, String name) {
         // Make sure we've got the server world stowed for state loads/saves.
@@ -83,7 +79,7 @@ public class BiolithState extends PersistentState {
     }
 
     @Override
-    public NbtCompound writeNbt(NbtCompound nbt) {
+    public NbtCompound writeNbt(NbtCompound nbt, RegistryWrapper.WrapperLookup registryLookup) {
         NbtList biomeReplacementsNbt = new NbtList();
         biomeReplacements.forEach((target, replacements) -> {
             NbtList replacementsNbt = new NbtList();

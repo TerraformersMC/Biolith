@@ -1,6 +1,8 @@
 accessWidener   v1  named
 
 accessible  field   net/minecraft/server/world/ThreadedAnvilChunkStorage chunkGenerator Lnet/minecraft/world/gen/chunk/ChunkGenerator;
+accessible  method  net/minecraft/world/biome/source/BiomeAccess method_38106 (JIIIDDD)D
+accessible  field   net/minecraft/world/biome/source/BiomeAccess storage Lnet/minecraft/world/biome/source/BiomeAccess$Storage;
 accessible  class   net/minecraft/world/biome/source/MultiNoiseBiomeSourceParameterList$Preset$BiomeSourceFunction
 accessible  method  net/minecraft/world/biome/source/util/MultiNoiseUtil$Entries getValue (Lnet/minecraft/world/biome/source/util/MultiNoiseUtil$NoiseValuePoint;Lnet/minecraft/world/biome/source/util/MultiNoiseUtil$NodeDistanceFunction;)Ljava/lang/Object;
 accessible  field   net/minecraft/world/biome/source/util/MultiNoiseUtil$Entries tree Lnet/minecraft/world/biome/source/util/MultiNoiseUtil$SearchTree;
@@ -17,5 +19,6 @@ extendable  class   net/minecraft/world/biome/source/util/MultiNoiseUtil$SearchT
 accessible  method  net/minecraft/world/biome/source/util/MultiNoiseUtil$SearchTree$TreeLeafNode <init> (Lnet/minecraft/world/biome/source/util/MultiNoiseUtil$NoiseHypercube;Ljava/lang/Object;)V
 accessible  field   net/minecraft/world/biome/source/util/MultiNoiseUtil$SearchTree$TreeLeafNode value Ljava/lang/Object;
 accessible  class   net/minecraft/world/gen/surfacebuilder/MaterialRules$BlockStateRule
+accessible  field   net/minecraft/world/ChunkRegion world Lnet/minecraft/server/world/ServerWorld;
 accessible  class   net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext
 accessible  method  net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext estimateSurfaceHeight ()I

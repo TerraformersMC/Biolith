@@ -5,16 +5,22 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.terraformersmc.biolith.api.biomeperimeters.BiomePerimeters;
 import com.terraformersmc.biolith.impl.Biolith;
+import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
+import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.*;
+import net.minecraft.world.ChunkRegion;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeAccess;
+import net.minecraft.world.biome.source.BiomeCoords;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Hashtable;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
 /**
  * BiomePerimetersImpl
@@ -38,12 +44,11 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 	private final int checkDistance;
 
 	public static final int MAX_HORIZON = 256;
-	private static final long COMPACTION_TIMER_TICKS = 300;
 
 	private final LoadingCache<ChunkPos, CacheRecord> caches =
 			CacheBuilder.newBuilder()
 					.maximumSize(4096)
-					.expireAfterAccess(30, TimeUnit.SECONDS)
+					.expireAfterAccess(300, TimeUnit.SECONDS)
 					.weakValues()
 					.build(new CacheLoader<>() {
 						@Override
@@ -52,7 +57,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 						}
 					});
 
-	private static final int MAX_THREAD_LOCAL_CACHE_SIZE = 128;
+	private static final int MAX_THREAD_LOCAL_CACHE_SIZE = 1024;
 	private final ThreadLocal<Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord>> threadLocalCaches =
 			ThreadLocal.withInitial(Object2ObjectLinkedOpenHashMap::new);
 
@@ -116,9 +121,20 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 
 		final var threadLocalCache = threadLocalCaches.get();
 
+		// Work around Mojang making it illegal to access nascent chunks for biome lookup.
+		Function<BlockPos, RegistryEntry<Biome>> getBiomeFunction = biomeAccess::getBiome;
+		if (biomeAccess.storage instanceof ChunkRegion chunkRegion) {
+			ServerWorld world = chunkRegion.world;
+			getBiomeFunction = (blockPos) -> world.getGeneratorStoredBiome(
+					BiomeCoords.fromBlock(blockPos.getX()),
+					BiomeCoords.fromBlock(blockPos.getY()),
+					BiomeCoords.fromBlock(blockPos.getZ())
+			);
+		}
+
 		// If we are on the perimeter, avoid some difficult "edge" cases (har har) by short-circuiting.
 		for (EightWayDirection direction : EightWayDirection.values()) {
-			if (!checkBiome(biomeAccess, pos.add(direction.getOffsetX(), 0, direction.getOffsetZ()), threadLocalCache)) {
+			if (!checkBiome(getBiomeFunction, pos.add(direction.getOffsetX(), 0, direction.getOffsetZ()), threadLocalCache)) {
 				return 0;
 			}
 		}
@@ -144,15 +160,15 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 			for (int radius = 0; radius < horizon; radius++) {
 				iterPos = pos.add(dx * radius, 0, dz * radius);
 				final CacheRecord cache = getCache(threadLocalCache, new ChunkPos(iterPos));
-				if (cache.perimeters.containsKey(CacheRecord.getIndex(iterPos)) || !checkBiome(biomeAccess, iterPos.add(dx, 0, dz), threadLocalCache)) {
-					int localMinimum = this.checkPerimeter(biomeAccess, pos, iterPos, direction, threadLocalCache);
+				if (cache.perimeters.containsKey(CacheRecord.getIndex(iterPos)) || !checkBiome(getBiomeFunction, iterPos.add(dx, 0, dz), threadLocalCache)) {
+					int localMinimum = this.checkPerimeter(getBiomeFunction, pos, iterPos, direction, threadLocalCache);
 					if (localMinimum >= 0) {
 						minimum = Math.min(minimum, localMinimum);
 						break;
 					} else {
 						// Power on through a small biome inclusion we found.
 						for (++radius; radius < horizon; radius++) {
-							if (checkBiome(biomeAccess, pos.add(dx * radius, 0, dz * radius), threadLocalCache)) {
+							if (checkBiome(getBiomeFunction, pos.add(dx * radius, 0, dz * radius), threadLocalCache)) {
 								++radius;
 								break;
 							}
@@ -166,7 +182,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		return rationalizeDistance(pos, minimum, threadLocalCache);
 	}
 
-	private int checkPerimeter(BiomeAccess biomeAccess, BlockPos centerPos, BlockPos perimeterPos, EightWayDirection direction, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
+	private int checkPerimeter(Function<BlockPos, RegistryEntry<Biome>> getBiomeFunction, BlockPos centerPos, BlockPos perimeterPos, EightWayDirection direction, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
 		BiomePerimeterPoint current;
 		EightWayDirection orientation;
 		double minimum;
@@ -189,7 +205,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 				orientation = getEightWayClockwiseRotation(orientation, 5);
 				for (int rotation = 2; rotation < 8; rotation++) {
 					orientation = getEightWayClockwiseRotation(orientation, 1);
-					if (!checkBiome(biomeAccess, current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ()), threadLocalCache)) {
+					if (!checkBiome(getBiomeFunction, current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ()), threadLocalCache)) {
 						orientation = getEightWayClockwiseRotation(orientation, -1);
 						BlockPos prospect = current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ());
 						BiomePerimeterPoint prospectPoint = getCache(threadLocalCache, new ChunkPos(prospect)).perimeters.get(CacheRecord.getIndex(prospect));
@@ -235,7 +251,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 				orientation = getEightWayClockwiseRotation(orientation, 3);
 				for (int rotation = 2; rotation < 8; rotation++) {
 					orientation = getEightWayClockwiseRotation(orientation, -1);
-					if (!checkBiome(biomeAccess, current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ()), threadLocalCache)) {
+					if (!checkBiome(getBiomeFunction, current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ()), threadLocalCache)) {
 						orientation = getEightWayClockwiseRotation(orientation, 1);
 						BlockPos prospect = current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ());
 						BiomePerimeterPoint prospectPoint = getCache(threadLocalCache, new ChunkPos(prospect)).perimeters.get(CacheRecord.getIndex(prospect));
@@ -298,13 +314,13 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		}
 	}
 
-	private boolean checkBiome(BiomeAccess biomeAccess, BlockPos pos, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
+	private boolean checkBiome(Function<BlockPos, RegistryEntry<Biome>> getBiomeFunction, BlockPos pos, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
 		/* Distance values in biomeCache:
 		 * -1:  special value indicating pos is in-biome but the perimeter distance is unknown
 		 *  0:  value indicating pos is not in-biome
 		 * >0:  pos is in-biome and the value indicates the distance to the perimeter
 		 */
-		return (getCache(threadLocalCache, new ChunkPos(pos)).biomeCache.computeIfAbsent(CacheRecord.getIndex(pos), (key) -> biomeAccess.getBiome(pos).value().equals(biome) ? -1 : 0) != 0);
+		return (getCache(threadLocalCache, new ChunkPos(pos)).biomeCache.computeIfAbsent(CacheRecord.getIndex(pos), (key) -> getBiomeFunction.apply(pos).value().equals(biome) ? -1 : 0) != 0);
 	}
 
 	private int rationalizeDistance(BlockPos pos, float proposed, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
@@ -327,6 +343,22 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		getCache(threadLocalCache, new ChunkPos(pos)).biomeCache.put(CacheRecord.getIndex(pos), distance);
 
 		return distance;
+	}
+
+	private static Function<BlockPos, RegistryEntry<Biome>> selectGetBiomeFunction(BiomeAccess biomeAccess) {
+		/*
+		 * When the BiomeAccess uses a ChunkRegion, it will deny lookup rather than creating a Chunk.
+		 * This implementation bypasses the BiomeAccess to use direct biome lookups.
+		 * We are forced to reimplement the getBiome smoothing function.
+		 */
+		if (biomeAccess.storage instanceof ChunkRegion chunkRegion) {
+			ServerWorld world = chunkRegion.world;
+
+			return (pos) -> VanillaCompat.callFunctionWithSmoothedBiomeCoords(world::getGeneratorStoredBiome, pos, world.getSeed());
+		}
+
+		// Fall back to the vanilla getBiome, which may work with some other biome access implementations...
+		return biomeAccess::getBiome;
 	}
 
 	/**

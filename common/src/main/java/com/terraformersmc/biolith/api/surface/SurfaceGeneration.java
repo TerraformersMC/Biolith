@@ -21,7 +21,7 @@ public final class SurfaceGeneration {
      * @param materialRules The surface rules to be injected
      */
     public static void addEndSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
-        SurfaceRuleCollector.END.add(rulesOwner, materialRules);
+        SurfaceRuleCollector.END.addFromMods(rulesOwner, materialRules);
     }
 
     /**
@@ -35,7 +35,7 @@ public final class SurfaceGeneration {
      * @param materialRules The surface rules to be injected
      */
     public static void addNetherSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
-        SurfaceRuleCollector.NETHER.add(rulesOwner, materialRules);
+        SurfaceRuleCollector.NETHER.addFromMods(rulesOwner, materialRules);
     }
 
     /**
@@ -49,7 +49,7 @@ public final class SurfaceGeneration {
      * @param materialRules The rules to be injected
      */
     public static void addOverworldSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
-        SurfaceRuleCollector.OVERWORLD.add(rulesOwner, materialRules);
+        SurfaceRuleCollector.OVERWORLD.addFromMods(rulesOwner, materialRules);
     }
 
     /**

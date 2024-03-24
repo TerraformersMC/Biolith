@@ -26,6 +26,10 @@ public class BiomeCoordinator {
     private static boolean serverStarted = false;
     protected static DynamicRegistryManager.Immutable registryManager;
 
+    public static boolean isServerStarted() {
+        return serverStarted;
+    }
+
     public static void setRegistryManager(CombinedDynamicRegistries<ServerDynamicRegistryType> combinedDynamicRegistries) {
         // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer and MixinServerLoader so we can set this really early.
         registryManager = combinedDynamicRegistries.getCombinedRegistryManager();
@@ -36,7 +40,6 @@ public class BiomeCoordinator {
     }
 
     public static Optional<RegistryWrapper.Impl<Biome>> getBiomeLookup() {
-        DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
         if (registryManager == null) {
             return Optional.empty();
         }
@@ -89,8 +92,13 @@ public class BiomeCoordinator {
     public static void handleServerStopped(MinecraftServer server) {
         serverStarted = false;
         registryManager = null;
+
         END_STATE = null;
         NETHER_STATE = null;
         OVERWORLD_STATE = null;
+
+        END.serverStopped();
+        NETHER.serverStopped();
+        OVERWORLD.serverStopped();
     }
 }

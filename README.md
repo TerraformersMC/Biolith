@@ -4,7 +4,7 @@
 A biome placement mod focusing on configurability and consistent
 distribution of modded biomes
 
-## Warning: SOMEWHAT EXPERIMENTAL
+## Warning: Somewhat Experimental
 
 This mod is still somewhat experimental.  Biome selection strategies may change,
 resulting in biomes being placed at different locations in existing worlds.
@@ -15,8 +15,10 @@ At this time, aside from any new things I've implemented and forgotten
 to update here, the following features are present:
 
 * From v1.2.0-alpha.1, Biolith supports all four major mod loaders!
+* From v2.0.0-alpha.1, biome placement and surface rules can be added via datapacks.
 
 * Place an Overworld, Nether, or End biome at a specified noise point.
+* Remove a vanilla/datapack Overworld, Nether, or End biome from all noise points.
 * Replace an Overworld, Nether, or End biome entirely or in part.
 * Add a sub-biome to an Overworld, Nether, End, or modded biome.
 * (End biome placement uses custom noise and is only available in 1.20+.)
@@ -25,7 +27,8 @@ to update here, the following features are present:
 * Override vanilla surfaces using custom surface builders.
 
 * Fully compatible with TerraBlender and Fabric Biome API biomes.
-* Somewhat compatible with BClib (biome placement may be modified by BClib).
+* Somewhat compatible with BClib (biome placement will be modified by BClib).
+* Can place biomes in Modern Beta worlds since 1.2.0-beta.1.
 
 ## Releases via Maven
 
@@ -60,7 +63,7 @@ If you wish to include Biolith in your mod for distribution, wrap the `modImplem
 Finally, set the Biolith version you want in `gradle.properties`:
 
 ```
-biolith_version=1.2.0-alpha.2
+biolith_version=1.2.0-beta.3
 ```
 
 For convenience, [Biolith can also be downloaded from Modrinth](https://modrinth.com/mod/biolith).

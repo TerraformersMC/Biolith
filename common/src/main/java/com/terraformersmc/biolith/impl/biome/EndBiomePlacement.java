@@ -59,6 +59,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
         weirdnessNoise   = new OpenSimplexNoise2(seedlets[3]);
     }
 
+    @Override
     public double getLocalNoise(int x, int y, int z) {
         double localNoise;
 
@@ -74,39 +75,14 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
         return localNoise;
     }
 
-    public void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters) {
-        biomesInjected = true;
-        RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
-
-        // End biomes are merged during construction of the End Biome stream.
-
-        placementRequests.forEach(pair -> parameters.accept(pair.mapSecond(biomeEntryGetter::getOrThrow)));
-
-        // Replacement biomes are placed out-of-range so they do not generate except as replacements.
-        // This adds the biome to TheEndBiomeSource and BiomeSource so features and structures will place.
-
-        replacementRequests.values().stream()
-                .flatMap(requestSet -> requestSet.requests.stream())
-                .map(ReplacementRequest::biome).distinct()
-                .forEach(biome -> {
-                    if (!biome.equals(VANILLA_PLACEHOLDER)) {
-                        parameters.accept(Pair.of(OUT_OF_RANGE, biomeEntryGetter.getOrThrow(biome)));
-                    }
-                });
-
-        subBiomeRequests.values().stream()
-                .flatMap(requestSet -> requestSet.requests.stream())
-                .map(SubBiomeRequest::biome).distinct()
-                .forEach(biome -> parameters.accept(Pair.of(OUT_OF_RANGE, biomeEntryGetter.getOrThrow(biome))));
-    }
-
-    // TODO: Deprecated for clean-up in the mixins -- Review and remove from all DimensionBiomePlacements?
+    // TODO: Should use DimensionBiomePlacement method instead,
+    //       but availability of biomeEntryGetter must be thoroughly validated first.
     public void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
         biomesInjected = true;
 
         // End biomes are merged during construction of the End Biome stream.
 
-        placementRequests.forEach(parameters);
+        placementRequests.forEach(request -> parameters.accept(request.pair()));
 
         // Replacement biomes are placed out-of-range so they do not generate except as replacements.
         // This adds the biome to TheEndBiomeSource and BiomeSource so features and structures will place.

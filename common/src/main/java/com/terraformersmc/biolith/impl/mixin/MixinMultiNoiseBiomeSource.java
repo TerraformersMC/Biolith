@@ -52,14 +52,24 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
                 if (this.biolith$getDimensionType().matchesKey(DimensionTypes.OVERWORLD)) {
                     List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameterList = new ArrayList<>(256);
 
-                    parameterList.addAll(originalEntries.getEntries());
+                    // Remove any biomes matching removals
+                    originalEntries.getEntries().stream()
+                            .filter(BiomeCoordinator.OVERWORLD::removalFilter)
+                            .forEach(parameterList::add);
+
+                    // Add all biomes from additions, replacements, and sub-biome requests
                     BiomeCoordinator.OVERWORLD.writeBiomeEntries(parameterList::add);
 
                     biolith$biomeEntries = new MultiNoiseUtil.Entries<>(parameterList);
                 } else if (this.biolith$getDimensionType().matchesKey(DimensionTypes.THE_NETHER)) {
                     List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameterList = new ArrayList<>(64);
 
-                    parameterList.addAll(originalEntries.getEntries());
+                    // Remove any biomes matching removals
+                    originalEntries.getEntries().stream()
+                            .filter(BiomeCoordinator.NETHER::removalFilter)
+                            .forEach(parameterList::add);
+
+                    // Add all biomes from additions, replacements, and sub-biome requests
                     BiomeCoordinator.NETHER.writeBiomeEntries(parameterList::add);
 
                     biolith$biomeEntries = new MultiNoiseUtil.Entries<>(parameterList);

@@ -18,7 +18,7 @@ public final class BiomePlacement {
      * @param noisePoint A multi-noise point at which to place the biome
      */
     public static void addEnd(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
-        BiomeCoordinator.END.addPlacement(biome, noisePoint);
+        BiomeCoordinator.END.addPlacement(biome, noisePoint, false);
     }
 
     /**
@@ -28,7 +28,7 @@ public final class BiomePlacement {
      * @param noisePoint A multi-noise point at which to place the biome
      */
     public static void addNether(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
-        BiomeCoordinator.NETHER.addPlacement(biome, noisePoint);
+        BiomeCoordinator.NETHER.addPlacement(biome, noisePoint, false);
     }
 
     /**
@@ -38,7 +38,35 @@ public final class BiomePlacement {
      * @param noisePoint A multi-noise point at which to place the biome
      */
     public static void addOverworld(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
-        BiomeCoordinator.OVERWORLD.addPlacement(biome, noisePoint);
+        BiomeCoordinator.OVERWORLD.addPlacement(biome, noisePoint, false);
+    }
+
+
+    /**
+     * Remove an End biome from all mixed noise points.
+     *
+     * @param biome The biome to be removed
+     */
+    public static void removeEnd(RegistryKey<Biome> biome) {
+        BiomeCoordinator.END.addRemoval(biome, false);
+    }
+
+    /**
+     * Remove a Nether biome from all mixed noise points.
+     *
+     * @param biome The biome to be removed
+     */
+    public static void removeNether(RegistryKey<Biome> biome) {
+        BiomeCoordinator.NETHER.addRemoval(biome, false);
+    }
+
+    /**
+     * Remove an Overworld biome from all mixed noise points.
+     *
+     * @param biome The biome to be placed
+     */
+    public static void removeOverworld(RegistryKey<Biome> biome) {
+        BiomeCoordinator.OVERWORLD.addRemoval(biome, false);
     }
 
 
@@ -49,7 +77,7 @@ public final class BiomePlacement {
      * @param biome  The replacement biome
      */
     public static void replaceEnd(RegistryKey<Biome> target, RegistryKey<Biome> biome) {
-        BiomeCoordinator.END.addReplacement(target, biome, 1.0D);
+        BiomeCoordinator.END.addReplacement(target, biome, 1.0D, false);
     }
 
     /**
@@ -61,7 +89,7 @@ public final class BiomePlacement {
      * @param proportion Approximate fraction of the target biome's volume to replace
      */
     public static void replaceEnd(RegistryKey<Biome> target, RegistryKey<Biome> biome, double proportion) {
-        BiomeCoordinator.END.addReplacement(target, biome, proportion);
+        BiomeCoordinator.END.addReplacement(target, biome, proportion, false);
     }
 
     /**
@@ -71,7 +99,7 @@ public final class BiomePlacement {
      * @param biome  The replacement biome
      */
     public static void replaceNether(RegistryKey<Biome> target, RegistryKey<Biome> biome) {
-        BiomeCoordinator.NETHER.addReplacement(target, biome, 1.0D);
+        BiomeCoordinator.NETHER.addReplacement(target, biome, 1.0D, false);
     }
 
     /**
@@ -83,7 +111,7 @@ public final class BiomePlacement {
      * @param proportion Approximate fraction of the target biome's volume to replace
      */
     public static void replaceNether(RegistryKey<Biome> target, RegistryKey<Biome> biome, double proportion) {
-        BiomeCoordinator.NETHER.addReplacement(target, biome, proportion);
+        BiomeCoordinator.NETHER.addReplacement(target, biome, proportion, false);
     }
 
     /**
@@ -93,7 +121,7 @@ public final class BiomePlacement {
      * @param biome  The replacement biome
      */
     public static void replaceOverworld(RegistryKey<Biome> target, RegistryKey<Biome> biome) {
-        BiomeCoordinator.OVERWORLD.addReplacement(target, biome, 1.0D);
+        BiomeCoordinator.OVERWORLD.addReplacement(target, biome, 1.0D, false);
     }
 
     /**
@@ -105,7 +133,7 @@ public final class BiomePlacement {
      * @param proportion Approximate fraction of the target biome's volume to replace
      */
     public static void replaceOverworld(RegistryKey<Biome> target, RegistryKey<Biome> biome, double proportion) {
-        BiomeCoordinator.OVERWORLD.addReplacement(target, biome, proportion);
+        BiomeCoordinator.OVERWORLD.addReplacement(target, biome, proportion, false);
     }
 
 
@@ -118,7 +146,7 @@ public final class BiomePlacement {
      * @param matcher Matching criteria for when to replace
      */
     public static void addSubEnd(RegistryKey<Biome> target, RegistryKey<Biome> biome, SubBiomeMatcher matcher) {
-        BiomeCoordinator.END.addSubBiome(target, biome, matcher);
+        BiomeCoordinator.END.addSubBiome(target, biome, matcher, false);
     }
 
     /**
@@ -130,7 +158,7 @@ public final class BiomePlacement {
      * @param matcher Matching criteria for when to replace
      */
     public static void addSubNether(RegistryKey<Biome> target, RegistryKey<Biome> biome, SubBiomeMatcher matcher) {
-        BiomeCoordinator.NETHER.addSubBiome(target, biome, matcher);
+        BiomeCoordinator.NETHER.addSubBiome(target, biome, matcher, false);
     }
 
     /**
@@ -142,6 +170,6 @@ public final class BiomePlacement {
      * @param matcher Matching criteria for when to replace
      */
     public static void addSubOverworld(RegistryKey<Biome> target, RegistryKey<Biome> biome, SubBiomeMatcher matcher) {
-        BiomeCoordinator.OVERWORLD.addSubBiome(target, biome, matcher);
+        BiomeCoordinator.OVERWORLD.addSubBiome(target, biome, matcher, false);
     }
 }

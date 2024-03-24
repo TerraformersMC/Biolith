@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Mixin(TheEndBiomeSource.class)
@@ -45,30 +46,42 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
 
         // Wrapping END.writeBiomeParameters() like this allows us to use the same interface there as we do for OVERWORLD.
         // So it looks kind of silly here, but it works fine and makes the code in the main biome placement classes alike.
-        DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
-        List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameterList = new ArrayList<>(64);
 
-        // Fallback lookup just in case.
-        if (biolith$biomeLookup == null) {
-            assert (registryManager != null);
-            biolith$biomeLookup = registryManager.getWrapperOrThrow(RegistryKeys.BIOME);
-        }
+        synchronized (this) {
+            // Only compute this once, since our version is more expensive than Mojang's.
+            if (biolith$biomeEntries == null) {
+                List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameterList = new ArrayList<>(64);
 
-        // Generate "Vanilla" and modded parameters list.
-        VanillaEndBiomeParameters.writeEndBiomeParameters(parameterList::add);
-        BiomeCoordinator.END.writeBiomeParameters(parameterList::add);
+                // Fallback lookup just in case.
+                if (biolith$biomeLookup == null) {
+                    DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
+                    Objects.requireNonNull(registryManager);
 
-        // Create a multi-noise parameter entries object.
-        if (biolith$biomeEntries == null) {
-            biolith$biomeEntries = new MultiNoiseUtil.Entries<>(parameterList.stream()
-                    .map(pair -> pair.mapSecond((key) -> (RegistryEntry<Biome>) biolith$biomeLookup.getOrThrow(key)))
-                    .toList());
+                    biolith$biomeLookup = registryManager.getWrapperOrThrow(RegistryKeys.BIOME);
+                }
+
+                // Generate vanilla parameters list.
+                VanillaEndBiomeParameters.writeEndBiomeParameters(parameterList::add);
+
+                // Remove any biomes matching removals.
+                parameterList.removeIf(entry ->
+                        !BiomeCoordinator.END.removalFilter(entry.mapSecond((key) -> biolith$biomeLookup.getOrThrow(key))));
+
+                // Add all biomes from additions, replacements, and sub-biome requests.
+                BiomeCoordinator.END.writeBiomeParameters(parameterList::add);
+
+                // Create a multi-noise parameter entries object.
+                biolith$biomeEntries = new MultiNoiseUtil.Entries<>(parameterList.stream()
+                        .map(pair -> pair.mapSecond(key -> (RegistryEntry<Biome>) biolith$biomeLookup.getOrThrow(key)))
+                        .toList());
+            }
         }
 
         // Output the registry entry stream (nominally the purpose of this method).
+        // Include the original entries in case another mod has appended to them.
         return Streams.concat(
                 original,
-                parameterList.stream().map(pair -> biolith$biomeLookup.getOrThrow(pair.getSecond()))
+                biolith$biomeEntries.getEntries().stream().map(Pair::getSecond)
             ).distinct();
     }
 
@@ -88,6 +101,7 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
         return BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes);
     }
 
+    // "Cannot resolve" annotation is false negative because NEW target fails with leading 'L'
     @WrapOperation(method = "getBiome",
             at = @At(
                     value = "NEW",

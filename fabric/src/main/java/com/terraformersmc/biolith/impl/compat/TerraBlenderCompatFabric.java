@@ -7,6 +7,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.world.gen.surfacebuilder.MaterialRules;
 import org.jetbrains.annotations.Nullable;
 import terrablender.api.Region;
 import terrablender.api.SurfaceRuleManager;
@@ -56,22 +57,21 @@ public class TerraBlenderCompatFabric implements TerraBlenderCompat {
     public void registerSurfaceRules() {
         Map.of(
                 SurfaceRuleCollector.OVERWORLD, SurfaceRuleManager.RuleCategory.OVERWORLD,
-                SurfaceRuleCollector.NETHER,    SurfaceRuleManager.RuleCategory.NETHER
+                SurfaceRuleCollector.NETHER,    SurfaceRuleManager.RuleCategory.NETHER,
+                SurfaceRuleCollector.END,       SurfaceRuleManager.RuleCategory.END
         ).forEach((biolithRules, terrablenderRuleCategory) -> {
             if (biolithRules.getRuleCount() > 0) {
                 for (Identifier ruleOwner : biolithRules.getRuleOwners()) {
-                    if (biolithRules.getRuleCount(ruleOwner) > 0) {
-                        if (ruleOwner.getNamespace().equals("minecraft")) {
+                    String namespace = ruleOwner.getNamespace();
+                    MaterialRules.MaterialRule rule = biolithRules.get(ruleOwner);
+                    if (rule != null) {
+                        if (namespace.equals("minecraft")) {
                             Biolith.LOGGER.warn("Unable to modify surface rules of vanilla biomes via TerraBlender; dropping: {}", ruleOwner);
                             continue;
                         }
                         try {
-                            SurfaceRuleManager.addSurfaceRules(
-                                    terrablenderRuleCategory,
-                                    ruleOwner.getNamespace(),
-                                    biolithRules.get(ruleOwner)
-                            );
-                        } catch(IllegalArgumentException e) {
+                            SurfaceRuleManager.addSurfaceRules(terrablenderRuleCategory, namespace, rule);
+                        } catch (IllegalArgumentException e) {
                             Biolith.LOGGER.debug("Exception: {}", e.getMessage());
                             Biolith.LOGGER.warn("Only one surface rule set per namespace can be registered with TerraBlender; dropping: {}", ruleOwner);
                         }

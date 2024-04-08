@@ -59,7 +59,7 @@ public abstract class DimensionBiomePlacement {
     }
 
     public void addReplacement(RegistryKey<Biome> target, RegistryKey<Biome> biome, double rate) {
-        if (biomesInjected) {
+        if (biomesInjected || (replacementRequests.containsKey(target) && replacementRequests.get(target).finalized)) {
             Biolith.LOGGER.error("Biolith's BiomePlacement.addReplacement() called too late for biome: {}", biome.getValue());
         } else {
             replacementRequests.computeIfAbsent(target, ReplacementRequestSet::new).addRequest(biome, rate);
@@ -67,7 +67,7 @@ public abstract class DimensionBiomePlacement {
     }
 
     public void addSubBiome(RegistryKey<Biome> target, RegistryKey<Biome> biome, SubBiomeMatcher matcher) {
-        if (biomesInjected) {
+        if (biomesInjected || (subBiomeRequests.containsKey(target) && subBiomeRequests.get(target).finalized)) {
             Biolith.LOGGER.error("Biolith's BiomePlacement.addSubBiome() called too late for biome: {}", biome.getValue());
         } else {
             subBiomeRequests.computeIfAbsent(target, SubBiomeRequestSet::new).addRequest(biome, matcher);
@@ -176,6 +176,7 @@ public abstract class DimensionBiomePlacement {
     }
 
     protected class ReplacementRequestSet {
+        private boolean finalized = false;
         RegistryKey<Biome> target;
         List<ReplacementRequest> requests = new ArrayList<>(8);
 
@@ -248,6 +249,7 @@ public abstract class DimensionBiomePlacement {
 
             // Store the finalized immutable request list.
             requests = List.copyOf(requests);
+            finalized = true;
         }
     }
 
@@ -278,6 +280,7 @@ public abstract class DimensionBiomePlacement {
     }
 
     protected class SubBiomeRequestSet {
+        private boolean finalized = false;
         RegistryKey<Biome> target;
         List<SubBiomeRequest> requests = new ArrayList<>(8);
 
@@ -316,6 +319,7 @@ public abstract class DimensionBiomePlacement {
                     .map(request -> request.complete(biomeEntryGetter))
                     .sorted(Comparator.comparing(request -> request.biome.getValue()))
                     .toList();
+            finalized = true;
         }
     }
 }

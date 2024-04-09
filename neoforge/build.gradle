@@ -2,9 +2,6 @@ plugins {
     id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
-// Ferry for publishing
-apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
-
 architectury {
     platformSetupLoomIde()
     neoForge()

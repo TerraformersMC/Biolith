@@ -79,7 +79,7 @@ public abstract class DimensionBiomePlacement {
     }
 
     public void addReplacement(RegistryKey<Biome> target, RegistryKey<Biome> biome, double rate, boolean fromData) {
-        if (biomesInjected) {
+        if (biomesInjected || (replacementRequests.containsKey(target) && replacementRequests.get(target).finalized)) {
             Biolith.LOGGER.error("Biolith's BiomePlacement.addReplacement() called too late for biome: {}", biome.getValue());
         } else {
             replacementRequests.computeIfAbsent(target, ReplacementRequestSet::new).addRequest(biome, rate, fromData);
@@ -87,7 +87,7 @@ public abstract class DimensionBiomePlacement {
     }
 
     public void addSubBiome(RegistryKey<Biome> target, RegistryKey<Biome> biome, SubBiomeMatcher matcher, boolean fromData) {
-        if (biomesInjected) {
+        if (biomesInjected || (subBiomeRequests.containsKey(target) && subBiomeRequests.get(target).finalized)) {
             Biolith.LOGGER.error("Biolith's BiomePlacement.addSubBiome() called too late for biome: {}", biome.getValue());
         } else {
             subBiomeRequests.computeIfAbsent(target, SubBiomeRequestSet::new).addRequest(biome, matcher, fromData);

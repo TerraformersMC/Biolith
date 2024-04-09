@@ -18,13 +18,16 @@ subprojects {
     }
 }
 
+// Ferry for publishing; this has to be after arch dev plugin apply and before subproject version is set.
+apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
+
 allprojects {
     apply plugin: "java"
     apply plugin: "architectury-plugin"
     apply plugin: "maven-publish"
 
-    version = rootProject.mod_version
     group = rootProject.maven_group
+    version = rootProject.version
 
     repositories {
         mavenCentral()

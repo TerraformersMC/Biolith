@@ -14,33 +14,33 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(TheEndBiomes.class)
 public class MixinFapiTheEndBiomes {
     @Inject(method = "addMainIslandBiome", at = @At("HEAD"), cancellable = true)
-    private static void biolith$scrapeEndMainIslandReplacement(RegistryKey<Biome> variant, double weight, CallbackInfo ci) {
-        BiomePlacement.replaceEnd(BiomeKeys.THE_END, variant, weight / (1d + weight));
+    private static void biolith$scrapeEndMainIslandReplacement(RegistryKey<Biome> biome, double weight, CallbackInfo ci) {
+        BiomePlacement.replaceEnd(BiomeKeys.THE_END, biome, weight / (1d + weight));
         ci.cancel();
     }
 
     @Inject(method = "addHighlandsBiome", at = @At("HEAD"), cancellable = true)
-    private static void biolith$scrapeEndHighlandsReplacement(RegistryKey<Biome> variant, double weight, CallbackInfo ci) {
-        BiomePlacement.replaceEnd(BiomeKeys.END_HIGHLANDS, variant, weight / (1d + weight));
+    private static void biolith$scrapeEndHighlandsReplacement(RegistryKey<Biome> biome, double weight, CallbackInfo ci) {
+        BiomePlacement.replaceEnd(BiomeKeys.END_HIGHLANDS, biome, weight / (1d + weight));
         ci.cancel();
     }
 
     @Inject(method = "addSmallIslandsBiome", at = @At("HEAD"), cancellable = true)
-    private static void biolith$scrapeEndSmallIslandsReplacement(RegistryKey<Biome> variant, double weight, CallbackInfo ci) {
-        BiomePlacement.replaceEnd(BiomeKeys.SMALL_END_ISLANDS, variant, weight / (1d + weight));
+    private static void biolith$scrapeEndSmallIslandsReplacement(RegistryKey<Biome> biome, double weight, CallbackInfo ci) {
+        BiomePlacement.replaceEnd(BiomeKeys.SMALL_END_ISLANDS, biome, weight / (1d + weight));
         ci.cancel();
     }
 
     @Inject(method = "addMidlandsBiome", at = @At("HEAD"), cancellable = true)
-    private static void biolith$scrapeEndMidlandsReplacement(RegistryKey<Biome> highlands, RegistryKey<Biome> variant, double weight, CallbackInfo ci) {
-        BiomePlacement.addSubEnd(BiomeKeys.END_MIDLANDS, variant,
+    private static void biolith$scrapeEndMidlandsReplacement(RegistryKey<Biome> highlands, RegistryKey<Biome> midlands, double weight, CallbackInfo ci) {
+        BiomePlacement.addSubEnd(BiomeKeys.END_MIDLANDS, midlands,
                 SubBiomeMatcher.of(SubBiomeMatcher.Criterion.ofAlternate(SubBiomeMatcher.CriterionTargets.ALTERNATE, highlands, BiomeKeys.END_HIGHLANDS, false)));
         ci.cancel();
     }
 
     @Inject(method = "addBarrensBiome", at = @At("HEAD"), cancellable = true)
-    private static void biolith$scrapeBarrensReplacement(RegistryKey<Biome> highlands, RegistryKey<Biome> variant, double weight, CallbackInfo ci) {
-        BiomePlacement.addSubEnd(BiomeKeys.END_BARRENS, variant,
+    private static void biolith$scrapeBarrensReplacement(RegistryKey<Biome> highlands, RegistryKey<Biome> barrens, double weight, CallbackInfo ci) {
+        BiomePlacement.addSubEnd(BiomeKeys.END_BARRENS, barrens,
                 SubBiomeMatcher.of(SubBiomeMatcher.Criterion.ofAlternate(SubBiomeMatcher.CriterionTargets.ALTERNATE, highlands, BiomeKeys.END_HIGHLANDS, false)));
         ci.cancel();
     }

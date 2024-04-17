@@ -34,14 +34,14 @@ public class MixinFapiTheEndBiomes {
     @Inject(method = "addMidlandsBiome", at = @At("HEAD"), cancellable = true)
     private static void biolith$scrapeEndMidlandsReplacement(RegistryKey<Biome> highlands, RegistryKey<Biome> variant, double weight, CallbackInfo ci) {
         BiomePlacement.addSubEnd(BiomeKeys.END_MIDLANDS, variant,
-                SubBiomeMatcher.of(SubBiomeMatcher.Criterion.ofAlternate(SubBiomeMatcher.CriterionTargets.ALTERNATE, highlands, BiomeKeys.END_HIGHLANDS, false)));
+                SubBiomeMatcher.of(SubBiomeMatcher.Criterion.ofAlternate(highlands, BiomeKeys.END_HIGHLANDS, false)));
         ci.cancel();
     }
 
     @Inject(method = "addBarrensBiome", at = @At("HEAD"), cancellable = true)
     private static void biolith$scrapeBarrensReplacement(RegistryKey<Biome> highlands, RegistryKey<Biome> variant, double weight, CallbackInfo ci) {
         BiomePlacement.addSubEnd(BiomeKeys.END_BARRENS, variant,
-                SubBiomeMatcher.of(SubBiomeMatcher.Criterion.ofAlternate(SubBiomeMatcher.CriterionTargets.ALTERNATE, highlands, BiomeKeys.END_HIGHLANDS, false)));
+                SubBiomeMatcher.of(SubBiomeMatcher.Criterion.ofAlternate(highlands, BiomeKeys.END_HIGHLANDS, false)));
         ci.cancel();
     }
 }

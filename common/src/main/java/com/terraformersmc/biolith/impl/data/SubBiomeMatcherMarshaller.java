@@ -10,8 +10,10 @@ import net.minecraft.registry.tag.TagKey;
 import net.minecraft.util.dynamic.Codecs;
 import net.minecraft.world.biome.Biome;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 public record SubBiomeMatcherMarshaller(List<SubBiomeCriterionMarshaller> criteria) {
     public static Codec<SubBiomeMatcherMarshaller> CODEC = RecordCodecBuilder.create(
@@ -27,8 +29,8 @@ public record SubBiomeMatcherMarshaller(List<SubBiomeCriterionMarshaller> criter
                 .toArray(SubBiomeMatcher.Criterion[]::new));
     }
 
-    public record SubBiomeCriterionMarshaller(SubBiomeMatcher.CriterionTargets target, SubBiomeMatcher.CriterionTypes type, RegistryKey<Biome> biome, RegistryKey<Biome> secondary, TagKey<Biome> biomeTag, float min, float max, boolean invert) {
-        public static Codec<SubBiomeCriterionMarshaller> CODEC = RecordCodecBuilder.create(
+    public record SubBiomeCriterionMarshaller(SubBiomeMatcher.CriterionTargets target, SubBiomeMatcher.CriterionTypes type, RegistryKey<Biome> biome, RegistryKey<Biome> secondary, TagKey<Biome> biomeTag, float min, float max, List<SubBiomeCriterionMarshaller> criteria, boolean invert) {
+        public static Codec<SubBiomeCriterionMarshaller> CODEC = Codec.recursive("SubBiomeCriterionMarshaller", codec -> RecordCodecBuilder.create(
                 (instance) -> instance.group(
                         Codec.STRING.fieldOf("target")
                                 .forGetter((marshaller) -> marshaller.target.name()),
@@ -44,10 +46,12 @@ public record SubBiomeMatcherMarshaller(List<SubBiomeCriterionMarshaller> criter
                                 .forGetter(SubBiomeCriterionMarshaller::min),
                         Codec.FLOAT.optionalFieldOf("max", Float.MAX_VALUE)
                                 .forGetter(SubBiomeCriterionMarshaller::max),
+                        codec.listOf().optionalFieldOf("criteria")
+                                .forGetter(marshaller -> Optional.of(marshaller.criteria)),
                         Codec.BOOL.optionalFieldOf("invert", false)
                                 .forGetter(SubBiomeCriterionMarshaller::invert)
                         )
-                        .apply(instance, (target, type, biome, secondary, biomeTag, min, max, invert) ->
+                        .apply(instance, (target, type, biome, secondary, biomeTag, min, max, criteria, invert) ->
                                 new SubBiomeCriterionMarshaller(
                                         SubBiomeMatcher.CriterionTargets.valueOf(target.toUpperCase()),
                                         SubBiomeMatcher.CriterionTypes.valueOf(type.toUpperCase()),
@@ -56,10 +60,22 @@ public record SubBiomeMatcherMarshaller(List<SubBiomeCriterionMarshaller> criter
                                         biomeTag.orElse(null),
                                         min,
                                         max,
-                                        invert)));
+                                        criteria.orElse(null),
+                                        invert))));
 
-        public SubBiomeMatcher.Criterion unmarshall() {
-            return new SubBiomeMatcherImpl.Criterion(target, type, biome, secondary, biomeTag, min, max, invert);
+        public SubBiomeMatcherImpl.Criterion unmarshall() {
+            if (criteria == null) {
+                return new SubBiomeMatcherImpl.Criterion(
+                        target, type, biome, secondary, biomeTag, min, max, null, invert);
+            }
+
+            Set<SubBiomeMatcher.Criterion> criteriaSet = new HashSet<>();
+            criteria.stream()
+                    .map(SubBiomeCriterionMarshaller::unmarshall)
+                    .forEach(criteriaSet::add);
+
+            return new SubBiomeMatcherImpl.Criterion(
+                    target, type, biome, secondary, biomeTag, min, max, List.copyOf(criteriaSet), invert);
         }
     }
 }

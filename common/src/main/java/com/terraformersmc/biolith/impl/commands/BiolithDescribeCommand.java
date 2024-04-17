@@ -168,7 +168,7 @@ public class BiolithDescribeCommand {
                 )));
         context.getSource().sendMessage(Text.literal(
                 String.format("§7PV§r:%+05.3f  §4Te§r:%+05.3f  §5We§r:%+05.3f  §6BR§r:%+05.3f",
-                        MultiNoiseUtil.toFloat(SubBiomeMatcherImpl.pvFromWeirdness(noisePoint.weirdnessNoise())),
+                        MultiNoiseUtil.toFloat(SubBiomeMatcherImpl.Criterion.pvFromWeirdness(noisePoint.weirdnessNoise())),
                         MultiNoiseUtil.toFloat(noisePoint.temperatureNoise()),
                         MultiNoiseUtil.toFloat(noisePoint.weirdnessNoise()),
                         replacementNoise

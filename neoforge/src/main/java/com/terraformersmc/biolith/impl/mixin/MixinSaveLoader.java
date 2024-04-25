@@ -16,8 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinSaveLoader {
     @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Ljava/lang/Record;<init>()V", shift = At.Shift.AFTER))
     private void biolith$earlyCaptureRegistries(LifecycledResourceManager lifecycledResourceManager, DataPackContents dataPackContents, CombinedDynamicRegistries<ServerDynamicRegistryType> combinedDynamicRegistries, SaveProperties saveProperties, CallbackInfo ci) {
-        // Capture the registries ridiculously early on Fabric because BClib does,
-        // and immediately forces us to provide biome entries...
         BiomeCoordinator.setRegistryManager(combinedDynamicRegistries);
     }
 }

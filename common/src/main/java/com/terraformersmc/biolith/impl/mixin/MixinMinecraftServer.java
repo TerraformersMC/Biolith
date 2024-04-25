@@ -3,6 +3,7 @@ package com.terraformersmc.biolith.impl.mixin;
 import com.google.common.collect.Streams;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import net.minecraft.registry.*;
@@ -17,7 +18,6 @@ import net.minecraft.world.gen.chunk.ChunkGenerator;
 import net.minecraft.world.gen.chunk.ChunkGeneratorSettings;
 import net.minecraft.world.gen.chunk.NoiseChunkGenerator;
 import net.minecraft.world.gen.surfacebuilder.MaterialRules;
-import net.minecraft.world.level.ServerWorldProperties;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -53,7 +53,7 @@ public abstract class MixinMinecraftServer {
     }
 
     @Inject(method = "createWorlds", at = @At(value = "RETURN"), locals = LocalCapture.CAPTURE_FAILHARD)
-    private void biolith$prependSurfaceRules(WorldGenerationProgressListener worldGenerationProgressListener, CallbackInfo ci, ServerWorldProperties serverWorldProperties, boolean isDebug, Registry<DimensionOptions> dimensionOptionsRegistry) {
+    private void biolith$prependSurfaceRules(WorldGenerationProgressListener worldGenerationProgressListener, CallbackInfo ci, @Local Registry<DimensionOptions> dimensionOptionsRegistry) {
         MaterialRules.MaterialRule[] rulesType = new MaterialRules.MaterialRule[0];
 
         for (World world : worlds.values()) {

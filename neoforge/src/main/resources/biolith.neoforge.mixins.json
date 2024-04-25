@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "com.terraformersmc.biolith.impl.mixin.BiolithNeoForgeMixinConfigPlugin",
   "mixins": [
+    "MixinSaveLoader",
     "MixinTBTheEndBiomeSource"
   ],
   "client": [

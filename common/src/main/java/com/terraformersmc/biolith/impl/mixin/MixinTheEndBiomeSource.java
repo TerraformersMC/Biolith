@@ -101,7 +101,6 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
         return BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes);
     }
 
-    // "Cannot resolve" annotation is false negative because NEW target fails with leading 'L'
     @WrapOperation(method = "getBiome",
             at = @At(
                     value = "NEW",

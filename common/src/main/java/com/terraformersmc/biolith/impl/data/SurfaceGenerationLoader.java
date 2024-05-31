@@ -32,7 +32,7 @@ public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<L
         for (String namespace : manager.getAllNamespaces()) {
             profiler.push(namespace);
             try {
-                for (Resource resource : manager.getAllResources(new Identifier(namespace, RESOURCE_PATH))) {
+                for (Resource resource : manager.getAllResources(Identifier.of(namespace, RESOURCE_PATH))) {
                     profiler.push(resource.getPackId());
                     try {
                         InputStream inputStream = resource.getInputStream();

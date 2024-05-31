@@ -1,6 +1,5 @@
 accessWidener   v1  named
 
-accessible  field   net/minecraft/server/world/ThreadedAnvilChunkStorage chunkGenerator Lnet/minecraft/world/gen/chunk/ChunkGenerator;
 accessible  method  net/minecraft/world/biome/source/BiomeAccess method_38106 (JIIIDDD)D
 accessible  field   net/minecraft/world/biome/source/BiomeAccess storage Lnet/minecraft/world/biome/source/BiomeAccess$Storage;
 accessible  class   net/minecraft/world/biome/source/MultiNoiseBiomeSourceParameterList$Preset$BiomeSourceFunction

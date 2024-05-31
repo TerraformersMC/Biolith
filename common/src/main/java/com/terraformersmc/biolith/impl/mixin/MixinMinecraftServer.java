@@ -77,7 +77,6 @@ public abstract class MixinMinecraftServer {
             // TODO: Consider whether we need to guard against modifying the same ChunkGeneratorSettings more than once...
             if (dimensionOptions != null && surfaceRuleCollector.getRuleCount() > 0) {
                 ChunkGenerator chunkGenerator = dimensionOptions.chunkGenerator();
-                //ChunkGenerator chunkGenerator = ((ServerChunkManager) world.getChunkManager()).threadedAnvilChunkStorage.chunkGenerator;
                 if (chunkGenerator instanceof NoiseChunkGenerator noiseChunkGenerator) {
                     ChunkGeneratorSettings chunkGeneratorSettings = noiseChunkGenerator.getSettings().value();
 

@@ -26,6 +26,13 @@ configurations {
     developmentForge.extendsFrom common
 }
 
+// Hack to force Forge-required version of jopt-simple (required since 1.20.5).
+configurations.all {
+    resolutionStrategy {
+        force 'net.sf.jopt-simple:jopt-simple:5.0.4'
+    }
+}
+
 dependencies {
     forge "net.minecraftforge:forge:${rootProject.forge_version}"
     // Remove the next line if you don't want to depend on the API

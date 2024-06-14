@@ -2,6 +2,7 @@ package com.terraformersmc.biolith.impl.commands;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.terraformersmc.biolith.api.biome.subbiome.BiomeParameterTarget;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.*;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
@@ -168,7 +169,7 @@ public class BiolithDescribeCommand {
                 )));
         context.getSource().sendMessage(Text.literal(
                 String.format("§7PV§r:%+05.3f  §4Te§r:%+05.3f  §5We§r:%+05.3f  §6BR§r:%+05.3f",
-                        MultiNoiseUtil.toFloat(SubBiomeMatcherImpl.Criterion.pvFromWeirdness(noisePoint.weirdnessNoise())),
+                        MultiNoiseUtil.toFloat(BiomeParameterTarget.getPV(noisePoint.weirdnessNoise())),
                         MultiNoiseUtil.toFloat(noisePoint.temperatureNoise()),
                         MultiNoiseUtil.toFloat(noisePoint.weirdnessNoise()),
                         replacementNoise

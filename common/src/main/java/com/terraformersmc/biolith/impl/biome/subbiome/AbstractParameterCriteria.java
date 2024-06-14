@@ -22,8 +22,8 @@ public abstract class AbstractParameterCriteria implements Criteria {
     protected static <T extends AbstractParameterCriteria> MapCodec<T> buildCodec(Function3<BiomeParameterTarget, Float, Float, T> function) {
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
             BiomeParameterTarget.CODEC.fieldOf("parameter").forGetter(AbstractParameterCriteria::parameter),
-            Codec.FLOAT.optionalFieldOf("min", Float.MIN_VALUE).forGetter(AbstractParameterCriteria::min),
-            Codec.FLOAT.optionalFieldOf("max", Float.MAX_VALUE).forGetter(AbstractParameterCriteria::max)
+            Codec.FLOAT.optionalFieldOf("min", -64f).forGetter(AbstractParameterCriteria::min),
+            Codec.FLOAT.optionalFieldOf("max", 64f).forGetter(AbstractParameterCriteria::max)
         ).apply(instance, function));
     }
 

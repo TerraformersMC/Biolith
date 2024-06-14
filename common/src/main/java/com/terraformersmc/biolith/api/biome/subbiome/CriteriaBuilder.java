@@ -35,11 +35,11 @@ public class CriteriaBuilder {
     }
 
     public static Criteria valueMin(BiomeParameterTarget parameter, float min) {
-        return new ValueCriteria(parameter, min, Float.MAX_VALUE);
+        return new ValueCriteria(parameter, min, 64);
     }
 
     public static Criteria valueMax(BiomeParameterTarget parameter, float max) {
-        return new ValueCriteria(parameter, Float.MIN_VALUE, max);
+        return new ValueCriteria(parameter, -64, max);
     }
 
     public static Criteria centerDistance(BiomeParameterTarget parameter, float min, float max) {
@@ -47,11 +47,11 @@ public class CriteriaBuilder {
     }
 
     public static Criteria centerDistanceMin(BiomeParameterTarget parameter, float min) {
-        return new CenterDistanceCriteria(parameter, min, Float.MAX_VALUE);
+        return new CenterDistanceCriteria(parameter, min, 64);
     }
 
     public static Criteria centerDistanceMax(BiomeParameterTarget parameter, float max) {
-        return new CenterDistanceCriteria(parameter, Float.MIN_VALUE, max);
+        return new CenterDistanceCriteria(parameter, -64, max);
     }
 
     public static Criteria ratio(RatioTarget target, float min, float max) {
@@ -59,11 +59,11 @@ public class CriteriaBuilder {
     }
 
     public static Criteria ratioMin(RatioTarget target, float min) {
-        return new RatioCriteria(target, min, Float.MAX_VALUE);
+        return new RatioCriteria(target, min, 64);
     }
 
     public static Criteria ratioMax(RatioTarget target, float max) {
-        return new RatioCriteria(target, Float.MIN_VALUE, max);
+        return new RatioCriteria(target, -64, max);
     }
 
     public static Criteria original(RegistryKey<Biome> biome) {

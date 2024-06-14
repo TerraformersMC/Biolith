@@ -5,7 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.api.biome.subbiome.Criteria;
+import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.RegistryKeys;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -15,16 +15,16 @@ import net.minecraft.world.biome.Biome;
 import java.util.Optional;
 import java.util.function.Function;
 
-public abstract class AbstractBiomeCriteria implements Criteria {
+public abstract class AbstractBiomeCriterion implements Criterion {
     protected final BiomeTarget biomeTarget;
 
-    public AbstractBiomeCriteria(BiomeTarget biomeTarget) {
+    public AbstractBiomeCriterion(BiomeTarget biomeTarget) {
         this.biomeTarget = biomeTarget;
     }
 
-    protected static <T extends AbstractBiomeCriteria> MapCodec<T> buildCodec(Function<BiomeTarget, T> function) {
+    protected static <T extends AbstractBiomeCriterion> MapCodec<T> buildCodec(Function<BiomeTarget, T> function) {
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
-            BiomeTarget.CODEC.fieldOf("biome_target").forGetter(AbstractBiomeCriteria::biomeTarget)
+            BiomeTarget.CODEC.fieldOf("biome_target").forGetter(AbstractBiomeCriterion::biomeTarget)
         ).apply(instance, function));
     }
 

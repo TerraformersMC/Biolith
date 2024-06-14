@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.impl.biome;
 
 import com.mojang.datafixers.util.Pair;
-import com.terraformersmc.biolith.api.biome.subbiome.Criteria;
+import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
 import com.terraformersmc.biolith.impl.config.BiolithState;
@@ -86,11 +86,11 @@ public abstract class DimensionBiomePlacement {
         }
     }
 
-    public void addSubBiome(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criteria criteria, boolean fromData) {
+    public void addSubBiome(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criterion criterion, boolean fromData) {
         if (biomesInjected || (subBiomeRequests.containsKey(target) && subBiomeRequests.get(target).finalized)) {
             Biolith.LOGGER.error("Biolith's BiomePlacement.addSubBiome() called too late for biome: {}", biome.getValue());
         } else {
-            subBiomeRequests.computeIfAbsent(target, SubBiomeRequestSet::new).addRequest(biome, criteria, fromData);
+            subBiomeRequests.computeIfAbsent(target, SubBiomeRequestSet::new).addRequest(biome, criterion, fromData);
         }
     }
 
@@ -402,15 +402,15 @@ public abstract class DimensionBiomePlacement {
         }
     }
 
-    protected record SubBiomeRequest(RegistryKey<Biome> biome, Criteria criteria, RegistryEntry<Biome> biomeEntry, boolean fromData) {
-        static SubBiomeRequest of(RegistryKey<Biome> biome, Criteria criteria, boolean fromData) {
-            return new SubBiomeRequest(biome, criteria, null, fromData);
+    protected record SubBiomeRequest(RegistryKey<Biome> biome, Criterion criterion, RegistryEntry<Biome> biomeEntry, boolean fromData) {
+        static SubBiomeRequest of(RegistryKey<Biome> biome, Criterion criterion, boolean fromData) {
+            return new SubBiomeRequest(biome, criterion, null, fromData);
         }
 
         @Override
         public boolean equals(Object object) {
             if (object instanceof SubBiomeRequest request) {
-                return request.biome.equals(this.biome) && request.criteria.equals(this.criteria);
+                return request.biome.equals(this.biome) && request.criterion.equals(this.criterion);
             }
 
             return false;
@@ -424,7 +424,7 @@ public abstract class DimensionBiomePlacement {
 
         SubBiomeRequest complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
             // Requests must be re-completed after every server restart in case the biome registry has changed.
-            return new SubBiomeRequest(biome, criteria, biomeEntryGetter.getOrThrow(biome), fromData);
+            return new SubBiomeRequest(biome, criterion, biomeEntryGetter.getOrThrow(biome), fromData);
         }
     }
 
@@ -437,8 +437,8 @@ public abstract class DimensionBiomePlacement {
             this.target = target;
         }
 
-        void addRequest(RegistryKey<Biome> biome, Criteria criteria, boolean fromData) {
-            addRequest(SubBiomeRequest.of(biome, criteria, fromData));
+        void addRequest(RegistryKey<Biome> biome, Criterion criterion, boolean fromData) {
+            addRequest(SubBiomeRequest.of(biome, criterion, fromData));
         }
 
         void addRequest(SubBiomeRequest request) {
@@ -451,7 +451,7 @@ public abstract class DimensionBiomePlacement {
 
         public @Nullable SubBiomeRequest selectSubBiome(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Vector2fc localRange, double localNoise) {
             for (SubBiomeRequest request : requests) {
-                if (request.criteria().matches(fittestNodes, DimensionBiomePlacement.this , noisePoint, localRange, (float) localNoise)) {
+                if (request.criterion().matches(fittestNodes, DimensionBiomePlacement.this , noisePoint, localRange, (float) localNoise)) {
                     return request;
                 }
             }

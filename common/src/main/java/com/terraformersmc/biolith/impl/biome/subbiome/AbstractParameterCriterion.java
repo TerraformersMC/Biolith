@@ -5,25 +5,23 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.api.biome.subbiome.BiomeParameterTarget;
-import com.terraformersmc.biolith.api.biome.subbiome.Criteria;
+import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
 import net.minecraft.util.dynamic.Range;
 
-import java.util.function.BiFunction;
-
-public abstract class AbstractParameterCriteria implements Criteria {
+public abstract class AbstractParameterCriterion implements Criterion {
     protected final BiomeParameterTarget parameter;
     protected Range<Float> allowedValues;
 
-    public AbstractParameterCriteria(BiomeParameterTarget parameter, float min, float max) {
+    public AbstractParameterCriterion(BiomeParameterTarget parameter, float min, float max) {
         this.parameter = parameter;
         this.allowedValues = new Range<>(min, max);
     }
 
-    protected static <T extends AbstractParameterCriteria> MapCodec<T> buildCodec(Function3<BiomeParameterTarget, Float, Float, T> function) {
+    protected static <T extends AbstractParameterCriterion> MapCodec<T> buildCodec(Function3<BiomeParameterTarget, Float, Float, T> function) {
         return RecordCodecBuilder.mapCodec(instance -> instance.group(
-            BiomeParameterTarget.CODEC.fieldOf("parameter").forGetter(AbstractParameterCriteria::parameter),
-            Codec.FLOAT.optionalFieldOf("min", -64f).forGetter(AbstractParameterCriteria::min),
-            Codec.FLOAT.optionalFieldOf("max", 64f).forGetter(AbstractParameterCriteria::max)
+            BiomeParameterTarget.CODEC.fieldOf("parameter").forGetter(AbstractParameterCriterion::parameter),
+            Codec.FLOAT.optionalFieldOf("min", -64f).forGetter(AbstractParameterCriterion::min),
+            Codec.FLOAT.optionalFieldOf("max", 64f).forGetter(AbstractParameterCriterion::max)
         ).apply(instance, function));
     }
 

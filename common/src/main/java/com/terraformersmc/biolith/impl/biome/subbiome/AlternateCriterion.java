@@ -2,7 +2,7 @@ package com.terraformersmc.biolith.impl.biome.subbiome;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.api.biome.subbiome.CriteriaType;
+import com.terraformersmc.biolith.api.biome.subbiome.CriterionType;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.registry.RegistryKey;
@@ -13,21 +13,21 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2fc;
 
-public class AlternateCriteria extends AbstractBiomeCriteria {
-    public static final MapCodec<AlternateCriteria> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        BiomeTarget.CODEC.fieldOf("biome_target").forGetter(AbstractBiomeCriteria::biomeTarget),
-        RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("alternate").forGetter(AlternateCriteria::alternate)
-    ).apply(instance, AlternateCriteria::new));
+public class AlternateCriterion extends AbstractBiomeCriterion {
+    public static final MapCodec<AlternateCriterion> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        BiomeTarget.CODEC.fieldOf("biome_target").forGetter(AbstractBiomeCriterion::biomeTarget),
+        RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("alternate").forGetter(AlternateCriterion::alternate)
+    ).apply(instance, AlternateCriterion::new));
 
     private final RegistryKey<Biome> alternate;
 
-    public AlternateCriteria(BiomeTarget biomeTarget, RegistryKey<Biome> alternate) {
+    public AlternateCriterion(BiomeTarget biomeTarget, RegistryKey<Biome> alternate) {
         super(biomeTarget);
         this.alternate = alternate;
     }
 
     @Override
-    public CriteriaType<AlternateCriteria> getType() {
+    public CriterionType<AlternateCriterion> getType() {
         return BiolithCriterion.ALTERNATE;
     }
 
@@ -36,7 +36,7 @@ public class AlternateCriteria extends AbstractBiomeCriteria {
     }
 
     @Override
-    public MapCodec<AlternateCriteria> getCodec() {
+    public MapCodec<AlternateCriterion> getCodec() {
         return CODEC;
     }
 

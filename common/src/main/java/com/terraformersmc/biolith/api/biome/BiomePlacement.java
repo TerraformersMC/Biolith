@@ -1,6 +1,6 @@
 package com.terraformersmc.biolith.api.biome;
 
-import com.terraformersmc.biolith.api.biome.subbiome.Criteria;
+import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
@@ -144,10 +144,10 @@ public final class BiomePlacement {
      *
      * @param target  The biome to be replaced
      * @param biome   The replacement biome
-     * @param criteria Matching criteria for when to replace
+     * @param criterion Matching criteria for when to replace
      */
-    public static void addSubEnd(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criteria criteria) {
-        BiomeCoordinator.END.addSubBiome(target, biome, criteria, false);
+    public static void addSubEnd(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criterion criterion) {
+        BiomeCoordinator.END.addSubBiome(target, biome, criterion, false);
     }
 
     /**
@@ -156,10 +156,10 @@ public final class BiomePlacement {
      *
      * @param target  The biome to be replaced
      * @param biome   The replacement biome
-     * @param criteria Matching criteria for when to replace
+     * @param criterion Matching criteria for when to replace
      */
-    public static void addSubNether(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criteria criteria) {
-        BiomeCoordinator.NETHER.addSubBiome(target, biome, criteria, false);
+    public static void addSubNether(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criterion criterion) {
+        BiomeCoordinator.NETHER.addSubBiome(target, biome, criterion, false);
     }
 
     /**
@@ -168,9 +168,9 @@ public final class BiomePlacement {
      *
      * @param target  The biome to be replaced
      * @param biome   The replacement biome
-     * @param criteria Matching criteria for when to replace
+     * @param criterion Matching criteria for when to replace
      */
-    public static void addSubOverworld(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criteria criteria) {
-        BiomeCoordinator.OVERWORLD.addSubBiome(target, biome, criteria, false);
+    public static void addSubOverworld(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criterion criterion) {
+        BiomeCoordinator.OVERWORLD.addSubBiome(target, biome, criterion, false);
     }
 }

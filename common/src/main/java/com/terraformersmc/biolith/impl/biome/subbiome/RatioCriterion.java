@@ -3,8 +3,8 @@ package com.terraformersmc.biolith.impl.biome.subbiome;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.api.biome.subbiome.Criteria;
-import com.terraformersmc.biolith.api.biome.subbiome.CriteriaType;
+import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
+import com.terraformersmc.biolith.api.biome.subbiome.CriterionType;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -16,14 +16,14 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2fc;
 
-public record RatioCriteria(RatioTarget target, Range<Float> allowedValues) implements Criteria {
-    public static final MapCodec<RatioCriteria> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        RatioTarget.CODEC.fieldOf("target").forGetter(RatioCriteria::target),
-        Codec.FLOAT.optionalFieldOf("min", Float.MIN_VALUE).forGetter(RatioCriteria::min),
-        Codec.FLOAT.optionalFieldOf("max", Float.MAX_VALUE).forGetter(RatioCriteria::max)
-    ).apply(instance, RatioCriteria::new));
+public record RatioCriterion(RatioTarget target, Range<Float> allowedValues) implements Criterion {
+    public static final MapCodec<RatioCriterion> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        RatioTarget.CODEC.fieldOf("target").forGetter(RatioCriterion::target),
+        Codec.FLOAT.optionalFieldOf("min", Float.MIN_VALUE).forGetter(RatioCriterion::min),
+        Codec.FLOAT.optionalFieldOf("max", Float.MAX_VALUE).forGetter(RatioCriterion::max)
+    ).apply(instance, RatioCriterion::new));
 
-    public RatioCriteria(RatioTarget target, float min, float max) {
+    public RatioCriterion(RatioTarget target, float min, float max) {
         this(target, new Range<>(min, max));
     }
 
@@ -35,12 +35,12 @@ public record RatioCriteria(RatioTarget target, Range<Float> allowedValues) impl
         return allowedValues.maxInclusive();
     }
     @Override
-    public CriteriaType<? extends Criteria> getType() {
+    public CriterionType<? extends Criterion> getType() {
         return BiolithCriterion.RATIO;
     }
 
     @Override
-    public MapCodec<? extends Criteria> getCodec() {
+    public MapCodec<? extends Criterion> getCodec() {
         return CODEC;
     }
 

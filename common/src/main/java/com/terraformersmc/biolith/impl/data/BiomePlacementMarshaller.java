@@ -2,7 +2,7 @@ package com.terraformersmc.biolith.impl.data;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.api.biome.subbiome.Criteria;
+import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import net.minecraft.registry.RegistryKey;
@@ -118,21 +118,21 @@ public record BiomePlacementMarshaller(List<AddBiomeMarshaller> additions, List<
         }
     }
 
-    public record AddSubBiomeMarshaller(RegistryKey<DimensionType> dimension, RegistryKey<Biome> target, RegistryKey<Biome> biome, Criteria criteria) {
+    public record AddSubBiomeMarshaller(RegistryKey<DimensionType> dimension, RegistryKey<Biome> target, RegistryKey<Biome> biome, Criterion criterion) {
         public static Codec<AddSubBiomeMarshaller> CODEC = RecordCodecBuilder.create(instance -> instance.group(
             RegistryKey.createCodec(RegistryKeys.DIMENSION_TYPE).fieldOf("dimension").forGetter(AddSubBiomeMarshaller::dimension),
             RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("target").forGetter(AddSubBiomeMarshaller::target),
             RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("biome").forGetter(AddSubBiomeMarshaller::biome),
-            Criteria.MATCHER_CODEC.fieldOf("criteria").forGetter(AddSubBiomeMarshaller::criteria)
+            Criterion.MATCHER_CODEC.fieldOf("criteria").forGetter(AddSubBiomeMarshaller::criterion)
         ).apply(instance, AddSubBiomeMarshaller::new));
 
         public void unmarshall() {
             if (dimension.equals(DimensionTypes.OVERWORLD)) {
-                BiomeCoordinator.OVERWORLD.addSubBiome(target, biome, criteria, true);
+                BiomeCoordinator.OVERWORLD.addSubBiome(target, biome, criterion, true);
             } else if (dimension.equals(DimensionTypes.THE_NETHER)) {
-                BiomeCoordinator.NETHER.addSubBiome(target, biome, criteria, true);
+                BiomeCoordinator.NETHER.addSubBiome(target, biome, criterion, true);
             } else if (dimension.equals(DimensionTypes.THE_END)) {
-                BiomeCoordinator.END.addSubBiome(target, biome, criteria, true);
+                BiomeCoordinator.END.addSubBiome(target, biome, criterion, true);
             } else {
                 Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.getValue());
             }

@@ -2,8 +2,8 @@ package com.terraformersmc.biolith.impl.biome.subbiome;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.api.biome.subbiome.Criteria;
-import com.terraformersmc.biolith.api.biome.subbiome.CriteriaType;
+import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
+import com.terraformersmc.biolith.api.biome.subbiome.CriterionType;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -14,28 +14,28 @@ import org.joml.Vector2fc;
 
 import java.util.List;
 
-public record AllOfCriteria(List<Criteria> criterion) implements Criteria {
-    public static final MapCodec<AllOfCriteria> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
-        Criteria.CODEC.listOf().fieldOf("criterion").forGetter(AllOfCriteria::criterion)
-    ).apply(instance, AllOfCriteria::new));
+public record AnyOfCriterion(List<Criterion> criteria) implements Criterion {
+    public static final MapCodec<AnyOfCriterion> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+        Criterion.CODEC.listOf().fieldOf("criteria").forGetter(AnyOfCriterion::criteria)
+    ).apply(instance, AnyOfCriterion::new));
 
     @Override
-    public CriteriaType<AllOfCriteria> getType() {
-        return BiolithCriterion.ALL_OF;
+    public CriterionType<AnyOfCriterion> getType() {
+        return BiolithCriterion.ANY_OF;
     }
 
     @Override
-    public MapCodec<AllOfCriteria> getCodec() {
+    public MapCodec<AnyOfCriterion> getCodec() {
         return CODEC;
     }
 
     @Override
     public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Vector2fc replacementRange, float replacementNoise) {
-        for (Criteria criteria : criterion) {
-            if (!criteria.matches(fittestNodes, biomePlacement, noisePoint, replacementRange, replacementNoise)) {
-                return false;
+        for (Criterion criterion : this.criteria) {
+            if (!criterion.matches(fittestNodes, biomePlacement, noisePoint, replacementRange, replacementNoise)) {
+                return true;
             }
         }
-        return true;
+        return false;
     }
 }

@@ -2,7 +2,7 @@ package com.terraformersmc.biolith.impl.biome.subbiome;
 
 import com.mojang.serialization.MapCodec;
 import com.terraformersmc.biolith.api.biome.subbiome.BiomeParameterTarget;
-import com.terraformersmc.biolith.api.biome.subbiome.CriteriaType;
+import com.terraformersmc.biolith.api.biome.subbiome.CriterionType;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -11,20 +11,20 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Vector2fc;
 
-public class CenterDistanceCriteria extends AbstractParameterCriteria {
-    public static final MapCodec<CenterDistanceCriteria> CODEC = buildCodec(CenterDistanceCriteria::new);
+public class CenterDistanceCriterion extends AbstractParameterCriterion {
+    public static final MapCodec<CenterDistanceCriterion> CODEC = buildCodec(CenterDistanceCriterion::new);
 
-    public CenterDistanceCriteria(BiomeParameterTarget parameter, float min, float max) {
+    public CenterDistanceCriterion(BiomeParameterTarget parameter, float min, float max) {
         super(parameter, min, max);
     }
 
     @Override
-    public CriteriaType<CenterDistanceCriteria> getType() {
+    public CriterionType<CenterDistanceCriterion> getType() {
         return BiolithCriterion.CENTER_DISTANCE;
     }
 
     @Override
-    public MapCodec<CenterDistanceCriteria> getCodec() {
+    public MapCodec<CenterDistanceCriterion> getCodec() {
         return CODEC;
     }
 

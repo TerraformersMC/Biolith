@@ -1,8 +1,7 @@
 package com.terraformersmc.biolith.impl.mixin;
 
 import com.terraformersmc.biolith.api.biome.BiomePlacement;
-import com.terraformersmc.biolith.api.biome.subbiome.CriteriaBuilder;
-import com.terraformersmc.biolith.api.biome.subbiome.CriteriaTypes;
+import com.terraformersmc.biolith.api.biome.subbiome.CriterionBuilder;
 import net.fabricmc.fabric.api.biome.v1.TheEndBiomes;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;
@@ -34,13 +33,13 @@ public class MixinFapiTheEndBiomes {
 
     @Inject(method = "addMidlandsBiome", at = @At("HEAD"), cancellable = true)
     private static void biolith$scrapeEndMidlandsReplacement(RegistryKey<Biome> highlands, RegistryKey<Biome> midlands, double weight, CallbackInfo ci) {
-        BiomePlacement.addSubEnd(BiomeKeys.END_MIDLANDS, midlands, CriteriaBuilder.alternate(highlands, BiomeKeys.END_HIGHLANDS));
+        BiomePlacement.addSubEnd(BiomeKeys.END_MIDLANDS, midlands, CriterionBuilder.alternate(highlands, BiomeKeys.END_HIGHLANDS));
         ci.cancel();
     }
 
     @Inject(method = "addBarrensBiome", at = @At("HEAD"), cancellable = true)
     private static void biolith$scrapeBarrensReplacement(RegistryKey<Biome> highlands, RegistryKey<Biome> barrens, double weight, CallbackInfo ci) {
-        BiomePlacement.addSubEnd(BiomeKeys.END_BARRENS, barrens, CriteriaBuilder.alternate(highlands, BiomeKeys.END_HIGHLANDS));
+        BiomePlacement.addSubEnd(BiomeKeys.END_BARRENS, barrens, CriterionBuilder.alternate(highlands, BiomeKeys.END_HIGHLANDS));
         ci.cancel();
     }
 }

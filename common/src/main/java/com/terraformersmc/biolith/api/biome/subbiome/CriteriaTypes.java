@@ -9,7 +9,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class CriteriaTypes {
     private static final Map<Identifier, CriteriaType<?>> CRITERIA_TYPES = new ConcurrentHashMap<>();
 
-    public static CriteriaType<?> get(Identifier id) {
+    protected static CriteriaType<?> get(Identifier id) {
         return CRITERIA_TYPES.get(id);
     }
 

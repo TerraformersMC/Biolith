@@ -123,7 +123,7 @@ public record BiomePlacementMarshaller(List<AddBiomeMarshaller> additions, List<
             RegistryKey.createCodec(RegistryKeys.DIMENSION_TYPE).fieldOf("dimension").forGetter(AddSubBiomeMarshaller::dimension),
             RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("target").forGetter(AddSubBiomeMarshaller::target),
             RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("biome").forGetter(AddSubBiomeMarshaller::biome),
-            Criteria.CODEC.fieldOf("criteria").forGetter(AddSubBiomeMarshaller::criteria)
+            Criteria.MATCHER_CODEC.fieldOf("criteria").forGetter(AddSubBiomeMarshaller::criteria)
         ).apply(instance, AddSubBiomeMarshaller::new));
 
         public void unmarshall() {

@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.impl.compat;
 
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.Biolith;
-import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;

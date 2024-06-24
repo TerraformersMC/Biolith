@@ -1,5 +1,6 @@
 package com.terraformersmc.biolith.impl.biome;
 
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
 @SuppressWarnings("unused")

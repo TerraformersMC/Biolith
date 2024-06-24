@@ -1,6 +1,6 @@
 package com.terraformersmc.biolith.impl.compat;
 
-import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;

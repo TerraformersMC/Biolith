@@ -2,7 +2,8 @@ package com.terraformersmc.biolith.impl.commands;
 
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.terraformersmc.biolith.api.biome.subbiome.BiomeParameterTarget;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTarget;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.*;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
@@ -17,6 +18,7 @@ import net.minecraft.server.world.ServerWorld;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import net.minecraft.util.dynamic.Range;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeCoords;
@@ -24,7 +26,6 @@ import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2f;
 
 public class BiolithDescribeCommand {
     protected static int atCaller(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
@@ -169,7 +170,7 @@ public class BiolithDescribeCommand {
                 )));
         context.getSource().sendMessage(Text.literal(
                 String.format("§7PV§r:%+05.3f  §4Te§r:%+05.3f  §5We§r:%+05.3f  §6BR§r:%+05.3f",
-                        MultiNoiseUtil.toFloat(BiomeParameterTarget.getPV(noisePoint.weirdnessNoise())),
+                        MultiNoiseUtil.toFloat(BiomeParameterTarget.getPeaksValleysNoiseLong(noisePoint.weirdnessNoise())),
                         MultiNoiseUtil.toFloat(noisePoint.temperatureNoise()),
                         MultiNoiseUtil.toFloat(noisePoint.weirdnessNoise()),
                         replacementNoise
@@ -181,6 +182,11 @@ public class BiolithDescribeCommand {
         if (terrablenderFittestNodes != null) {
             context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.terrablender")
                     .append(textFromFittestNodes(terrablenderFittestNodes)));
+        }
+
+        if (describeBiomeData.replacementBiome != null && describeBiomeData.replacementRange == null) {
+            // Impossible, but this helps to convince IDEA
+            return -2;
         }
 
         if (describeBiomeData.replacementBiome != null) {
@@ -197,9 +203,9 @@ public class BiolithDescribeCommand {
                             Text.translatable("biolith.command.describe.biome.none") :
                             textFromBiome(describeBiomeData.higherBiome))
                     .append(Text.literal(String.format("\n    %+05.3f < %+05.3f < %+05.3f ",
-                            describeBiomeData.replacementRange.x,
+                            describeBiomeData.replacementRange.minInclusive(),
                             replacementNoise,
-                            describeBiomeData.replacementRange.y))));
+                            describeBiomeData.replacementRange.maxInclusive()))));
         }
 
         if (describeBiomeData.subBiome != null) {
@@ -237,7 +243,7 @@ public class BiolithDescribeCommand {
 
     // Ferries back data from DimensionalBiomePlacement.getBiomeData().
     public record DescribeBiomeData(
-            @Nullable Vector2f replacementRange,
+            @Nullable Range<Float> replacementRange,
             @Nullable RegistryKey<Biome> replacementBiome,
             @Nullable RegistryKey<Biome> lowerBiome,
             @Nullable RegistryKey<Biome> higherBiome,

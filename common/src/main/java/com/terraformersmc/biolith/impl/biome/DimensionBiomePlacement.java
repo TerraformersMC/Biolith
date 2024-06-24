@@ -1,7 +1,8 @@
 package com.terraformersmc.biolith.impl.biome;
 
 import com.mojang.datafixers.util.Pair;
-import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
 import com.terraformersmc.biolith.impl.config.BiolithState;
@@ -9,15 +10,16 @@ import com.terraformersmc.biolith.impl.noise.OpenSimplexNoise2;
 import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.dynamic.Range;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2f;
-import org.joml.Vector2fc;
 
 import java.util.*;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public abstract class DimensionBiomePlacement {
     protected boolean biomesInjected = false;
@@ -42,14 +44,10 @@ public abstract class DimensionBiomePlacement {
         this.replacementRequests.forEach((biomeKey, requestSet) -> requestSet.complete(BiomeCoordinator.getBiomeLookupOrThrow()));
         this.subBiomeRequests.forEach((biomeKey, requestSet) -> requestSet.complete(BiomeCoordinator.getBiomeLookupOrThrow()));
 
-        seedlets[0] = (int) (seed       & 0xffL);
-        seedlets[1] = (int) (seed >>  8 & 0xffL);
-        seedlets[2] = (int) (seed >> 16 & 0xffL);
-        seedlets[3] = (int) (seed >> 24 & 0xffL);
-        seedlets[4] = (int) (seed >> 32 & 0xffL);
-        seedlets[5] = (int) (seed >> 40 & 0xffL);
-        seedlets[6] = (int) (seed >> 48 & 0xffL);
-        seedlets[7] = (int) (seed >> 56 & 0xffL);
+        // populate the seedlets from the game seed
+        for (int i = 0; i < 8; ++i) {
+            seedlets[i] = (int) (seed >> (i * 8) & 0xffL);
+        }
     }
 
     protected void serverStopped() {
@@ -106,7 +104,7 @@ public abstract class DimensionBiomePlacement {
         RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
 
         double localNoise = -1D;
-        Vector2f localRange = null;
+        Range<Float> localRange = null;
 
         // select phase one -- direct replacements
         if (replacementRequests.containsKey(biomeKey)) {
@@ -139,9 +137,16 @@ public abstract class DimensionBiomePlacement {
         return biomeEntry;
     }
 
-    /*
+    /**
      * This function is used by BiolithDescribeCommand to peek under the hood of getReplacement();
      * it is not performance-sensitive like the above function which it imitates.
+     *
+     * @param x X coordinate of the targetet point
+     * @param y Y coordinate of the targetet point
+     * @param z Z coordinate of the targetet point
+     * @param noisePoint Noise values at the targeted coordinates
+     * @param fittestNodes Biolith fittest nodes data structure at the targeted point
+     * @return Biolith's describe biome command's biome data structure for the targeted replacement
      */
     public BiolithDescribeCommand.DescribeBiomeData getBiomeData(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
         RegistryEntry<Biome> biomeEntry = fittestNodes.ultimate().value;
@@ -191,28 +196,50 @@ public abstract class DimensionBiomePlacement {
                         subBiomeRequest.biome());
     }
 
-    // For Modern Beta and any other similar direct-only schemes.
-    public RegistryEntry<Biome> getDirectReplacement(int x, int y, int z, RegistryEntry<Biome> biomeEntry) {
+    /**
+     * Wrapper around the internals of replacement requests, so Modern Beta or other similar direct-only schemes
+     * can directly query replacements without needing access to the internal classes of DimensionBiomePlacement.
+     *
+     * @param x X coordinate of the targetet point
+     * @param y Y coordinate of the targetet point
+     * @param z Z coordinate of the targetet point
+     * @param biomeEntry Registry entry of the targeted biome
+     * @return Entry of the selected biome if any; otherwise entry of the target biome
+     */
+    public @NotNull RegistryEntry<Biome> getReplacementEntry(int x, int y, int z, @NotNull RegistryEntry<Biome> biomeEntry) {
         RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
 
         // select phase one -- direct replacements
         if (replacementRequests.containsKey(biomeKey)) {
             ReplacementRequest request = replacementRequests.get(biomeKey).selectReplacement(getLocalNoise(x, y, z));
 
-            if (request != null) {
-
-                if (!request.biome().equals(VANILLA_PLACEHOLDER)) {
-                    biomeEntry = request.biomeEntry();
-                }
+            if (request != null && !request.biome().equals(VANILLA_PLACEHOLDER)) {
+                biomeEntry = request.biomeEntry();
             }
         }
 
         return biomeEntry;
     }
 
-    // For the alternate sub-biome criteria type.
-    public ReplacementRequestSet getReplacementRequest(RegistryKey<Biome> alternate) {
-        return replacementRequests.get(alternate);
+    /**
+     * Wrapper around the internals of replacement requests, so things like sub-biome alternate criteria can
+     * directly query replacements without needing access to the internal classes of DimensionBiomePlacement.
+     *
+     * @param biomeKey Registry key of the targeted biome
+     * @param replacementNoise Replacement noise value at the targeted point
+     * @return Pair of the biome key and registry entry if selected; otherwise null
+     */
+    public @Nullable Pair<RegistryKey<Biome>, RegistryEntry<Biome>> getReplacementPair(@Nullable RegistryKey<Biome> biomeKey, float replacementNoise) {
+        // select phase one -- direct replacements
+        if (biomeKey != null && replacementRequests.containsKey(biomeKey)) {
+            ReplacementRequest request = replacementRequests.get(biomeKey).selectReplacement(replacementNoise);
+
+            if (request != null && request.biome != null) {
+                return Pair.of(request.biome, request.biomeEntry);
+            }
+        }
+
+        return null;
     }
 
     // Used by mixins to add new noise biome placements.
@@ -275,7 +302,7 @@ public abstract class DimensionBiomePlacement {
     protected record RemovalRequest(RegistryKey<Biome> biome, boolean fromData) {
     }
 
-    public record ReplacementRequest(RegistryKey<Biome> biome, double rate, RegistryEntry<Biome> biomeEntry, double start, double end, boolean fromData) {
+    protected record ReplacementRequest(RegistryKey<Biome> biome, double rate, RegistryEntry<Biome> biomeEntry, double start, double end, boolean fromData) {
         public ReplacementRequest {
             rate = MathHelper.clamp(rate, 0D, 1D);
         }
@@ -285,8 +312,8 @@ public abstract class DimensionBiomePlacement {
         }
 
         // Reduced precision range packaged for sub-biome matchers.
-        public Vector2f range() {
-            return new Vector2f((float) start, end > 0.9999D ? 1f : (float) end);
+        public Range<Float> range() {
+            return new Range<>((float) start, end > 0.9999D ? 1f : (float) end);
         }
 
         @Override
@@ -314,7 +341,7 @@ public abstract class DimensionBiomePlacement {
         }
     }
 
-    public class ReplacementRequestSet {
+    protected class ReplacementRequestSet {
         private boolean finalized = false;
         RegistryKey<Biome> target;
         List<ReplacementRequest> requests = new ArrayList<>(8);
@@ -424,7 +451,16 @@ public abstract class DimensionBiomePlacement {
 
         SubBiomeRequest complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
             // Requests must be re-completed after every server restart in case the biome registry has changed.
+            criterion.complete(biomeEntryGetter);
+
             return new SubBiomeRequest(biome, criterion, biomeEntryGetter.getOrThrow(biome), fromData);
+        }
+
+        SubBiomeRequest reopen() {
+            // Delegate reopen down to all criteria in case a custom one needs it.
+            criterion.reopen();
+
+            return this;
         }
     }
 
@@ -449,7 +485,7 @@ public abstract class DimensionBiomePlacement {
             }
         }
 
-        public @Nullable SubBiomeRequest selectSubBiome(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Vector2fc localRange, double localNoise) {
+        public @Nullable SubBiomeRequest selectSubBiome(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> localRange, double localNoise) {
             for (SubBiomeRequest request : requests) {
                 if (request.criterion().matches(fittestNodes, DimensionBiomePlacement.this , noisePoint, localRange, (float) localNoise)) {
                     return request;
@@ -477,7 +513,10 @@ public abstract class DimensionBiomePlacement {
                 throw new IllegalStateException("Attempted to reopen sub-biome requests while server is running!");
             }
 
-            requests = new ArrayList<>(requests);
+            // Reopen the request list and associated criteria.
+            requests = requests.stream()
+                    .map(SubBiomeRequest::reopen)
+                    .collect(Collectors.toCollection(ArrayList::new));
             finalized = false;
         }
     }

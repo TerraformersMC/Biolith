@@ -1,15 +1,15 @@
-package com.terraformersmc.biolith.impl.biome.subbiome;
+package com.terraformersmc.biolith.impl.biome.sub;
 
 import com.mojang.serialization.MapCodec;
-import com.terraformersmc.biolith.api.biome.subbiome.BiomeParameterTarget;
-import com.terraformersmc.biolith.api.biome.subbiome.CriterionType;
-import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTarget;
+import com.terraformersmc.biolith.api.biome.sub.CriterionType;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.util.dynamic.Range;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import org.jetbrains.annotations.Nullable;
-import org.joml.Vector2fc;
 
 public class ValueCriterion extends AbstractParameterCriterion {
     public static final MapCodec<ValueCriterion> CODEC = buildCodec(ValueCriterion::new);
@@ -20,7 +20,7 @@ public class ValueCriterion extends AbstractParameterCriterion {
 
     @Override
     public CriterionType<ValueCriterion> getType() {
-        return BiolithCriterion.VALUE;
+        return BiolithCriteria.VALUE;
     }
 
     @Override
@@ -29,8 +29,7 @@ public class ValueCriterion extends AbstractParameterCriterion {
     }
 
     @Override
-    public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Vector2fc replacementRange, float replacementNoise) {
-        float value = parameter.getNoiseValue(noisePoint);
-        return allowedValues.contains(value);
+    public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> replacementRange, float replacementNoise) {
+        return allowedValues.contains(MultiNoiseUtil.toFloat(parameter.getNoiseValue(noisePoint)));
     }
 }

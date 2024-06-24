@@ -1,8 +1,8 @@
 package com.terraformersmc.biolith.impl.compat;
 
 import com.mojang.brigadier.context.CommandContext;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.Biolith;
-import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
@@ -46,6 +46,11 @@ public class ModernBetaCompatFabric {
         context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.modern_beta")
                 .append(textFromBiome(original)));
 
+        if (describeBiomeData.replacementBiome() != null && describeBiomeData.replacementRange() == null) {
+            // Impossible, but this helps to convince IDEA
+            return -2;
+        }
+
         if (describeBiomeData.replacementBiome() != null) {
             context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.replacement")
                     .append(textFromBiome(describeBiomeData.replacementBiome()))
@@ -60,9 +65,9 @@ public class ModernBetaCompatFabric {
                             Text.translatable("biolith.command.describe.biome.none") :
                             textFromBiome(describeBiomeData.higherBiome()))
                     .append(Text.literal(String.format("\n    %+05.3f < %+05.3f < %+05.3f ",
-                            describeBiomeData.replacementRange().x,
+                            describeBiomeData.replacementRange().minInclusive(),
                             replacementNoise,
-                            describeBiomeData.replacementRange().y))));
+                            describeBiomeData.replacementRange().maxInclusive()))));
         }
 
         return 1;

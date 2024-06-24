@@ -1,6 +1,6 @@
 package com.terraformersmc.biolith.api.biome;
 
-import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
+import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;

@@ -1,6 +1,6 @@
 package com.terraformersmc.biolith.impl.compat;
 
-import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.BlockPos;
@@ -92,8 +92,7 @@ public class VanillaCompat {
     }
 
     private static MultiNoiseUtil.NoiseHypercube createNoiseHypercube(MultiNoiseUtil.ParameterRange... parameters) {
-        assert parameters.length == 6;
-        return MultiNoiseUtil.createNoiseHypercube(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5], 0L);
+        return MultiNoiseUtil.createNoiseHypercube(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5], parameters[6].min());
     }
 
     /**

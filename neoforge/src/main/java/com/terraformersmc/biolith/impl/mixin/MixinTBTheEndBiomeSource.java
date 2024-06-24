@@ -1,6 +1,6 @@
 package com.terraformersmc.biolith.impl.mixin;
 
-import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import net.minecraft.registry.entry.RegistryEntry;

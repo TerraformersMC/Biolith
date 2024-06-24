@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.impl.mixin;
 
 import com.terraformersmc.biolith.api.biome.BiomePlacement;
-import com.terraformersmc.biolith.api.biome.subbiome.CriterionBuilder;
+import com.terraformersmc.biolith.api.biome.sub.CriterionBuilder;
 import net.fabricmc.fabric.api.biome.v1.TheEndBiomes;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.world.biome.Biome;

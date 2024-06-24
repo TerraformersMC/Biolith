@@ -1,11 +1,11 @@
-package com.terraformersmc.biolith.impl.biome.subbiome;
+package com.terraformersmc.biolith.impl.biome.sub;
 
 import com.mojang.datafixers.util.Function3;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.api.biome.subbiome.BiomeParameterTarget;
-import com.terraformersmc.biolith.api.biome.subbiome.Criterion;
+import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTarget;
+import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import net.minecraft.util.dynamic.Range;
 
 public abstract class AbstractParameterCriterion implements Criterion {
@@ -18,11 +18,16 @@ public abstract class AbstractParameterCriterion implements Criterion {
     }
 
     protected static <T extends AbstractParameterCriterion> MapCodec<T> buildCodec(Function3<BiomeParameterTarget, Float, Float, T> function) {
-        return RecordCodecBuilder.mapCodec(instance -> instance.group(
-            BiomeParameterTarget.CODEC.fieldOf("parameter").forGetter(AbstractParameterCriterion::parameter),
-            Codec.FLOAT.optionalFieldOf("min", -64f).forGetter(AbstractParameterCriterion::min),
-            Codec.FLOAT.optionalFieldOf("max", 64f).forGetter(AbstractParameterCriterion::max)
-        ).apply(instance, function));
+        return RecordCodecBuilder.mapCodec(
+                (instance) -> instance.group(
+                                BiomeParameterTarget.CODEC.fieldOf("parameter")
+                                        .forGetter(AbstractParameterCriterion::parameter),
+                                Codec.FLOAT.optionalFieldOf("min", Float.NEGATIVE_INFINITY)
+                                        .forGetter(AbstractParameterCriterion::min),
+                                Codec.FLOAT.optionalFieldOf("max", Float.POSITIVE_INFINITY)
+                                        .forGetter(AbstractParameterCriterion::max)
+                        )
+                        .apply(instance, function));
     }
 
     public BiomeParameterTarget parameter() {

@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.impl.mixin;
 
 import com.terraformersmc.biolith.impl.Biolith;
-import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.InterfaceSearchTree;
 import com.terraformersmc.biolith.impl.biome.SimpleArrayIterator;
 import net.minecraft.registry.RegistryKey;

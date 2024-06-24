@@ -1,4 +1,4 @@
-package com.terraformersmc.biolith.api.biome.subbiome;
+package com.terraformersmc.biolith.api.biome.sub;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;

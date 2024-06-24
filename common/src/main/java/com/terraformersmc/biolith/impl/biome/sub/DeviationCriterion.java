@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.impl.biome.sub;
 
 import com.mojang.serialization.MapCodec;
-import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTarget;
+import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTargets;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public class DeviationCriterion extends AbstractParameterCriterion {
     public static final MapCodec<DeviationCriterion> CODEC = buildCodec(DeviationCriterion::new);
 
-    public DeviationCriterion(BiomeParameterTarget parameter, float min, float max) {
+    public DeviationCriterion(BiomeParameterTargets parameter, float min, float max) {
         super(parameter, min, max);
     }
 
@@ -31,18 +31,18 @@ public class DeviationCriterion extends AbstractParameterCriterion {
     @Override
     public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> replacementRange, float replacementNoise) {
         long value = parameter.getNoiseValue(noisePoint);
-        long parameterCenter = BiomeParameterTarget.parameterCenter(getParameterRange(fittestNodes.ultimate().parameters));
+        long parameterCenter = BiomeParameterTargets.parameterCenter(getParameterRange(fittestNodes.ultimate().parameters));
 
         return allowedValues.contains(MultiNoiseUtil.toFloat(value - parameterCenter));
     }
 
     private MultiNoiseUtil.ParameterRange getParameterRange(MultiNoiseUtil.ParameterRange[] parameters) {
-        if (parameter == BiomeParameterTarget.PEAKS_VALLEYS) {
+        if (parameter == BiomeParameterTargets.PEAKS_VALLEYS) {
             // PV is a calculated noise based on folding weirdness twice
-            long weirdnessMin = parameters[BiomeParameterTarget.WEIRDNESS.ordinal()].min();
-            long weirdnessMax = parameters[BiomeParameterTarget.WEIRDNESS.ordinal()].max();
-            long point1 = BiomeParameterTarget.getPeaksValleysNoiseLong(weirdnessMin);
-            long point2 = BiomeParameterTarget.getPeaksValleysNoiseLong(weirdnessMax);
+            long weirdnessMin = parameters[BiomeParameterTargets.WEIRDNESS.ordinal()].min();
+            long weirdnessMax = parameters[BiomeParameterTargets.WEIRDNESS.ordinal()].max();
+            long point1 = BiomeParameterTargets.getPeaksValleysNoiseLong(weirdnessMin);
+            long point2 = BiomeParameterTargets.getPeaksValleysNoiseLong(weirdnessMax);
             long pvMin;
             long pvMax;
 

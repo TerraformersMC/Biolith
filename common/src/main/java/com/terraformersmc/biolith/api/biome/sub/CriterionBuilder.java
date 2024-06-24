@@ -25,8 +25,8 @@ import java.util.List;
  */
 @SuppressWarnings("unused")
 public class CriterionBuilder {
-    public static final Criterion NEAR_BORDER = ratioMax(RatioTarget.EDGE, 0.2f);
-    public static final Criterion NEAR_INTERIOR = ratioMax(RatioTarget.CENTER, 0.2f);
+    public static final Criterion NEAR_BORDER = ratioMax(RatioTargets.EDGE, 0.2f);
+    public static final Criterion NEAR_INTERIOR = ratioMax(RatioTargets.CENTER, 0.2f);
 
     public static final Criterion BEACHSIDE = allOf(NEAR_BORDER, neighbor(BiomeTags.IS_BEACH));
     public static final Criterion OCEANSIDE = allOf(NEAR_BORDER, neighbor(BiomeTags.IS_OCEAN));
@@ -87,15 +87,15 @@ public class CriterionBuilder {
      * Creates a numerical {@link Criterion} used to evaluate whether the raw noise value of the
      * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is within the provided range.
      * </p><p>
-     * The available noise values are detailed in {@link BiomeParameterTarget}.
+     * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
      *
-     * @param parameter {@link BiomeParameterTarget target} to evaluate
+     * @param parameter {@link BiomeParameterTargets target} to evaluate
      * @param min The minimum matching value of the validity range
      * @param max The maximum matching value of the validity range
      * @return The created {@link ValueCriterion}
      */
-    public static Criterion value(BiomeParameterTarget parameter, float min, float max) {
+    public static Criterion value(BiomeParameterTargets parameter, float min, float max) {
         return new ValueCriterion(parameter, min, max);
     }
 
@@ -104,14 +104,14 @@ public class CriterionBuilder {
      * Creates a numerical {@link Criterion} used to evaluate whether the raw noise value of the
      * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is at least the provided minimum.
      * </p><p>
-     * The available noise values are detailed in {@link BiomeParameterTarget}.
+     * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
      *
-     * @param parameter {@link BiomeParameterTarget target} to evaluate
+     * @param parameter {@link BiomeParameterTargets target} to evaluate
      * @param min The minimum matching value of the validity range
      * @return The created {@link ValueCriterion}
      */
-    public static Criterion valueMin(BiomeParameterTarget parameter, float min) {
+    public static Criterion valueMin(BiomeParameterTargets parameter, float min) {
         return value(parameter, min, Float.POSITIVE_INFINITY);
     }
 
@@ -120,14 +120,14 @@ public class CriterionBuilder {
      * Creates a numerical {@link Criterion} used to evaluate whether the raw noise value of the
      * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is no more than the provided maximum.
      * </p><p>
-     * The available noise values are detailed in {@link BiomeParameterTarget}.
+     * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
      *
-     * @param parameter {@link BiomeParameterTarget target} to evaluate
+     * @param parameter {@link BiomeParameterTargets target} to evaluate
      * @param max The maximum matching value of the validity range
      * @return The created {@link ValueCriterion}
      */
-    public static Criterion valueMax(BiomeParameterTarget parameter, float max) {
+    public static Criterion valueMax(BiomeParameterTargets parameter, float max) {
         return value(parameter, Float.NEGATIVE_INFINITY, max);
     }
 
@@ -137,15 +137,15 @@ public class CriterionBuilder {
      * selected biome's {@link MultiNoiseUtil.ParameterRange} to a selected noise value of the
      * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is within the provided range.
      * </p><p>
-     * The available noise values are detailed in {@link BiomeParameterTarget}.
+     * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
      *
-     * @param parameter {@link BiomeParameterTarget target} to evaluate
+     * @param parameter {@link BiomeParameterTargets target} to evaluate
      * @param min The minimum matching value of the validity range
      * @param max The maximum matching value of the validity range
      * @return The created {@link DeviationCriterion}
      */
-    public static Criterion deviation(BiomeParameterTarget parameter, float min, float max) {
+    public static Criterion deviation(BiomeParameterTargets parameter, float min, float max) {
         return new DeviationCriterion(parameter, min, max);
     }
 
@@ -155,14 +155,14 @@ public class CriterionBuilder {
      * selected biome's {@link MultiNoiseUtil.ParameterRange} to a selected noise value of the
      * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is at least the provided minimum.
      * </p><p>
-     * The available noise values are detailed in {@link BiomeParameterTarget}.
+     * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
      *
-     * @param parameter {@link BiomeParameterTarget target} to evaluate
+     * @param parameter {@link BiomeParameterTargets target} to evaluate
      * @param min The minimum matching value of the validity range
      * @return The created {@link DeviationCriterion}
      */
-    public static Criterion deviationMin(BiomeParameterTarget parameter, float min) {
+    public static Criterion deviationMin(BiomeParameterTargets parameter, float min) {
         return deviation(parameter, min, Float.POSITIVE_INFINITY);
     }
 
@@ -172,14 +172,14 @@ public class CriterionBuilder {
      * selected biome's {@link MultiNoiseUtil.ParameterRange} to a selected noise value of the
      * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is no more than the provided maximum.
      * </p><p>
-     * The available noise values are detailed in {@link BiomeParameterTarget}.
+     * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
      *
-     * @param parameter {@link BiomeParameterTarget target} to evaluate
+     * @param parameter {@link BiomeParameterTargets target} to evaluate
      * @param max The maximum matching value of the validity range
      * @return The created {@link DeviationCriterion}
      */
-    public static Criterion deviationMax(BiomeParameterTarget parameter, float max) {
+    public static Criterion deviationMax(BiomeParameterTargets parameter, float max) {
         return deviation(parameter, Float.NEGATIVE_INFINITY, max);
     }
 
@@ -189,15 +189,15 @@ public class CriterionBuilder {
      * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the of the
      * selected noise or replacement biome.
      * </p><p>
-     * The available noise values are detailed in {@link RatioTarget}.
+     * The available noise values are detailed in {@link RatioTargets}.
      * </p>
      *
-     * @param target {@link RatioTarget target} to evaluate
+     * @param target {@link RatioTargets target} to evaluate
      * @param min The minimum matching value of the validity range
      * @param max The maximum matching value of the validity range
      * @return The created {@link RatioCriterion}
      */
-    public static Criterion ratio(RatioTarget target, float min, float max) {
+    public static Criterion ratio(RatioTargets target, float min, float max) {
         return new RatioCriterion(target, min, max);
     }
 
@@ -207,14 +207,14 @@ public class CriterionBuilder {
      * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the of the
      * selected noise or replacement biome.
      * </p><p>
-     * The available noise values are detailed in {@link RatioTarget}.
+     * The available noise values are detailed in {@link RatioTargets}.
      * </p>
      *
-     * @param target {@link RatioTarget target} to evaluate
+     * @param target {@link RatioTargets target} to evaluate
      * @param min The minimum matching value of the validity range
      * @return The created {@link RatioCriterion}
      */
-    public static Criterion ratioMin(RatioTarget target, float min) {
+    public static Criterion ratioMin(RatioTargets target, float min) {
         return ratio(target, min, Float.POSITIVE_INFINITY);
     }
 
@@ -224,14 +224,14 @@ public class CriterionBuilder {
      * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the of the
      * selected noise or replacement biome.
      * </p><p>
-     * The available noise values are detailed in {@link RatioTarget}.
+     * The available noise values are detailed in {@link RatioTargets}.
      * </p>
      *
-     * @param target {@link RatioTarget target} to evaluate
+     * @param target {@link RatioTargets target} to evaluate
      * @param max The maximum matching value of the validity range
      * @return The created {@link RatioCriterion}
      */
-    public static Criterion ratioMax(RatioTarget target, float max) {
+    public static Criterion ratioMax(RatioTargets target, float max) {
         return ratio(target, Float.NEGATIVE_INFINITY, max);
     }
 

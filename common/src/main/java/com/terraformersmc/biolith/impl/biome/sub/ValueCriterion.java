@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.impl.biome.sub;
 
 import com.mojang.serialization.MapCodec;
-import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTarget;
+import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTargets;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
@@ -14,7 +14,7 @@ import org.jetbrains.annotations.Nullable;
 public class ValueCriterion extends AbstractParameterCriterion {
     public static final MapCodec<ValueCriterion> CODEC = buildCodec(ValueCriterion::new);
 
-    public ValueCriterion(BiomeParameterTarget parameter, float min, float max) {
+    public ValueCriterion(BiomeParameterTargets parameter, float min, float max) {
         super(parameter, min, max);
     }
 

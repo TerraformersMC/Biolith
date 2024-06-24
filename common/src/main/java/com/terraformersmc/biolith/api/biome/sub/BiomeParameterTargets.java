@@ -6,7 +6,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
 /**
- * Available noise values in the {@link BiomeParameterTarget} enum:
+ * Available noise values in the {@link BiomeParameterTargets} enum:
  * <ul>
  * <li>CONTINENTALNESS</li>
  * <li>DEPTH</li>
@@ -17,7 +17,7 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
  * <li>WEIRDNESS</li>
  * </ul>
  */
-public enum BiomeParameterTarget implements StringIdentifiable {
+public enum BiomeParameterTargets implements StringIdentifiable {
     /*
      * Do not add before or modify the order of the first six names;
      * they must be in the same order as Mojang's parameter arrays.
@@ -31,10 +31,10 @@ public enum BiomeParameterTarget implements StringIdentifiable {
     WEIRDNESS("weirdness"),
     PEAKS_VALLEYS("peaks_valleys");
 
-    public static final Codec<BiomeParameterTarget> CODEC = StringIdentifiable.createCodec(BiomeParameterTarget::values);
+    public static final Codec<BiomeParameterTargets> CODEC = StringIdentifiable.createCodec(BiomeParameterTargets::values);
     private final String name;
 
-    BiomeParameterTarget(String name) {
+    BiomeParameterTargets(String name) {
         this.name = name;
     }
 
@@ -51,7 +51,7 @@ public enum BiomeParameterTarget implements StringIdentifiable {
                 case EROSION -> noisePoint.erosionNoise();
                 case DEPTH -> noisePoint.depth();
                 case WEIRDNESS -> noisePoint.weirdnessNoise();
-                case PEAKS_VALLEYS -> BiomeParameterTarget.getPeaksValleysNoiseLong(noisePoint.weirdnessNoise());
+                case PEAKS_VALLEYS -> BiomeParameterTargets.getPeaksValleysNoiseLong(noisePoint.weirdnessNoise());
             };
     }
 

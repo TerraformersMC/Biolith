@@ -3,11 +3,11 @@ package com.terraformersmc.biolith.impl.biome.sub;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTarget;
+import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTargets;
 import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
-import com.terraformersmc.biolith.api.biome.sub.RatioTarget;
+import com.terraformersmc.biolith.api.biome.sub.RatioTargets;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.dynamic.Range;
@@ -16,10 +16,10 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import org.jetbrains.annotations.Nullable;
 
-public record RatioCriterion(RatioTarget target, Range<Float> allowedValues) implements Criterion {
+public record RatioCriterion(RatioTargets target, Range<Float> allowedValues) implements Criterion {
     public static final MapCodec<RatioCriterion> CODEC = RecordCodecBuilder.mapCodec(
             (instance) -> instance.group(
-                            RatioTarget.CODEC.fieldOf("target")
+                            RatioTargets.CODEC.fieldOf("target")
                                     .forGetter(RatioCriterion::target),
                             Codec.FLOAT.optionalFieldOf("min", Float.NEGATIVE_INFINITY)
                                     .forGetter(RatioCriterion::min),
@@ -28,7 +28,7 @@ public record RatioCriterion(RatioTarget target, Range<Float> allowedValues) imp
                     )
                     .apply(instance, RatioCriterion::new));
 
-    public RatioCriterion(RatioTarget target, float min, float max) {
+    public RatioCriterion(RatioTargets target, float min, float max) {
         this(target, new Range<>(min, max));
     }
 
@@ -53,10 +53,10 @@ public record RatioCriterion(RatioTarget target, Range<Float> allowedValues) imp
     public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> replacementRange, float replacementNoise) {
         float comparable;
 
-        if (target == RatioTarget.CENTER) {
+        if (target == RatioTargets.CENTER) {
             // Vanilla biomes pre-Biolith replacement; /10k is analogous to MultiNoiseUtil.toFloat(); param 6 is offset
-            comparable = MathHelper.sqrt((float) BiomeParameterTarget.getSquaredDistance(
-                    BiomeParameterTarget.parametersCenterPoint(fittestNodes.ultimate().parameters),
+            comparable = MathHelper.sqrt((float) BiomeParameterTargets.getSquaredDistance(
+                    BiomeParameterTargets.parametersCenterPoint(fittestNodes.ultimate().parameters),
                     noisePoint, fittestNodes.ultimate().parameters[6].min())) / 10000f;
             // Post-replacement we need to add in the replacement noise restriction
             if (replacementRange != null) {
@@ -72,7 +72,7 @@ public record RatioCriterion(RatioTarget target, Range<Float> allowedValues) imp
                             (replacementRange.minInclusive() + replacementRange.maxInclusive()) / 2f), comparable);
                 }
             }
-        } else if (target == RatioTarget.EDGE) {
+        } else if (target == RatioTargets.EDGE) {
             // Vanilla biomes pre-Biolith replacement
             if (fittestNodes.penultimate() == null) {
                 comparable = 1f;

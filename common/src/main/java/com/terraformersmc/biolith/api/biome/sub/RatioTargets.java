@@ -4,20 +4,20 @@ import com.mojang.serialization.Codec;
 import net.minecraft.util.StringIdentifiable;
 
 /**
- * Available computed ratios in the {@link RatioTarget} enum:
+ * Available computed ratios in the {@link RatioTargets} enum:
  * <ul>
  * <li>CENTER</li>
  * <li>EDGE</li>
  * </ul>
  */
-public enum RatioTarget implements StringIdentifiable {
+public enum RatioTargets implements StringIdentifiable {
     CENTER("center"),
     EDGE("edge");
 
-    public static final Codec<RatioTarget> CODEC = StringIdentifiable.createCodec(RatioTarget::values);
+    public static final Codec<RatioTargets> CODEC = StringIdentifiable.createCodec(RatioTargets::values);
     private final String name;
 
-    RatioTarget(String name) {
+    RatioTargets(String name) {
         this.name = name;
     }
 

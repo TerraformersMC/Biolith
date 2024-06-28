@@ -27,7 +27,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-@Mixin(TheEndBiomeSource.class)
+@Mixin(value = TheEndBiomeSource.class, priority = 1100)
 public abstract class MixinTheEndBiomeSource extends BiomeSource {
     private static RegistryEntryLookup<Biome> biolith$biomeLookup;
     private static MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$biomeEntries;

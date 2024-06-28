@@ -110,4 +110,8 @@ public class BiolithState extends PersistentState {
 
         this.markDirty();
     }
+
+    public ServerWorld getWorld() {
+        return world;
+    }
 }

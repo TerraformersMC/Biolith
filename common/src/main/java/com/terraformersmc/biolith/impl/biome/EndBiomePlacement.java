@@ -48,15 +48,22 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     protected void serverReplaced(BiolithState state, long seed) {
         super.serverReplaced(state, seed);
 
+        // Update vanilla biome entries for the End
         RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
         nodeSmallEndIslands = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseSmallEndIslands, biomeEntryGetter.getOrThrow(BiomeKeys.SMALL_END_ISLANDS));
         nodeEndBarrens      = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndBarrens,      biomeEntryGetter.getOrThrow(BiomeKeys.END_BARRENS));
         nodeEndMidlands     = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndMidlands,     biomeEntryGetter.getOrThrow(BiomeKeys.END_MIDLANDS));
         nodeEndHighlands    = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndHighlands,    biomeEntryGetter.getOrThrow(BiomeKeys.END_HIGHLANDS));
 
+        // Seed the End simplex noises based on the game seed
         humidityNoise    = new OpenSimplexNoise2(seedlets[7]);
         temperatureNoise = new OpenSimplexNoise2(seedlets[5]);
         weirdnessNoise   = new OpenSimplexNoise2(seedlets[3]);
+
+        // Somehow, biolith$getBiome() can be called before biolith$biomeStream() in the End
+        if (state.getWorld().getChunkManager().getChunkGenerator().getBiomeSource().getBiomes() == null) {
+            throw new IllegalStateException("Biome entries for the End are null after initialization...");
+        }
     }
 
     @Override

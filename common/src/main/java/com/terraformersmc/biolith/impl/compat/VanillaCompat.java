@@ -74,17 +74,17 @@ public class VanillaCompat {
 
         if (MathHelper.square((long) ChunkSectionPos.getSectionCoord(x)) +
                 MathHelper.square((long) ChunkSectionPos.getSectionCoord(z)) <= 4096L) {
-            biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.THE_END);
+            biomeEntry = BiomeCoordinator.END.nodeTheEnd.value;
         } else {
             double erosion = noise.erosion().sample(new DensityFunction.UnblendedNoisePos(x, y, z));
             if (erosion > 0.25) {
-                biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_HIGHLANDS);
+                biomeEntry = BiomeCoordinator.END.nodeEndHighlands.value;
             } else if (erosion >= -0.0625) {
-                biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_MIDLANDS);
+                biomeEntry = BiomeCoordinator.END.nodeEndMidlands.value;
             } else if (erosion < -0.21875) {
-                biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.SMALL_END_ISLANDS);
+                biomeEntry = BiomeCoordinator.END.nodeSmallEndIslands.value;
             } else {
-                biomeEntry = BiomeCoordinator.getBiomeLookupOrThrow().getOrThrow(BiomeKeys.END_BARRENS);
+                biomeEntry = BiomeCoordinator.END.nodeEndBarrens.value;
             }
         }
 

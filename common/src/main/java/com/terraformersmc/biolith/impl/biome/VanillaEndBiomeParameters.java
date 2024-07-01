@@ -9,6 +9,7 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import java.util.function.Consumer;
 
 import static com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement.DEFAULT_PARAMETER;
+import static com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement.OUT_OF_RANGE;
 
 public class VanillaEndBiomeParameters {
     private static final long VANILLA_OFFSET = 0L;
@@ -25,6 +26,7 @@ public class VanillaEndBiomeParameters {
     public static final MultiNoiseUtil.NoiseHypercube NOISE_END_HIGHLANDS     = new MultiNoiseUtil.NoiseHypercube(VANILLA_TEMPERATURE, VANILLA_HUMIDITY, DEFAULT_PARAMETER, MultiNoiseUtil.ParameterRange.of(0.25f, 1f), VANILLA_DEPTH, VANILLA_WEIRDNESS, VANILLA_OFFSET);
 
     public static void writeEndBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
+        parameters.accept(Pair.of(OUT_OF_RANGE,            BiomeKeys.THE_END));
         parameters.accept(Pair.of(NOISE_SMALL_END_ISLANDS, BiomeKeys.SMALL_END_ISLANDS));
         parameters.accept(Pair.of(NOISE_END_BARRENS,       BiomeKeys.END_BARRENS));
         parameters.accept(Pair.of(NOISE_END_MIDLANDS,      BiomeKeys.END_MIDLANDS));

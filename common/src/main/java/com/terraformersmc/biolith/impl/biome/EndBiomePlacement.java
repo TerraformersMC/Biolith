@@ -7,7 +7,6 @@ import com.terraformersmc.biolith.impl.noise.OpenSimplexNoise2;
 import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.math.ChunkSectionPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
@@ -19,11 +18,6 @@ import java.util.function.Consumer;
 
 public class EndBiomePlacement extends DimensionBiomePlacement {
     private final double[] scale = new double[4];
-
-    private final MultiNoiseUtil.NoiseHypercube noiseSmallEndIslands = new MultiNoiseUtil.NoiseHypercube(DEFAULT_PARAMETER, DEFAULT_PARAMETER, DEFAULT_PARAMETER, MultiNoiseUtil.ParameterRange.of(-1f, -0.21875f), DEFAULT_PARAMETER, DEFAULT_PARAMETER, 0L);
-    private final MultiNoiseUtil.NoiseHypercube noiseEndBarrens      = new MultiNoiseUtil.NoiseHypercube(DEFAULT_PARAMETER, DEFAULT_PARAMETER, DEFAULT_PARAMETER, MultiNoiseUtil.ParameterRange.of(-0.21875f, -0.0625f), DEFAULT_PARAMETER, DEFAULT_PARAMETER, 0L);
-    private final MultiNoiseUtil.NoiseHypercube noiseEndMidlands     = new MultiNoiseUtil.NoiseHypercube(DEFAULT_PARAMETER, DEFAULT_PARAMETER, DEFAULT_PARAMETER, MultiNoiseUtil.ParameterRange.of(-0.0625f, 0.25f), DEFAULT_PARAMETER, DEFAULT_PARAMETER, 0L);
-    private final MultiNoiseUtil.NoiseHypercube noiseEndHighlands    = new MultiNoiseUtil.NoiseHypercube(DEFAULT_PARAMETER, DEFAULT_PARAMETER, DEFAULT_PARAMETER, MultiNoiseUtil.ParameterRange.of(0.25f, 1f), DEFAULT_PARAMETER, DEFAULT_PARAMETER, 0L);
 
     public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeTheEnd;
     public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeSmallEndIslands;
@@ -51,16 +45,27 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
 
         // Update vanilla biome entries for the End
         RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
-        nodeTheEnd          = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(OUT_OF_RANGE,         biomeEntryGetter.getOrThrow(BiomeKeys.THE_END));
-        nodeSmallEndIslands = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseSmallEndIslands, biomeEntryGetter.getOrThrow(BiomeKeys.SMALL_END_ISLANDS));
-        nodeEndBarrens      = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndBarrens,      biomeEntryGetter.getOrThrow(BiomeKeys.END_BARRENS));
-        nodeEndMidlands     = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndMidlands,     biomeEntryGetter.getOrThrow(BiomeKeys.END_MIDLANDS));
-        nodeEndHighlands    = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndHighlands,    biomeEntryGetter.getOrThrow(BiomeKeys.END_HIGHLANDS));
+        nodeTheEnd          = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(OUT_OF_RANGE,                                      biomeEntryGetter.getOrThrow(BiomeKeys.THE_END));
+        nodeSmallEndIslands = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(VanillaEndBiomeParameters.NOISE_SMALL_END_ISLANDS, biomeEntryGetter.getOrThrow(BiomeKeys.SMALL_END_ISLANDS));
+        nodeEndBarrens      = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(VanillaEndBiomeParameters.NOISE_END_BARRENS,       biomeEntryGetter.getOrThrow(BiomeKeys.END_BARRENS));
+        nodeEndMidlands     = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(VanillaEndBiomeParameters.NOISE_END_MIDLANDS,      biomeEntryGetter.getOrThrow(BiomeKeys.END_MIDLANDS));
+        nodeEndHighlands    = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(VanillaEndBiomeParameters.NOISE_END_HIGHLANDS,     biomeEntryGetter.getOrThrow(BiomeKeys.END_HIGHLANDS));
 
         // Seed the End simplex noises based on the game seed
         humidityNoise    = new OpenSimplexNoise2(seedlets[7]);
         temperatureNoise = new OpenSimplexNoise2(seedlets[5]);
         weirdnessNoise   = new OpenSimplexNoise2(seedlets[3]);
+    }
+
+    @Override
+    protected void serverStopped() {
+        super.serverStopped();
+
+        nodeTheEnd = null;
+        nodeSmallEndIslands = null;
+        nodeEndBarrens = null;
+        nodeEndMidlands = null;
+        nodeEndHighlands = null;
     }
 
     @Override
@@ -109,9 +114,9 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     // TODO: This should be replaced with a more robust noise implementation, perhaps also more similar to vanilla.
     public MultiNoiseUtil.NoiseValuePoint sampleEndNoise(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler originalNoise, RegistryEntry<Biome> originalBiome) {
         double erosion = originalNoise.erosion().sample(new DensityFunction.UnblendedNoisePos(
-                (ChunkSectionPos.getSectionCoord(BiomeCoords.toBlock(x)) * 2 + 1) * 8,
+                BiomeCoords.toBlock(x),
                 BiomeCoords.toBlock(y),
-                (ChunkSectionPos.getSectionCoord(BiomeCoords.toBlock(z)) * 2 + 1) * 8
+                BiomeCoords.toBlock(z)
         ));
 
         return new MultiNoiseUtil.NoiseValuePoint(

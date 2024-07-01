@@ -35,7 +35,10 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
 
     @Inject(method = "createVanilla", at = @At("HEAD"))
     private static void biolith$getRegistry(RegistryEntryLookup<Biome> biomeLookup, CallbackInfoReturnable<TheEndBiomeSource> cir) {
-        biolith$biomeLookup = biomeLookup;
+        if (!biomeLookup.equals(biolith$biomeLookup)) {
+            biolith$biomeLookup = biomeLookup;
+            biolith$biomeEntries = null;
+        }
     }
 
     @ModifyReturnValue(method = "biomeStream", at = @At("RETURN"))

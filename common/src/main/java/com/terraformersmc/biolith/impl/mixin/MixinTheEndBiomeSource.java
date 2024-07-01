@@ -17,6 +17,7 @@ import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.TheEndBiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -27,7 +28,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
 
-@Mixin(value = TheEndBiomeSource.class, priority = 1100)
+@Mixin(value = TheEndBiomeSource.class, priority = 990)
 public abstract class MixinTheEndBiomeSource extends BiomeSource {
     private static RegistryEntryLookup<Biome> biolith$biomeLookup;
     private static MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$biomeEntries;
@@ -96,7 +97,7 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
         MultiNoiseUtil.NoiseValuePoint noisePoint = BiomeCoordinator.END.sampleEndNoise(x, y, z, noise, original);
 
         // Select noise biome
-        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, biolith$biomeEntries, original);
+        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, this.biolith$getBiomeEntries(), original);
 
         // Process any replacements or sub-biomes.
         return BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes);
@@ -114,7 +115,16 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
     }
 
     @Override
-    public MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
+    public @NotNull MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
+        // I don't know why this hasn't always happened already, but sometimes it hasn't...
+        if (biolith$biomeEntries == null) {
+            this.biomeStream();
+
+            if (biolith$biomeEntries == null) {
+                throw new IllegalStateException("biolith$biomeEntries is null after call to " + this.getClass().getCanonicalName() + ".biomeStream()");
+            }
+        }
+
         return biolith$biomeEntries;
     }
 }

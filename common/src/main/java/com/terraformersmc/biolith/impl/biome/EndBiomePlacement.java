@@ -25,6 +25,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     private final MultiNoiseUtil.NoiseHypercube noiseEndMidlands     = new MultiNoiseUtil.NoiseHypercube(DEFAULT_PARAMETER, DEFAULT_PARAMETER, DEFAULT_PARAMETER, MultiNoiseUtil.ParameterRange.of(-0.0625f, 0.25f), DEFAULT_PARAMETER, DEFAULT_PARAMETER, 0L);
     private final MultiNoiseUtil.NoiseHypercube noiseEndHighlands    = new MultiNoiseUtil.NoiseHypercube(DEFAULT_PARAMETER, DEFAULT_PARAMETER, DEFAULT_PARAMETER, MultiNoiseUtil.ParameterRange.of(0.25f, 1f), DEFAULT_PARAMETER, DEFAULT_PARAMETER, 0L);
 
+    public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeTheEnd;
     public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeSmallEndIslands;
     public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeEndBarrens;
     public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeEndMidlands;
@@ -50,6 +51,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
 
         // Update vanilla biome entries for the End
         RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
+        nodeTheEnd          = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(OUT_OF_RANGE,         biomeEntryGetter.getOrThrow(BiomeKeys.THE_END));
         nodeSmallEndIslands = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseSmallEndIslands, biomeEntryGetter.getOrThrow(BiomeKeys.SMALL_END_ISLANDS));
         nodeEndBarrens      = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndBarrens,      biomeEntryGetter.getOrThrow(BiomeKeys.END_BARRENS));
         nodeEndMidlands     = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(noiseEndMidlands,     biomeEntryGetter.getOrThrow(BiomeKeys.END_MIDLANDS));
@@ -59,11 +61,6 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
         humidityNoise    = new OpenSimplexNoise2(seedlets[7]);
         temperatureNoise = new OpenSimplexNoise2(seedlets[5]);
         weirdnessNoise   = new OpenSimplexNoise2(seedlets[3]);
-
-        // Somehow, biolith$getBiome() can be called before biolith$biomeStream() in the End
-        if (state.getWorld().getChunkManager().getChunkGenerator().getBiomeSource().getBiomes() == null) {
-            throw new IllegalStateException("Biome entries for the End are null after initialization...");
-        }
     }
 
     @Override

@@ -30,10 +30,12 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
     @Unique
     private static final ThreadLocal<Boolean> bypass = ThreadLocal.withInitial(() -> false);
 
+    @Override
     public boolean biolith$getBypass() {
         return bypass.get();
     }
 
+    @Override
     public void biolith$setBypass(boolean value) {
         bypass.set(value);
     }

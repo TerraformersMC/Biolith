@@ -117,9 +117,7 @@ public class BiolithDescribeCommand {
         } else if (world.getDimensionEntry().matchesKey(DimensionTypes.THE_END)) {
             RegistryEntry<Biome> original = VanillaCompat.getOriginalEndBiome(biomeX, biomeY, biomeZ, noise);
             noisePoint = BiomeCoordinator.END.sampleEndNoise(biomeX, biomeY, biomeZ, noise, original);
-            vanillaFittestNodes = new BiolithFittestNodes<>(
-                    new MultiNoiseUtil.SearchTree.TreeLeafNode<>(DimensionBiomePlacement.OUT_OF_RANGE,
-                            VanillaCompat.getOriginalEndBiome(biomeX, biomeY, biomeZ, noise)), 0L);
+            vanillaFittestNodes = VanillaCompat.getEndBiome(noisePoint, biomeEntries, original);
             if (BiolithCompat.COMPAT_TERRABLENDER) {
                 biomeSource.biolith$setBypass(true);
                 fittestNodes = terrablenderFittestNodes = new BiolithFittestNodes<>(

@@ -4,7 +4,7 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.minecraft.world.dimension.DimensionType;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 @SuppressWarnings("unused")
 public interface InterfaceBiomeSource {
@@ -12,8 +12,8 @@ public interface InterfaceBiomeSource {
 
     void biolith$setDimensionType(RegistryEntry<DimensionType> dimensionTypeEntry);
 
-    default @Nullable MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
-        return null;
+    default @NotNull MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
+        throw new UnsupportedOperationException("Unimplemented on abstract BiomeSource!");
     }
 
     default boolean biolith$getBypass() {

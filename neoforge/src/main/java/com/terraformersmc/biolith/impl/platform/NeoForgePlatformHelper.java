@@ -9,8 +9,8 @@ import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
 import net.neoforged.fml.ModList;
+import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.fml.loading.FMLLoader;
-import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.apache.commons.lang3.function.TriFunction;
@@ -37,7 +37,7 @@ public class NeoForgePlatformHelper implements PlatformHelper {
 
     @Override
     public Path getConfigDir() {
-        return FMLPaths.CONFIGDIR.get();
+        return Path.of(FMLConfig.defaultConfigPath());
     }
 
     @Override

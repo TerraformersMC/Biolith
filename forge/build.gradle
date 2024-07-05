@@ -14,7 +14,7 @@ loom {
         convertAccessWideners = true
         extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
 
-        mixinConfig("biolith.mixins.json", "biolith.forge.mixins.json")
+        mixinConfig("biolith.forge.mixins.json")
     }
 }
 
@@ -67,6 +67,7 @@ remapJar {
 }
 
 sourcesJar {
+    duplicatesStrategy = DuplicatesStrategy.WARN
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }

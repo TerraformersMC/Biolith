@@ -75,7 +75,7 @@ public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<L
                         }
                         inputStream.close();
                     } catch (RuntimeException runtimeBreak) {
-                        Biolith.LOGGER.warn("Parsing error loading biome placement '{}': '{}'", resource.getPackId(), runtimeBreak);
+                        Biolith.LOGGER.warn("Parsing error loading surface generation '{}': '{}'", resource.getPackId(), runtimeBreak);
                     }
                     profiler.pop();
                 }

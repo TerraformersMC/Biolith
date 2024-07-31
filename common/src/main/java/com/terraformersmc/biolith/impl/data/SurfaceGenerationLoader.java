@@ -9,6 +9,7 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import net.minecraft.resource.Resource;
+import net.minecraft.resource.ResourceFinder;
 import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.SinglePreparationResourceReloader;
 import net.minecraft.util.Identifier;
@@ -20,9 +21,10 @@ import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<List<SurfaceGenerationMarshaller>> {
-    public static final String RESOURCE_PATH = "biolith/surface_generation.json";
+    public static final ResourceFinder SURFACE_GENERATION_FINDER = ResourceFinder.json("biolith/surface_generation");
 
     @Override
     protected List<SurfaceGenerationMarshaller> prepare(ResourceManager manager, Profiler profiler) {
@@ -32,7 +34,9 @@ public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<L
         for (String namespace : manager.getAllNamespaces()) {
             profiler.push(namespace);
             try {
-                for (Resource resource : manager.getAllResources(Identifier.of(namespace, RESOURCE_PATH))) {
+                for (Map.Entry<Identifier, Resource> entry : SURFACE_GENERATION_FINDER.findResources(manager).entrySet()) {
+                    Resource resource = entry.getValue();
+
                     profiler.push(resource.getPackId());
                     try {
                         InputStream inputStream = resource.getInputStream();
@@ -71,7 +75,7 @@ public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<L
                         }
                         inputStream.close();
                     } catch (RuntimeException runtimeBreak) {
-                        Biolith.LOGGER.warn("Invalid {} in resourcepack: '{}'", RESOURCE_PATH, resource.getPackId(), runtimeBreak);
+                        Biolith.LOGGER.warn("Parsing error loading surface generation '{}': '{}'", resource.getPackId(), runtimeBreak);
                     }
                     profiler.pop();
                 }
@@ -92,7 +96,7 @@ public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<L
             return;
         }
 
-        if (marshallers.size() > 0) {
+        if (!marshallers.isEmpty()) {
             Biolith.LOGGER.info("Applying surface generation data from {} source(s).", marshallers.size());
         }
 

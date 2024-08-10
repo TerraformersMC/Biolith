@@ -110,4 +110,16 @@ public class BiolithState extends PersistentState {
 
         this.markDirty();
     }
+
+    public Identifier getDimensionId() {
+        if (world.getDimensionEntry().getKey().isEmpty()) {
+            return Identifier.of("biolith", "unregistered_dimension");
+        }
+
+        return world.getDimensionEntry().getKey().get().getValue();
+    }
+
+    public Identifier getWorldId() {
+        return world.getRegistryKey().getValue();
+    }
 }

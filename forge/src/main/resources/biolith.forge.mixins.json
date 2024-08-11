@@ -5,19 +5,8 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "com.terraformersmc.biolith.impl.mixin.BiolithForgeMixinConfigPlugin",
   "mixins": [
-    "MixinBiomeSource",
-    "MixinChunkGenerator",
-    "MixinChunkGeneratorSettings",
-    "MixinDataPackContents",
-    "MixinDimensionOptions",
-    "MixinMinecraftServer",
-    "MixinMultiNoiseBiomeSource",
     "MixinSaveLoader",
-    "MixinSearchTree",
-    "MixinServerWorld",
-    "MixinSurfaceBuilder",
-    "MixinTBTheEndBiomeSource",
-    "MixinTheEndBiomeSource"
+    "MixinTBTheEndBiomeSource"
   ],
   "client": [
   ],

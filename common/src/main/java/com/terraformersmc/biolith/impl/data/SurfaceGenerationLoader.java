@@ -31,59 +31,55 @@ public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<L
         profiler.startTick();
         List<SurfaceGenerationMarshaller> marshallers = new ArrayList<>();
 
-        for (String namespace : manager.getAllNamespaces()) {
-            profiler.push(namespace);
-            try {
-                for (Map.Entry<Identifier, Resource> entry : SURFACE_GENERATION_FINDER.findResources(manager).entrySet()) {
-                    Resource resource = entry.getValue();
+        profiler.push("biolith/surface_generation");
+        try {
+            for (Map.Entry<Identifier, Resource> entry : SURFACE_GENERATION_FINDER.findResources(manager).entrySet()) {
+                Resource resource = entry.getValue();
 
-                    profiler.push(resource.getPackId());
+                profiler.push(resource.getPackId());
+                try {
+                    InputStream inputStream = resource.getInputStream();
                     try {
-                        InputStream inputStream = resource.getInputStream();
+                        InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                         try {
-                            InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
-                            try {
-                                profiler.push("parse");
-
-                                JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
-                                SurfaceGenerationMarshaller marshaller = get(SurfaceGenerationMarshaller.CODEC, jsonObject);
-                                if (marshaller != null) {
-                                    marshallers.add(marshaller);
-                                } else {
-                                    throw new RuntimeException();
-                                }
-
-                                profiler.pop();
-                            } catch (Throwable throwable) {
-                                try {
-                                    reader.close();
-                                } catch (Throwable closeBreak) {
-                                    throwable.addSuppressed(closeBreak);
-                                }
-                                throw throwable;
+                            profiler.push("parse");
+                            JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
+                            SurfaceGenerationMarshaller marshaller = get(SurfaceGenerationMarshaller.CODEC, jsonObject);
+                            if (marshaller != null) {
+                                marshallers.add(marshaller);
+                            } else {
+                                throw new RuntimeException();
                             }
-                            reader.close();
+                            profiler.pop();
                         } catch (Throwable throwable) {
-                            if (inputStream != null) {
-                                try {
-                                    inputStream.close();
-                                } catch (Throwable closeBreak) {
-                                    throwable.addSuppressed(closeBreak);
-                                }
+                            try {
+                                reader.close();
+                            } catch (Throwable closeBreak) {
+                                throwable.addSuppressed(closeBreak);
                             }
                             throw throwable;
                         }
-                        inputStream.close();
-                    } catch (RuntimeException runtimeBreak) {
-                        Biolith.LOGGER.warn("Parsing error loading surface generation '{}': '{}'", resource.getPackId(), runtimeBreak);
+                        reader.close();
+                    } catch (Throwable throwable) {
+                        if (inputStream != null) {
+                            try {
+                                inputStream.close();
+                            } catch (Throwable closeBreak) {
+                                throwable.addSuppressed(closeBreak);
+                            }
+                        }
+                        throw throwable;
                     }
-                    profiler.pop();
+                    inputStream.close();
+                } catch (RuntimeException runtimeBreak) {
+                    Biolith.LOGGER.warn("Parsing error loading surface generation '{}': '{}'", resource.getPackId(), runtimeBreak);
                 }
-            } catch (IOException ignored) {
-                // No surface generation
+                profiler.pop();
             }
-            profiler.pop();
+        } catch (IOException ignored) {
+            // No surface generation
         }
+        profiler.pop();
 
         profiler.endTick();
         return marshallers;

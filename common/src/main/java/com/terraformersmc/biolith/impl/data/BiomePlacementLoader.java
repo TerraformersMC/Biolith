@@ -30,6 +30,7 @@ public class BiomePlacementLoader extends SinglePreparationResourceReloader<List
         profiler.startTick();
         List<BiomePlacementMarshaller> marshallers = new ArrayList<>();
 
+        profiler.push("biolith/biome_placement");
         try {
             for (Map.Entry<Identifier, Resource> entry : BIOME_PLACEMENT_FINDER.findResources(manager).entrySet()) {
                 Resource resource = entry.getValue();
@@ -41,7 +42,6 @@ public class BiomePlacementLoader extends SinglePreparationResourceReloader<List
                         InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                         try {
                             profiler.push("parse");
-
                             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
                             BiomePlacementMarshaller marshaller = get(BiomePlacementMarshaller.CODEC, jsonObject);
                             if (marshaller != null) {
@@ -49,7 +49,6 @@ public class BiomePlacementLoader extends SinglePreparationResourceReloader<List
                             } else {
                                 throw new RuntimeException();
                             }
-
                             profiler.pop();
                         } catch (Throwable throwable) {
                             try {
@@ -81,6 +80,7 @@ public class BiomePlacementLoader extends SinglePreparationResourceReloader<List
         }
         profiler.pop();
 
+        profiler.endTick();
         return marshallers;
     }
 

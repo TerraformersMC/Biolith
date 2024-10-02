@@ -40,12 +40,12 @@ public class BiomeCoordinator {
         return registryManager;
     }
 
-    public static Optional<RegistryWrapper.Impl<Biome>> getBiomeLookup() {
+    public static Optional<Registry<Biome>> getBiomeLookup() {
         if (registryManager == null) {
             return Optional.empty();
         }
 
-        return registryManager.getOptionalWrapper(RegistryKeys.BIOME);
+        return registryManager.getOptional(RegistryKeys.BIOME);
     }
 
     public static RegistryEntryLookup<Biome> getBiomeLookupOrThrow() {

@@ -3,7 +3,10 @@ package com.terraformersmc.biolith.impl.mixin;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.terraformersmc.biolith.impl.data.BiomePlacementLoader;
 import com.terraformersmc.biolith.impl.data.SurfaceGenerationLoader;
-import net.minecraft.registry.DynamicRegistryManager;
+import net.minecraft.registry.CombinedDynamicRegistries;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryWrapper;
+import net.minecraft.registry.ServerDynamicRegistryType;
 import net.minecraft.resource.ResourceReloader;
 import net.minecraft.resource.featuretoggle.FeatureSet;
 import net.minecraft.server.DataPackContents;
@@ -25,7 +28,7 @@ public abstract class MixinDataPackContents {
     private SurfaceGenerationLoader surfaceGenerationLoader;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void biolith$addDataPackContents(DynamicRegistryManager.Immutable dynamicRegistryManager, FeatureSet enabledFeatures, CommandManager.RegistrationEnvironment environment, int functionPermissionLevel, CallbackInfo ci) {
+    private void biolith$addDataPackContents(CombinedDynamicRegistries<ServerDynamicRegistryType> dynamicRegistries, RegistryWrapper.WrapperLookup registries, FeatureSet enabledFeatures, CommandManager.RegistrationEnvironment environment, List<Registry.PendingTagLoad<?>> pendingTagLoads, int functionPermissionLevel, CallbackInfo ci) {
         biomePlacementLoader = new BiomePlacementLoader();
         surfaceGenerationLoader = new SurfaceGenerationLoader();
     }

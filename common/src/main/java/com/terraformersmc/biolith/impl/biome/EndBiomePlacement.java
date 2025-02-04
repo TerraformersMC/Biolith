@@ -13,6 +13,7 @@ import net.minecraft.world.biome.BiomeKeys;
 import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
 
@@ -40,7 +41,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     }
 
     @Override
-    protected void serverReplaced(BiolithState state, long seed) {
+    protected void serverReplaced(@NotNull BiolithState state, long seed) {
         super.serverReplaced(state, seed);
 
         // Update vanilla biome entries for the End

@@ -37,12 +37,13 @@ public abstract class DimensionBiomePlacement {
 
     public static final RegistryKey<Biome> VANILLA_PLACEHOLDER = RegistryKey.of(RegistryKeys.BIOME, Identifier.of(Biolith.MOD_ID, "vanilla"));
 
-    protected void serverReplaced(BiolithState state, long seed) {
+    protected void serverReplaced(@NotNull BiolithState state, long seed) {
         this.state = state;
         this.replacementNoise = new OpenSimplexNoise2(seed);
         this.seedRandom = new Random(seed);
         this.replacementRequests.forEach((biomeKey, requestSet) -> requestSet.complete(BiomeCoordinator.getBiomeLookupOrThrow()));
         this.subBiomeRequests.forEach((biomeKey, requestSet) -> requestSet.complete(BiomeCoordinator.getBiomeLookupOrThrow()));
+        this.state.write();
 
         // populate the seedlets from the game seed
         for (int i = 0; i < 8; ++i) {

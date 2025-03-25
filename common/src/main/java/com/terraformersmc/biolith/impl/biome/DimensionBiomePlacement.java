@@ -174,11 +174,13 @@ public abstract class DimensionBiomePlacement {
             }
         }
 
-        if (subBiomeRequests.containsKey(biomeKey)) {
-            if (replacementRequest == null) {
+        if (replacementRequest == null) {
+            if (subBiomeRequests.containsKey(biomeKey)) {
                 subBiomeRequest = subBiomeRequests.get(biomeKey).
                         selectSubBiome(fittestNodes, noisePoint, null, localNoise);
-            } else {
+            }
+        } else {
+            if (subBiomeRequests.containsKey(replacementRequest.biome())) {
                 subBiomeRequest = subBiomeRequests.get(replacementRequest.biome()).
                         selectSubBiome(fittestNodes, noisePoint, replacementRequest.range(), localNoise);
             }

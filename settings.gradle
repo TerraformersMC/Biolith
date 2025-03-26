@@ -2,6 +2,10 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
+            name = 'temp'
+            url = 'https://repo.redlance.org/public/'
+        }
+        maven {
             name = 'Architectury'
             url = 'https://maven.architectury.dev/'
         }
@@ -20,4 +24,4 @@ rootProject.name = "biolith"
 include("common")
 include("fabric")
 //include("forge")
-//include("neoforge")
+include("neoforge")

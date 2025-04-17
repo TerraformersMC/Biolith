@@ -6,10 +6,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
-import com.terraformersmc.biolith.impl.biome.*;
+import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
+import com.terraformersmc.biolith.impl.biome.VanillaEndBiomeParameters;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
-import net.minecraft.registry.*;
+import net.minecraft.registry.RegistryEntryLookup;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeCoords;
@@ -57,13 +59,9 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
             if (biolith$biomeEntries == null) {
                 List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameterList = new ArrayList<>(64);
 
-                // Fallback lookup just in case.
-                if (biolith$biomeLookup == null) {
-                    DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
-                    Objects.requireNonNull(registryManager);
-
-                    biolith$biomeLookup = registryManager.getWrapperOrThrow(RegistryKeys.BIOME);
-                }
+                // Get an updated registry lookup if possible.
+                BiomeCoordinator.getBiomeLookup().ifPresent(lookup -> biolith$biomeLookup = lookup);
+                Objects.requireNonNull(biolith$biomeLookup, "Failed to acquire biome lookup for The End.");
 
                 // Generate vanilla parameters list.
                 VanillaEndBiomeParameters.writeEndBiomeParameters(parameterList::add);
@@ -80,7 +78,7 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
                         .map(pair -> pair.mapSecond(key -> (RegistryEntry<Biome>) biolith$biomeLookup.getOrThrow(key)))
                         .toList());
             }
-        }
+        } // synchronized (this)
 
         // Output the registry entry stream (nominally the purpose of this method).
         // Include the original entries in case another mod has appended to them.

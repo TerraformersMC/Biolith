@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Stream;
 
 @Mixin(TheEndBiomeSource.class)
@@ -45,14 +46,11 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
 
         // Wrapping END.writeBiomeParameters() like this allows us to use the same interface there as we do for OVERWORLD.
         // So it looks kind of silly here, but it works fine and makes the code in the main biome placement classes alike.
-        DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
         List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameterList = new ArrayList<>(64);
 
-        // Fallback lookup just in case.
-        if (biolith$biomeLookup == null) {
-            assert (registryManager != null);
-            biolith$biomeLookup = registryManager.getWrapperOrThrow(RegistryKeys.BIOME);
-        }
+                // Get an updated registry lookup if possible.
+                BiomeCoordinator.getBiomeLookup().ifPresent(lookup -> biolith$biomeLookup = lookup);
+                Objects.requireNonNull(biolith$biomeLookup, "Failed to acquire biome lookup for The End.");
 
         // Generate "Vanilla" and modded parameters list.
         VanillaEndBiomeParameters.writeEndBiomeParameters(parameterList::add);

@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-@Mixin(DimensionOptions.class)
+@Mixin(value = DimensionOptions.class, priority = 900)
 public class MixinDimensionOptions {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void biolith$storeDimensionTypeToBiomeSource(RegistryEntry<DimensionType> dimensionTypeEntry, ChunkGenerator chunkGenerator, CallbackInfo ci) {

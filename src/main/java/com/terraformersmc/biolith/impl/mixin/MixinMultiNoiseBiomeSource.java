@@ -49,14 +49,14 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
                 MultiNoiseUtil.Entries<RegistryEntry<Biome>> originalEntries =
                         (MultiNoiseUtil.Entries<RegistryEntry<Biome>>) original.call(instance, leftMap, rightMap);
 
-                if (biolith$getDimensionType().matchesKey(DimensionTypes.OVERWORLD)) {
+                if (this.biolith$getDimensionType().getValue().equals(DimensionTypes.OVERWORLD.getValue())) {
                     List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameterList = new ArrayList<>(256);
 
                     parameterList.addAll(originalEntries.getEntries());
                     BiomeCoordinator.OVERWORLD.writeBiomeEntries(parameterList::add);
 
                     biolith$biomeEntries = new MultiNoiseUtil.Entries<>(parameterList);
-                } else if (biolith$getDimensionType().matchesKey(DimensionTypes.THE_NETHER)) {
+                } else if (this.biolith$getDimensionType().getValue().equals(DimensionTypes.THE_NETHER.getValue())) {
                     List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameterList = new ArrayList<>(64);
 
                     parameterList.addAll(originalEntries.getEntries());
@@ -89,9 +89,9 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
         }
 
         // Apply biome overlays.
-        if (biolith$getDimensionType().matchesKey(DimensionTypes.OVERWORLD)) {
+        if (this.biolith$getDimensionType().getValue().equals(DimensionTypes.OVERWORLD.getValue())) {
             cir.setReturnValue(BiomeCoordinator.OVERWORLD.getReplacement(x, y, z, noisePoint, fittestNodes));
-        } else if (biolith$getDimensionType().matchesKey(DimensionTypes.THE_NETHER)) {
+        } else if (this.biolith$getDimensionType().getValue().equals(DimensionTypes.THE_NETHER.getValue())) {
             cir.setReturnValue(BiomeCoordinator.NETHER.getReplacement(x, y, z, noisePoint, fittestNodes));
         } else {
             cir.setReturnValue(fittestNodes.ultimate().value);

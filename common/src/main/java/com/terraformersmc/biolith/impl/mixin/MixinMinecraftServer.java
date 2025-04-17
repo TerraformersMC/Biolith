@@ -26,24 +26,17 @@ import net.minecraft.world.level.storage.LevelStorage;
 import net.minecraft.world.spawner.SpecialSpawner;
 import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.stream.Stream;
 
 @Mixin(MinecraftServer.class)
 public abstract class MixinMinecraftServer {
-    @Shadow
-    @Final
-    private Map<RegistryKey<World>, ServerWorld> worlds;
-
     @WrapOperation(method = "<init>", at = @At(
             value = "INVOKE",
             target = "Lnet/minecraft/registry/CombinedDynamicRegistries;getCombinedRegistryManager()Lnet/minecraft/registry/DynamicRegistryManager$Immutable;",

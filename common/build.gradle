@@ -1,15 +1,15 @@
-architectury {
-    common(rootProject.enabled_platforms.split(","))
-}
+unimined.minecraft {
+    accessWidener {
+        accessWidener "src/main/resources/biolith.accesswidener"
+    }
 
-loom {
-    accessWidenerPath = file("src/main/resources/biolith.accesswidener")
-}
+    // you may want to set this if you want to include arch mods in common
+    mods.modImplementation {
+        namespace("intermediary")
+    }
 
-dependencies {
-    // We depend on fabric loader here to use the fabric @Environment annotations and get the mixin dependencies
-    // Do NOT use other classes from fabric loader
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    // Remove the next line if you don't want to depend on the API
-    //modApi "dev.architectury:architectury:${rootProject.architectury_version}"
+    // if you don't want to build/remap a "common" jar
+    if (sourceSet == sourceSets.main) {
+        defaultRemapJar = false
+    }
 }

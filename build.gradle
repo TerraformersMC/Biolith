@@ -1,30 +1,14 @@
 plugins {
-    id "architectury-plugin" version "3.4-SNAPSHOT"
-    id 'dev.architectury.loom' version '1.4-SNAPSHOT' apply(false)
-}
-
-architectury {
-    minecraft = rootProject.minecraft_version
+    id 'java'
+    id "xyz.wagyourtail.unimined" version "1.2.9" apply false
 }
 
 subprojects {
-    apply plugin: "dev.architectury.loom"
+    apply plugin: "xyz.wagyourtail.unimined"
+    apply plugin: "java"
+    apply plugin: 'maven-publish'
 
     project.archivesBaseName = "${rootProject.archives_base_name}-${project.name}"
-
-    dependencies {
-        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
-        mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
-    }
-}
-
-// Ferry for publishing; this has to be after arch dev plugin apply and before subproject version is set.
-//apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
-
-allprojects {
-    apply plugin: "java"
-    apply plugin: "architectury-plugin"
-    apply plugin: "maven-publish"
 
     version = rootProject.mod_version
     group = rootProject.maven_group
@@ -54,6 +38,40 @@ allprojects {
         }
     }
 
+    dependencies {
+    }
+
+    configurations {
+        modCompileOnly
+        compileOnly.extendsFrom modCompileOnly
+        modApi
+        api.extendsFrom modApi
+    }
+
+    unimined.minecraft(sourceSets.main, true) {
+        version rootProject.minecraft_version
+
+        mappings {
+            intermediary()
+            yarn(rootProject.yarn_mappings)
+            devNamespace "yarn"
+            devFallbackNamespace "intermediary"
+        }
+
+        mods {
+            remap(configurations.modCompileOnly) {
+            }
+
+            remap(configurations.modApi)
+
+            // this is basically just a shortcut for `remap(configurations.modImplementation)`
+            modImplementation {
+                // you can do this is mods have the wrong access widener mapping, but it may break runs
+                catchAWNamespaceAssertion()
+            }
+        }
+    }
+
     tasks.withType(JavaCompile).configureEach {
         it.options.encoding = 'UTF-8'
         it.options.getRelease().set(17)
@@ -63,3 +81,6 @@ allprojects {
         withSourcesJar()
     }
 }
+
+// Ferry for publishing; this has to be after arch dev plugin apply and before subproject version is set.
+//apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'

@@ -1,36 +1,7 @@
-plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2"
-}
-
 // Ferry for publishing
-apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
-
-architectury {
-    platformSetupLoomIde()
-    forge()
-}
-
-loom {
-    accessWidenerPath = project(":common").loom.accessWidenerPath
-
-    forge {
-        convertAccessWideners = true
-        extraAccessWideners.add loom.accessWidenerPath.get().asFile.name
-
-        mixinConfig("biolith.mixins.json", "biolith.forge.mixins.json")
-    }
-}
-
-configurations {
-    common
-    shadowCommon // Don't use shadow from the shadow plugin since it *excludes* files.
-    compileClasspath.extendsFrom common
-    runtimeClasspath.extendsFrom common
-    developmentForge.extendsFrom common
-}
+//apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
 
 dependencies {
-    forge "net.minecraftforge:forge:${rootProject.forge_version}"
     // Remove the next line if you don't want to depend on the API
     //modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
 
@@ -38,8 +9,7 @@ dependencies {
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixinextras_version}"))
     implementation(include("io.github.llamalad7:mixinextras-forge:${rootProject.mixinextras_version}"))
 
-    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
-    shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
+    implementation(project(path: ":common")) { transitive = false }
 
     // TerraBlender so we can use its API
     modCompileOnly "com.github.glitchfiend:TerraBlender-forge:${rootProject.terrablender_version}"
@@ -48,7 +18,17 @@ dependencies {
     //include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
 }
 
+unimined.minecraft {
+    combineWith(":common:main")
+    minecraftForge {
+        loader forge_version
+        mixinConfig("biolith.mixins.json", "biolith-forge.mixins.json")
+        accessTransformer aw2at("../common/src/main/resources/biolith.accesswidener")
+    }
+}
+
 processResources {
+    //from project(":common").sourceSets.main.resources
     inputs.property "version", project.version
 
     filesMatching("META-INF/mods.toml") {
@@ -56,24 +36,15 @@ processResources {
     }
 }
 
-shadowJar {
-    exclude "fabric.mod.json"
-    exclude "architectury.common.json"
-
-    configurations = [project.configurations.shadowCommon]
-    archiveClassifier.set("dev-shadow")
-}
-
-remapJar {
-    input.set shadowJar.archiveFile
-    dependsOn shadowJar
-}
-
-sourcesJar {
+/*sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
-}
+}*/
+
+/*tasks.named('compileJava', JavaCompile) {
+    source(project(":common").sourceSets.main.allSource)
+}*/
 
 components.java {
     withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {

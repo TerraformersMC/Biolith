@@ -1,0 +1,21 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "com.terraformersmc.biolith.impl.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "mixins": [
+    "MixinBiomeSource",
+    "MixinChunkGeneratorSettings",
+    "MixinDimensionOptions",
+    "MixinMinecraftServer",
+    "MixinMultiNoiseBiomeSource",
+    "MixinSearchTree",
+    "MixinServerWorld",
+    "MixinSurfaceBuilder",
+    "MixinTheEndBiomeSource"
+  ],
+  "injectors": {
+    "defaultRequire": 1,
+    "maxShiftBy": 2
+  }
+}

@@ -1,0 +1,7 @@
+{
+  "accessWidener": "biolith.accesswidener",
+  "injected_interfaces": {
+    "net/minecraft/class_1966": ["com/terraformersmc/biolith/impl/biome/InterfaceBiomeSource"],
+    "net/minecraft/class_6544$class_6548": ["com/terraformersmc/biolith/impl/biome/InterfaceSearchTree"]
+  }
+}

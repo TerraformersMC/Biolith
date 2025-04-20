@@ -1,0 +1,47 @@
+{
+    "schemaVersion": 1,
+    "id": "biolith",
+    "version": "${version}",
+    "name": "Biolith",
+    "description": "Terraformers' world generation utilities",
+    "authors": [
+        "TerraformersMC",
+        "gniftygnome"
+    ],
+    "contact": {
+        "homepage": "https://modrinth.com/mod/biolith",
+        "sources": "https://github.com/TerraformersMC/Biolith",
+        "issues": "https://github.com/TerraformersMC/Biolith/issues"
+    },
+    "license": "LGPL-3.0",
+    "icon": "assets/biolith/icon.png",
+    "environment": "*",
+    "entrypoints": {
+        "main": [
+            "com.terraformersmc.biolith.impl.BiolithInit"
+        ]
+    },
+    "mixins": [
+        "biolith.mixins.json",
+        "biolith.fabric.mixins.json"
+    ],
+    "custom": {
+        "loom:injected_interfaces": {
+            "net/minecraft/class_1966": ["com/terraformersmc/biolith/impl/biome/InterfaceBiomeSource"],
+            "net/minecraft/class_6544\u0024class_6548": ["com/terraformersmc/biolith/impl/biome/InterfaceSearchTree"]
+        },
+        "modmenu": {
+            "badges": [
+                "library"
+            ],
+            "links": {
+                "modmenu.discord": "https://discord.gg/jEGF5fb"
+            }
+        }
+    },
+    "depends": {
+        "fabricloader": ">=0.15.3",
+        "fabric-api": "*",
+        "minecraft": ">1.20.1 <1.20.2"
+    }
+}

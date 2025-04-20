@@ -1,126 +1,65 @@
 plugins {
-    id 'fabric-loom' version '1.1.+'
-    id 'maven-publish'
-    id 'io.github.juuxel.loom-vineflower' version '1.11.0'
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id 'dev.architectury.loom' version '1.4-SNAPSHOT' apply(false)
 }
 
-archivesBaseName = project.archive_name
-version = project.mod_version
-group = project.maven_group
+architectury {
+    minecraft = rootProject.minecraft_version
+}
 
-apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/2.6/ferry.gradle'
+subprojects {
+    apply plugin: "dev.architectury.loom"
 
-sourceCompatibility = JavaVersion.VERSION_17
-targetCompatibility = JavaVersion.VERSION_17
+    project.archivesBaseName = "${rootProject.archives_base_name}-${project.name}"
 
-repositories {
-    // Add repositories to retrieve artifacts from in here.
-    // You should only use this when depending on other mods because
-    // Loom adds the essential maven repositories to download Minecraft and libraries from automatically.
-    // See https://docs.gradle.org/current/userguide/declaring_repositories.html
-    // for more information about repositories.
-
-    maven {
-        name = 'TerraformersMC'
-        url = 'https://maven.terraformersmc.com/'
-    }
-
-    // TerraBlender
-    maven {
-        url = 'https://maven.minecraftforge.net/'
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
     }
 }
 
-dependencies {
-    // To change the versions see the gradle.properties file
-    minecraft "com.mojang:minecraft:${project.minecraft_version}"
-    mappings "net.fabricmc:yarn:${project.yarn_mappings}:v2"
-    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+// Ferry for publishing; this has to be after arch dev plugin apply and before subproject version is set.
+//apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
 
-    // Fabric API. This is technically optional, but you probably want it anyway.
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+allprojects {
+    apply plugin: "java"
+    apply plugin: "architectury-plugin"
+    apply plugin: "maven-publish"
 
-    // TerraBlender so we can target it with mixins
-    modCompileOnlyApi "com.github.glitchfiend:TerraBlender-fabric:${terrablender_version}"
+    version = rootProject.mod_version
+    group = rootProject.maven_group
 
-    // Terraform Surfaces API for OpenSimplexNoise
-    include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${project.terraform_surfaces_api_version}"))
+    repositories {
+        mavenCentral()
+        maven {
+            name = 'TerraformersMC'
+            url = 'https://maven.terraformersmc.com/'
+        }
 
-    // MixinExtras so we can mixin in a more compatible manner
-    include(implementation(annotationProcessor("io.github.llamalad7:mixinextras-fabric:${project.mixinextras_version}")))
-}
+        // for TerraBlender
+        maven {
+            url = 'https://maven.minecraftforge.net/'
+        }
 
-// Ferry does this
-//processResources {
-//    inputs.property "version", project.version
-//
-//    filesMatching("fabric.mod.json") {
-//        expand "version": project.version
-//    }
-//}
-
-tasks.withType(JavaCompile).configureEach {
-    // Minecraft 1.18 (1.18-pre2) upwards uses Java 17.
-    it.options.release = 17
-}
-
-loom {
-    accessWidenerPath = file("src/main/resources/biolith.accesswidener")
-}
-
-vineflower {
-    addToRuntimeClasspath.set(true)
-}
-
-java {
-    // Loom will automatically attach sourcesJar to a RemapSourcesJar task and to the "build" task
-    // if it is present.
-    // If you remove this line, sources will not be generated.
-    withSourcesJar()
-}
-
-jar {
-    from("LICENSE") {
-        rename { "${it}_${project.archivesBaseName}"}
-    }
-}
-
-publish {
-    onlyIf {
-        checkVersion(archivesBaseName, version)
-    }
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            // Exclude TerraBlender from maven deps so Loom does not load it during builds
-            // and tests of other projects using our API (unless they configure it to).
-            pom.withXml {
-                asNode().dependencies.dependency.each { dep ->
-                    if (dep.artifactId.last().value().last() in ["TerraBlender-fabric"]) {
-                        assert dep.parent().remove(dep)
-                    }
+        // for Modern Beta
+        exclusiveContent {
+            forRepository {
+                maven {
+                    url "https://cursemaven.com"
                 }
+            }
+            filter {
+                includeGroup "curse.maven"
             }
         }
     }
-}
 
-ext.checkVersion = { archivesBaseName, version ->
-    try {
-        def xml = new URL("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").text
-        def metadata = new XmlSlurper().parseText(xml)
-        def versions = metadata.versioning.versions.version*.text()
-        if (versions.contains(version)) {
-            println "$archivesBaseName version $version will not be published; already exists"
-            return false
-        } else {
-            println "$archivesBaseName version $version will be published"
-            return true
-        }
-    } catch (FileNotFoundException ignored) {
-        println "$archivesBaseName is not on maven yet"
-        return true
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = 'UTF-8'
+        it.options.getRelease().set(17)
+    }
+
+    java {
+        withSourcesJar()
     }
 }

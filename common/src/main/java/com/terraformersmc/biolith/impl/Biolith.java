@@ -2,9 +2,6 @@ package com.terraformersmc.biolith.impl;
 
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
-import net.fabricmc.api.ModInitializer;
-import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.loader.api.FabricLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

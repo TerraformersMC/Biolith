@@ -25,10 +25,10 @@ processResources {
 }
 
 unimined.minecraft {
-    combineWith(":common:main") // combine with common, for identifying both together as one mod for dev runs
+    combineWith(project(":common").sourceSets.main) // combine with common, for identifying both together as one mod for dev runs
     fabric {
         loader project.fabric_loader_version
-        accessWidener "../common/src/main/resources/biolith.accesswidener"
+        accessWidener file("../common/src/main/resources/biolith.accesswidener")
     }
 }
 
@@ -36,12 +36,6 @@ sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
-}
-
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
-    }
 }
 
 publish {

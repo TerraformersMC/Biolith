@@ -1,6 +1,6 @@
 unimined.minecraft {
     accessWidener {
-        accessWidener "src/main/resources/biolith.accesswidener"
+        accessWidener file("src/main/resources/biolith.accesswidener")
     }
 
     // you may want to set this if you want to include arch mods in common

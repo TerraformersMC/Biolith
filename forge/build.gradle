@@ -19,11 +19,11 @@ dependencies {
 }
 
 unimined.minecraft {
-    combineWith(":common:main")
+    combineWith(project(":common").sourceSets.main) // combine with common, for identifying both together as one mod for dev runs
     minecraftForge {
         loader forge_version
         mixinConfig("biolith.mixins.json", "biolith-forge.mixins.json")
-        accessTransformer aw2at("../common/src/main/resources/biolith.accesswidener")
+        accessTransformer aw2at(file("../common/src/main/resources/biolith.accesswidener"))
     }
 }
 
@@ -45,12 +45,6 @@ processResources {
 /*tasks.named('compileJava', JavaCompile) {
     source(project(":common").sourceSets.main.allSource)
 }*/
-
-components.java {
-    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
-        skip()
-    }
-}
 
 publish {
     onlyIf {

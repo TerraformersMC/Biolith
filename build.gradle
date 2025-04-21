@@ -60,6 +60,7 @@ subprojects {
 
         mods {
             remap(configurations.modCompileOnly) {
+                catchAWNamespaceAssertion()
             }
 
             remap(configurations.modApi)

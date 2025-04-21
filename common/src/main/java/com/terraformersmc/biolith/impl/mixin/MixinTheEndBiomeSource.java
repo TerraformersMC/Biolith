@@ -56,7 +56,6 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
         // Fallback lookup just in case.
         if (biolith$biomeLookup == null) {
             assert (registryManager != null);
-            RegistryWrapper<Biome> biomeWrapper;
             biolith$biomeLookup = registryManager.getWrapperOrThrow(RegistryKeys.BIOME);
         }
 
@@ -82,7 +81,6 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
     private void biolith$getBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise, CallbackInfoReturnable<RegistryEntry<Biome>> cir) {
         // For the End we go to some lengths to mock up a multi-noise placement regime.
         // Still, we try to let other mods do whatever they do to place things in the End too.
-        DynamicRegistryManager.Immutable registryManager = BiomeCoordinator.getRegistryManager();
         RegistryEntry<Biome> original = cir.getReturnValue();
 
         // Fake up a noise point for sub biome placement.

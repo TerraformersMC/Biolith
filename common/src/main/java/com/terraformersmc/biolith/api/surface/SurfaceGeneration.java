@@ -6,7 +6,10 @@ import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.surfacebuilder.MaterialRules;
 
 @SuppressWarnings("unused")
-public class SurfaceGeneration {
+public final class SurfaceGeneration {
+    private SurfaceGeneration() {
+        throw new UnsupportedOperationException();
+    }
     /**
      * SurfaceGeneration.addEndSurfaceRules()
      *

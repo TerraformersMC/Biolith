@@ -38,7 +38,7 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
         bypass.set(value);
     }
 
-    @Inject(method = "getBiome", at = @At("HEAD"), cancellable = true)
+    /*@Inject(method = "getBiome", at = @At("HEAD"), cancellable = true)
     private void biolith$getBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise, CallbackInfoReturnable<RegistryEntry<Biome>> cir) {
         // Allows us to call unmodified (by us) getBiome() to get TerraBlender values.
         if (bypass.get()) {
@@ -60,15 +60,15 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
         cir.setReturnValue(BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes));
     }
 
-    /*
+    *//*
      * Under normal conditions, TerraBlender will have already canceled, but if bclib is present, it may not.
      * This ensures our main getBiome() mixin will not be called when bypass is true.
-     */
+     *//*
     @Inject(method = "getBiome", at = @At("RETURN"), cancellable = true)
     private void biolith$cancelGetBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise, CallbackInfoReturnable<RegistryEntry<Biome>> cir) {
         // Allows us to call unmodified (by us) getBiome() to get TerraBlender values.
         if (bypass.get()) {
             cir.setReturnValue(cir.getReturnValue());
         }
-    }
+    }*/
 }

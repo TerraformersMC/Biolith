@@ -5,7 +5,6 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
-import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
 import mod.bespectacled.modernbeta.world.biome.ModernBetaBiomeSource;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
@@ -16,11 +15,11 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
-import static com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand.textFromBiome;
+//import static com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand.textFromBiome;
 
 public class ModernBetaCompatFabric {
     public static int describe(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
-        if (!(biomeSource instanceof ModernBetaBiomeSource)) {
+        /*if (!(biomeSource instanceof ModernBetaBiomeSource)) {
             return 0;
         }
 
@@ -64,7 +63,7 @@ public class ModernBetaCompatFabric {
                             replacementNoise,
                             describeBiomeData.replacementRange().y))));
         }
-
+*/
         return 1;
     }
 }

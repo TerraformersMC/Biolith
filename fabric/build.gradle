@@ -1,3 +1,11 @@
+unimined.minecraft {
+    combineWith(project(":common").sourceSets.main) // combine with common, for identifying both together as one mod for dev runs
+    fabric {
+        loader project.fabric_loader_version
+        accessWidener file("../common/src/main/resources/biolith.accesswidener")
+    }
+}
+
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
@@ -24,13 +32,7 @@ processResources {
     }
 }
 
-unimined.minecraft {
-    combineWith(project(":common").sourceSets.main) // combine with common, for identifying both together as one mod for dev runs
-    fabric {
-        loader project.fabric_loader_version
-        accessWidener file("../common/src/main/resources/biolith.accesswidener")
-    }
-}
+
 
 sourcesJar {
     def commonSources = project(":common").sourcesJar

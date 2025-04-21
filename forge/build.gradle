@@ -1,6 +1,15 @@
 // Ferry for publishing
 //apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
 
+unimined.minecraft {
+    combineWith(project(":common").sourceSets.main) // combine with common, for identifying both together as one mod for dev runs
+    minecraftForge {
+        loader forge_version
+        mixinConfig("biolith.mixins.json", "biolith-forge.mixins.json")
+        accessTransformer aw2at(file("../common/src/main/resources/biolith.accesswidener"))
+    }
+}
+
 dependencies {
     // Remove the next line if you don't want to depend on the API
     //modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
@@ -16,15 +25,6 @@ dependencies {
 
     // Terraform Surfaces API for OpenSimplexNoise
     //include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
-}
-
-unimined.minecraft {
-    combineWith(project(":common").sourceSets.main) // combine with common, for identifying both together as one mod for dev runs
-    minecraftForge {
-        loader forge_version
-        mixinConfig("biolith.mixins.json", "biolith-forge.mixins.json")
-        accessTransformer aw2at(file("../common/src/main/resources/biolith.accesswidener"))
-    }
 }
 
 processResources {

@@ -2,6 +2,7 @@ package com.terraformersmc.biolith.impl.compat;
 
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.impl.biome.InterfaceSearchTree;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.Identifier;
@@ -41,12 +42,12 @@ public class TerraBlenderCompatForge implements TerraBlenderCompat {
         }
 
         // Apply our RTree search implementation to TerraBlender's search tree.
-        fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+        fittestNodes = ((InterfaceSearchTree<RegistryEntry<Biome>>) (Object)searchTree).biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
 
         // TerraBlender requires a second search if the first returned their placeholder biome.
         if (fittestNodes.ultimate().value.matchesKey(Region.DEFERRED_PLACEHOLDER)) {
             searchTree = entries.getTree(0);
-            fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+            fittestNodes = ((InterfaceSearchTree<RegistryEntry<Biome>>) (Object)searchTree).biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
         }
 
         return fittestNodes;

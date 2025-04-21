@@ -1,15 +1,8 @@
 unimined.minecraft {
-    accessWidener {
+    fabric {
+        loader fabric_loader_version
         accessWidener file("src/main/resources/biolith.accesswidener")
     }
 
-    // you may want to set this if you want to include arch mods in common
-    mods.modImplementation {
-        namespace("intermediary")
-    }
-
-    // if you don't want to build/remap a "common" jar
-    if (sourceSet == sourceSets.main) {
-        defaultRemapJar = false
-    }
+    defaultRemapJar = false
 }

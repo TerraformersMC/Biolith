@@ -7,7 +7,9 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.EndBiomePlacement;
+import com.terraformersmc.biolith.impl.biome.InterfaceSearchTree;
 import com.terraformersmc.biolith.impl.biome.VanillaEndBiomeParameters;
+import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.util.math.ChunkSectionPos;
@@ -41,7 +43,7 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
 
     @ModifyReturnValue(method = "biomeStream", at = @At("RETURN"))
     private Stream<RegistryEntry<Biome>> biolith$biomeStream(Stream<RegistryEntry<Biome>> original) {
-        if (Biolith.COMPAT_DATAGEN) {
+        if (BiolithCompat.COMPAT_DATAGEN) {
             // During datagen we have to avoid adding registry keys.
             return original;
         }
@@ -119,7 +121,7 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
             // Evaluate the best fit biome by noise at the noise point.
             // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
             //noinspection unchecked
-            fittestNodes = biolith$biomeEntries.tree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+            fittestNodes = ((InterfaceSearchTree<RegistryEntry<Biome>>) (Object)biolith$biomeEntries.tree).biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
         }
 
         // If the best noise fit was a vanilla biome, let whatever vanilla picked leak through.

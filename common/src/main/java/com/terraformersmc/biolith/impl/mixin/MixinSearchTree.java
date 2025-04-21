@@ -44,8 +44,8 @@ public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
         MultiNoiseUtil.SearchTree.TreeLeafNode<T> ultimate = previousUltimateNode.get();
         MultiNoiseUtil.SearchTree.TreeLeafNode<T> penultimate = previousPenultimateNode.get();
 
-        long ultimateDistance = ultimate != null ? distanceFunction.getDistance(ultimate, otherParameters) : Long.MAX_VALUE;
-        long penultimateDistance = penultimate != null ? distanceFunction.getDistance(penultimate, otherParameters) : Long.MAX_VALUE;
+        long ultimateDistance = ultimate != null ? distanceFunction.distance(ultimate, otherParameters) : Long.MAX_VALUE;
+        long penultimateDistance = penultimate != null ? distanceFunction.distance(penultimate, otherParameters) : Long.MAX_VALUE;
 
         // It's possible for the best and next-best fit to have switched places
         if (ultimateDistance > penultimateDistance) {
@@ -67,7 +67,7 @@ public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
                 // TODO:  Turns out this is actually a thing.  Consider the implications.
                 //        Maybe implement some system to warn exactly once.
                 //Biolith.LOGGER.warn("Only one biome is available in MultiNoiseBiomeSource!");
-                return new BiolithFittestNodes<>(leafNode, distanceFunction.getDistance(leafNode, otherParameters));
+                return new BiolithFittestNodes<>(leafNode, distanceFunction.distance(leafNode, otherParameters));
             } else {
                 // This should not occur; it would imply there are no biomes available
                 Biolith.LOGGER.error("No biomes are available in MultiNoiseBiomeSource!");
@@ -79,13 +79,13 @@ public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
         while (stack[stackDepth].hasNext()) {
             // Advance to the next available branch node
             node = stack[stackDepth].next();
-            nodeDistance = distanceFunction.getDistance(node, otherParameters);
+            nodeDistance = distanceFunction.distance(node, otherParameters);
 
             // Descend the branch until we find a leaf or the branch is no longer fitter
             while (node instanceof MultiNoiseUtil.SearchTree.TreeBranchNode<T> branchNode && penultimateDistance > nodeDistance) {
                 stack[++stackDepth] = new SimpleArrayIterator<>(branchNode.subTree);
                 node = stack[stackDepth].next();
-                nodeDistance = distanceFunction.getDistance(node, otherParameters);
+                nodeDistance = distanceFunction.distance(node, otherParameters);
             }
 
             // If we're at a leaf, it may be fitter

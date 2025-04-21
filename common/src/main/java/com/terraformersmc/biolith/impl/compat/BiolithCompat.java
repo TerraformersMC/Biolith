@@ -4,6 +4,7 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.platform.Services;
 
 public class BiolithCompat {
+    public static final boolean COMPAT_DATAGEN = System.getProperty("fabric-api.datagen") != null;
     public static final boolean COMPAT_MODERN_BETA = Services.PLATFORM.isModLoaded("modern_beta");
     public static final boolean COMPAT_TERRABLENDER = Services.PLATFORM.isModLoaded("terrablender");
 

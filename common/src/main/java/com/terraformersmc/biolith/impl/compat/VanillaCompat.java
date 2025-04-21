@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl.compat;
 
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.impl.biome.InterfaceSearchTree;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
@@ -11,6 +12,6 @@ public class VanillaCompat {
     public static BiolithFittestNodes<RegistryEntry<Biome>> getBiome(MultiNoiseUtil.NoiseValuePoint noisePoint, MultiNoiseUtil.Entries<RegistryEntry<Biome>> entries) {
         MultiNoiseUtil.SearchTree<RegistryEntry<Biome>> searchTree = entries.tree;
 
-        return searchTree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+        return ((InterfaceSearchTree<RegistryEntry<Biome>>) (Object)searchTree).biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
     }
 }

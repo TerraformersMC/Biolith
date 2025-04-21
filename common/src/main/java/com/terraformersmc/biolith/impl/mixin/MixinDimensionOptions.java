@@ -1,5 +1,6 @@
 package com.terraformersmc.biolith.impl.mixin;
 
+import com.terraformersmc.biolith.impl.biome.InterfaceBiomeSource;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.dimension.DimensionType;
@@ -13,6 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinDimensionOptions {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void biolith$storeDimensionTypeToBiomeSource(RegistryEntry<DimensionType> dimensionTypeEntry, ChunkGenerator chunkGenerator, CallbackInfo ci) {
-        chunkGenerator.getBiomeSource().biolith$setDimensionType(dimensionTypeEntry);
+        ((InterfaceBiomeSource)chunkGenerator.getBiomeSource()).biolith$setDimensionType(dimensionTypeEntry);
     }
 }

@@ -1,16 +1,15 @@
 package com.terraformersmc.biolith.impl.biome;
 
 import com.terraformersmc.biolith.impl.Biolith;
+import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.config.BiolithState;
-import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
+import com.terraformersmc.biolith.impl.platform.Services;
 import net.minecraft.registry.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
-import terrablender.api.SurfaceRuleManager;
 
 import java.util.Map;
 import java.util.Optional;
@@ -55,8 +54,9 @@ public class BiomeCoordinator {
             registryManager = server.getCombinedDynamicRegistries().getCombinedRegistryManager();
         }
 
-        if (Biolith.COMPAT_TERRABLENDER) {
-            registerWithTerrablender();
+        if (BiolithCompat.COMPAT_TERRABLENDER && !registeredWithTerrablender) {
+            Services.PLATFORM.getTerraBlenderCompat().registerSurfaceRules();
+            registeredWithTerrablender = true;
         }
 
         if (serverStarted) {
@@ -91,30 +91,5 @@ public class BiomeCoordinator {
         END_STATE = null;
         NETHER_STATE = null;
         OVERWORLD_STATE = null;
-    }
-
-    // When TerraBlender is present, it ignores our surface rules in the Overworld and Nether.
-    // To avoid this, we submit a duplicate registration to TerraBlender (but only once).
-    private static void registerWithTerrablender() {
-        if (!registeredWithTerrablender) {
-            Map.of(
-                    SurfaceRuleCollector.OVERWORLD, SurfaceRuleManager.RuleCategory.OVERWORLD,
-                    SurfaceRuleCollector.NETHER,    SurfaceRuleManager.RuleCategory.NETHER
-            ).forEach((biolithRules, terrablenderRuleCategory) -> {
-                if (biolithRules.getRuleCount() > 0) {
-                    for (Identifier ruleOwner : biolithRules.getRuleOwners()) {
-                        if (biolithRules.getRuleCount(ruleOwner) > 0) {
-                            SurfaceRuleManager.addSurfaceRules(
-                                    terrablenderRuleCategory,
-                                    ruleOwner.getNamespace(),
-                                    biolithRules.get(ruleOwner)
-                            );
-                        }
-                    }
-                }
-            });
-
-            registeredWithTerrablender = true;
-        }
     }
 }

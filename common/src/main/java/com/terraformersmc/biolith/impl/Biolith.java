@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl;
 
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
+import com.terraformersmc.biolith.impl.commands.BiolithCommands;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.config.BiolithConfigManager;
 import org.slf4j.Logger;
@@ -17,7 +18,7 @@ public class Biolith {
         CONFIG_MANAGER.getGeneralConfig();
 
         BiolithCompat.init();
-        //BiolithCommands.init();
+        BiolithCommands.init();
     }
 
     public static BiolithConfigManager getConfigManager() {

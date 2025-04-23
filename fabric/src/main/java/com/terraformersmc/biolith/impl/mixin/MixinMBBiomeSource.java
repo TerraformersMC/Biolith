@@ -40,8 +40,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
     private RegistryEntry<Biome> biolith$getBiome(BiomeProvider instance, int biomeX, int biomeY, int biomeZ, Operation<RegistryEntry<Biome>> operation) {
         RegistryEntry<Biome> original = operation.call(instance, biomeX, biomeY, biomeZ);
 
-        return original;
-        //return BiomeCoordinator.OVERWORLD.getDirectReplacement(biomeX, biomeY, biomeZ, original);
+        return BiomeCoordinator.OVERWORLD.getDirectReplacement(biomeX, biomeY, biomeZ, original);
     }
 
     @WrapOperation(method = {"getBiomeForSpawn", "getBiomeForSurfaceGen"},
@@ -57,8 +56,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
         int biomeY = y >> 2;
         int biomeZ = z >> 2;
 
-        return original;
-        //return BiomeCoordinator.OVERWORLD.getDirectReplacement(biomeX, biomeY, biomeZ, original);
+        return BiomeCoordinator.OVERWORLD.getDirectReplacement(biomeX, biomeY, biomeZ, original);
     }
 
     @ModifyReturnValue(method = "biomeStream", at = @At("RETURN"))

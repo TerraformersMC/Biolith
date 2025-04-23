@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl.biome;
 
 import com.mojang.datafixers.util.Pair;
+import com.terraformersmc.biolith.impl.Biolith;
 import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
@@ -10,13 +11,26 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import java.util.function.Consumer;
 
 public class NetherBiomePlacement extends DimensionBiomePlacement {
-    protected double getLocalNoise(int x, int y, int z) {
+    private final double[] scale = new double[5];
+
+    public NetherBiomePlacement() {
+        super();
+
+        int configScale = Biolith.getConfigManager().getGeneralConfig().getNetherReplacementScale();
+        scale[0] = 256 * configScale;
+        scale[1] =  64 * configScale;
+        scale[2] =  32 * configScale;
+        scale[3] =   8 * configScale;
+        scale[4] =   2 * configScale;
+    }
+
+    public double getLocalNoise(int x, int y, int z) {
         double localNoise;
 
         // Three octaves to give some edge fuzz
-        localNoise  = replacementNoise.sample((double)(x + seedlets[0]) / 512D, (double)(y + seedlets[0]) / 128D, (double)(z + seedlets[1]) / 512D);
-        localNoise += replacementNoise.sample((double)(x + seedlets[4]) /  64D, (double)(y + seedlets[0]) /  16D, (double)(z + seedlets[5]) /  64D) / 16D;
-        localNoise += replacementNoise.sample((double)(x + seedlets[6]) /  16D, (double)(y + seedlets[0]) /   4D, (double)(z + seedlets[7]) /  16D) / 32D;
+        localNoise  = replacementNoise.sample((double)(x + seedlets[0]) / scale[0], (double)(y + seedlets[0]) / scale[1], (double)(z + seedlets[1]) / scale[0]);
+        localNoise += replacementNoise.sample((double)(x + seedlets[4]) / scale[2], (double)(y + seedlets[0]) / scale[3], (double)(z + seedlets[5]) / scale[2]) / 16D;
+        localNoise += replacementNoise.sample((double)(x + seedlets[6]) / scale[3], (double)(y + seedlets[0]) / scale[4], (double)(z + seedlets[7]) / scale[3]) / 32D;
 
         // Scale the result back to amplitude 1 and then normalize
         localNoise = normalize(localNoise / 1.09375D);

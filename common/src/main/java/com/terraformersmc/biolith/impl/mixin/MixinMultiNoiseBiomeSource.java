@@ -105,4 +105,8 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
             cir.setReturnValue(fittestNodes.ultimate().value);
         }
     }
+
+    public MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
+        return biolith$biomeEntries;
+    }
 }

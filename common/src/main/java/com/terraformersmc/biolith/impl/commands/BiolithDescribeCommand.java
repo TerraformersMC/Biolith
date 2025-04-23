@@ -54,7 +54,8 @@ public class BiolithDescribeCommand {
             world = context.getSource().getServer().getOverworld();
         }
         BiomeSource biomeSource = world.getChunkManager().getChunkGenerator().getBiomeSource();
-        MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries = biomeSource.biolith$getBiomeEntries();
+        InterfaceBiomeSource iBiomeSource = (InterfaceBiomeSource) biomeSource;
+        MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries = iBiomeSource.biolith$getBiomeEntries();
         if (biomeEntries == null) {
             context.getSource().sendMessage(Text.translatable("biolith.command.describe.notOurs").formatted(Formatting.RED));
 
@@ -119,11 +120,11 @@ public class BiolithDescribeCommand {
                     new MultiNoiseUtil.SearchTree.TreeLeafNode<>(DimensionBiomePlacement.OUT_OF_RANGE,
                             VanillaCompat.getOriginalEndBiome(biomeX, biomeY, biomeZ, noise)), 0L);
             if (BiolithCompat.COMPAT_TERRABLENDER) {
-                biomeSource.biolith$setBypass(true);
+                iBiomeSource.biolith$setBypass(true);
                 fittestNodes = terrablenderFittestNodes = new BiolithFittestNodes<>(
                         new MultiNoiseUtil.SearchTree.TreeLeafNode<>(DimensionBiomePlacement.OUT_OF_RANGE,
                                 biomeSource.getBiome(biomeX, biomeY, biomeZ, noise)), 0L);
-                biomeSource.biolith$setBypass(false);
+                iBiomeSource.biolith$setBypass(false);
             }
             if (fittestNodes == null) {
                 fittestNodes = vanillaFittestNodes;

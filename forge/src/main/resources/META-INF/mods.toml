@@ -13,19 +13,12 @@ description = '''
 Terraformers' world generation utilities
 '''
 logoFile = "assets/biolith/logo.png"
-
-[[mixins]]
-config = "biolith.mixins.json"
-[[mixins]]
-config = "biolith.forge.mixins.json"
-
 [[dependencies.biolith]]
 modId = "forge"
 mandatory = true
 versionRange = "[47,)"
 ordering = "NONE"
 side = "BOTH"
-
 [[dependencies.biolith]]
 modId = "minecraft"
 mandatory = true

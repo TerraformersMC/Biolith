@@ -1,16 +1,35 @@
-unimined.minecraft {
-    combineWith(project(":common").sourceSets.main) // combine with common, for identifying both together as one mod for dev runs
-    fabric {
-        loader project.fabric_loader_version
-        accessWidener file("../common/src/main/resources/biolith.accesswidener")
-    }
+plugins {
+    id "com.github.johnrengelman.shadow" version "7.1.2"
+}
+
+// Ferry for publishing
+apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0/ferry-mpp.gradle'
+
+architectury {
+    platformSetupLoomIde()
+    fabric()
+}
+
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+}
+
+configurations {
+    common
+    shadowCommon // Don't use shadow from the shadow plugin since it *excludes* files.
+    compileClasspath.extendsFrom common
+    runtimeClasspath.extendsFrom common
+    developmentFabric.extendsFrom common
 }
 
 dependencies {
     modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modImplementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    // Remove the next line if you don't want to depend on the API
+    //modApi "dev.architectury:architectury-fabric:${rootProject.architectury_version}"
 
-    implementation(project(path: ":common")) { transitive = false }
+    common(project(path: ":common", configuration: "namedElements")) { transitive = false }
+    shadowCommon(project(path: ":common", configuration: "transformProductionFabric")) { transitive = false }
 
     // Terraform Surfaces API for OpenSimplexNoise
     //include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
@@ -19,7 +38,7 @@ dependencies {
     modCompileOnly "com.github.glitchfiend:TerraBlender-fabric:${rootProject.terrablender_version}"
 
     // Modern Beta so we can target it with mixins
-    modCompileOnly "curse.maven:modern_beta-410423:4836942"
+    modCompileOnly "curse.maven:modern_beta-410423:4596369"
 }
 
 processResources {
@@ -30,10 +49,29 @@ processResources {
     }
 }
 
+shadowJar {
+    exclude "architectury.common.json"
+
+    configurations = [project.configurations.shadowCommon]
+    archiveClassifier.set("dev-shadow")
+}
+
+remapJar {
+    injectAccessWidener = true
+    input.set shadowJar.archiveFile
+    dependsOn shadowJar
+}
+
 sourcesJar {
     def commonSources = project(":common").sourcesJar
     dependsOn commonSources
     from commonSources.archiveFile.map { zipTree(it) }
+}
+
+components.java {
+    withVariantsFromConfiguration(project.configurations.shadowRuntimeElements) {
+        skip()
+    }
 }
 
 publish {

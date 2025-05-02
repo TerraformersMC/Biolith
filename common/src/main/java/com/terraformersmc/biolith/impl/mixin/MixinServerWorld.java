@@ -18,6 +18,7 @@ public class MixinServerWorld {
     ))
     @SuppressWarnings("unused")
     private StructurePlacementCalculator biolith$serverWorldStarting(ServerChunkManager instance, Operation<StructurePlacementCalculator> original) {
+        //noinspection ConstantConditions
         BiomeCoordinator.handleWorldStarting((ServerWorld)(Object) this);
 
         return original.call(instance);

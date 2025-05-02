@@ -1,52 +1,30 @@
 plugins {
-    id 'java'
-    id "xyz.wagyourtail.unimined" version "1.3.14" apply false
+    id "architectury-plugin" version "3.4-SNAPSHOT"
+    id 'dev.architectury.loom' version '1.7-SNAPSHOT' apply(false)
+}
+
+architectury {
+    minecraft = rootProject.minecraft_version
 }
 
 subprojects {
-    apply plugin: "xyz.wagyourtail.unimined"
+    apply plugin: "dev.architectury.loom"
 
     project.archivesBaseName = "${rootProject.archives_base_name}-${project.name}"
 
-    configurations {
-        modCompileOnly
-        compileOnly.extendsFrom modCompileOnly
-        modApi
-        api.extendsFrom modApi
-    }
-
-    unimined.minecraft(sourceSets.main, true) {
-        version rootProject.minecraft_version
-
-        mappings {
-            intermediary()
-            yarn(rootProject.yarn_mappings)
-            devNamespace "yarn"
-            devFallbackNamespace "intermediary"
-        }
-
-        mods {
-            remap(configurations.modCompileOnly) {
-                catchAWNamespaceAssertion()
-            }
-
-            remap(configurations.modApi)
-
-            // This is basically just a shortcut for `remap(configurations.modImplementation)`.
-            modImplementation {
-                // You can do this if mods have the wrong access widener mapping, but it may break runs.
-                catchAWNamespaceAssertion()
-            }
-        }
+    dependencies {
+        minecraft "com.mojang:minecraft:${rootProject.minecraft_version}"
+        mappings("net.fabricmc:yarn:${rootProject.yarn_mappings}:v2")
     }
 }
 
-// Ferry for publishing; this has to be after unimined plugin apply and before subproject version is set.
+// Ferry for publishing; this has to be after arch dev plugin apply and before subproject version is set.
 apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0/ferry-mpp.gradle'
 
 allprojects {
     apply plugin: "java"
-    apply plugin: 'maven-publish'
+    apply plugin: "architectury-plugin"
+    apply plugin: "maven-publish"
 
     version = rootProject.version
     group = rootProject.maven_group

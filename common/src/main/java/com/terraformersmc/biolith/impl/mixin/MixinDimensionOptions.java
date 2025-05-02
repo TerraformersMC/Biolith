@@ -14,6 +14,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinDimensionOptions {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void biolith$storeDimensionTypeToBiomeSource(RegistryEntry<DimensionType> dimensionTypeEntry, ChunkGenerator chunkGenerator, CallbackInfo ci) {
-        ((InterfaceBiomeSource)chunkGenerator.getBiomeSource()).biolith$setDimensionType(dimensionTypeEntry);
+        chunkGenerator.getBiomeSource().biolith$setDimensionType(dimensionTypeEntry);
     }
 }

@@ -50,7 +50,7 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
                 MultiNoiseUtil.Entries<RegistryEntry<Biome>> originalEntries =
                         (MultiNoiseUtil.Entries<RegistryEntry<Biome>>) original.call(instance, leftMap, rightMap);
 
-                InterfaceBiomeSource biomeSource = (InterfaceBiomeSource) this;
+                InterfaceBiomeSource biomeSource = this;
 
                 if (biomeSource.biolith$getDimensionType().getValue().equals(DimensionTypes.OVERWORLD.getValue())) {
                     List<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameterList = new ArrayList<>(256);
@@ -91,7 +91,7 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
             fittestNodes = VanillaCompat.getBiome(noisePoint, getBiomeEntries());
         }
 
-        InterfaceBiomeSource biomeSource = (InterfaceBiomeSource) this;
+        InterfaceBiomeSource biomeSource = this;
 
         // Apply biome overlays.
         if (biomeSource.biolith$getDimensionType().getValue().equals(DimensionTypes.OVERWORLD.getValue())) {
@@ -103,9 +103,7 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
         }
     }
 
-    // Overrides injected interface (not supported by Unimined)
-    //@Override
-    @SuppressWarnings("unused")
+    @Override
     public MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
         return biolith$biomeEntries;
     }

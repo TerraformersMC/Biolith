@@ -2,8 +2,7 @@ package com.terraformersmc.biolith.impl.mixin;
 
 import com.google.common.collect.ImmutableMap;
 import com.llamalad7.mixinextras.MixinExtrasBootstrap;
-import com.terraformersmc.biolith.impl.platform.Services;
-import net.minecraftforge.fml.ModList;
+import net.minecraftforge.fml.loading.LoadingModList;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -17,7 +16,8 @@ public class BiolithForgeMixinConfigPlugin implements IMixinConfigPlugin {
     private static final Supplier<Boolean> TRUE = () -> true;
 
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            "com.terraformersmc.biolith.impl.mixin.MixinTBTheEndBiomeSource", () -> Services.PLATFORM.isModLoaded("terrablender"));
+            "com.terraformersmc.biolith.impl.mixin.MixinTBTheEndBiomeSource", () -> LoadingModList.get().getModFileById("terrablender") != null
+    );
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {

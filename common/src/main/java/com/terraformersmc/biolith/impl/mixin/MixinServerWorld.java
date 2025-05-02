@@ -1,16 +1,25 @@
 package com.terraformersmc.biolith.impl.mixin;
 
+import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
+import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
+import net.minecraft.server.world.ServerChunkManager;
 import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.gen.chunk.placement.StructurePlacementCalculator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(ServerWorld.class)
 public class MixinServerWorld {
-    @Inject(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/world/ServerChunkManager;<init>(Lnet/minecraft/server/world/ServerWorld;Lnet/minecraft/world/level/storage/LevelStorage$Session;Lcom/mojang/datafixers/DataFixer;Lnet/minecraft/structure/StructureTemplateManager;Ljava/util/concurrent/Executor;Lnet/minecraft/world/gen/chunk/ChunkGenerator;IIZLnet/minecraft/server/WorldGenerationProgressListener;Lnet/minecraft/world/chunk/ChunkStatusChangeListener;Ljava/util/function/Supplier;)V", shift = At.Shift.BY, by = 2))
-    private void biolith$ServerWorld(CallbackInfo ci) {
+    @WrapOperation(method = "<init>", at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/server/world/ServerChunkManager;getStructurePlacementCalculator()Lnet/minecraft/world/gen/chunk/placement/StructurePlacementCalculator;",
+            ordinal = 0
+    ))
+    @SuppressWarnings("unused")
+    private StructurePlacementCalculator biolith$serverWorldStarting(ServerChunkManager instance, Operation<StructurePlacementCalculator> original) {
         BiomeCoordinator.handleWorldStarting((ServerWorld)(Object) this);
+
+        return original.call(instance);
     }
 }

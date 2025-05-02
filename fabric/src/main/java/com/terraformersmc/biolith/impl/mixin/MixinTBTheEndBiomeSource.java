@@ -13,7 +13,6 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import terrablender.core.TerraBlender;
 
 /*
  * This entire mixin is basically a work-around for TerraBlender's HEAD mixin and @Unique variables.

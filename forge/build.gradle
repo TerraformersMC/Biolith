@@ -1,19 +1,13 @@
-// Ferry for publishing
-//apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
-
 unimined.minecraft {
     combineWith(project(":common").sourceSets.main) // combine with common, for identifying both together as one mod for dev runs
     minecraftForge {
         loader forge_version
-        mixinConfig("biolith.mixins.json", "biolith-forge.mixins.json")
+        mixinConfig("biolith.mixins.json", "biolith.forge.mixins.json")
         accessTransformer aw2at(file("../common/src/main/resources/biolith.accesswidener"))
     }
 }
 
 dependencies {
-    // Remove the next line if you don't want to depend on the API
-    //modApi "dev.architectury:architectury-forge:${rootProject.architectury_version}"
-
     // Forge does not provide MixinExtras
     compileOnly(annotationProcessor("io.github.llamalad7:mixinextras-common:${rootProject.mixinextras_version}"))
     implementation(include("io.github.llamalad7:mixinextras-forge:${rootProject.mixinextras_version}"))
@@ -28,23 +22,12 @@ dependencies {
 }
 
 processResources {
-    //from project(":common").sourceSets.main.resources
     inputs.property "version", project.version
 
     filesMatching("META-INF/mods.toml") {
         expand "version": project.version
     }
 }
-
-/*sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-}*/
-
-/*tasks.named('compileJava', JavaCompile) {
-    source(project(":common").sourceSets.main.allSource)
-}*/
 
 publish {
     onlyIf {

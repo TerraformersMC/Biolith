@@ -4,15 +4,12 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Either;
 import com.mojang.datafixers.util.Pair;
-import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.InterfaceBiomeSource;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
-import com.terraformersmc.biolith.impl.compat.TerraBlenderCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import com.terraformersmc.biolith.impl.platform.Services;
-import com.terraformersmc.biolith.impl.platform.services.PlatformHelper;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
@@ -106,6 +103,9 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
         }
     }
 
+    // Overrides injected interface (not supported by Unimined)
+    //@Override
+    @SuppressWarnings("unused")
     public MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
         return biolith$biomeEntries;
     }

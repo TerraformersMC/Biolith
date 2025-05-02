@@ -1,6 +1,5 @@
 package com.terraformersmc.biolith.impl;
 
-import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.commands.BiolithCommands;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.config.BiolithConfigManager;

@@ -29,9 +29,10 @@ public class ForgePlatformHelper implements PlatformHelper {
 
     @Override
     public boolean isModLoaded(String modId) {
-        if (ModList.get() == null){
+        if (ModList.get() == null) {
             return LoadingModList.get().getMods().stream().map(ModInfo::getModId).anyMatch(modId::equals);
         }
+
         return ModList.get().isLoaded(modId);
     }
 

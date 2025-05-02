@@ -1,6 +1,5 @@
 package com.terraformersmc.biolith.impl.biome;
 
-import com.terraformersmc.biolith.api.biome.BiomePlacement;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.config.BiolithState;
@@ -12,7 +11,6 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Map;
 import java.util.Optional;
 
 public class BiomeCoordinator {

@@ -10,7 +10,7 @@ import net.minecraft.util.dynamic.Range;
 
 public abstract class AbstractParameterCriterion implements Criterion {
     protected final BiomeParameterTargets parameter;
-    protected Range<Float> allowedValues;
+    protected final Range<Float> allowedValues;
 
     public AbstractParameterCriterion(BiomeParameterTargets parameter, float min, float max) {
         this.parameter = parameter;

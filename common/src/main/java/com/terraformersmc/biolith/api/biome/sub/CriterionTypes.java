@@ -13,9 +13,9 @@ public class CriterionTypes {
         return CRITERION_TYPES.get(id);
     }
 
-    public static synchronized  <T extends Criterion> CriterionType<T> add(CriterionType<T> type) {
+    public static synchronized <T extends Criterion> CriterionType<T> add(CriterionType<T> type) {
         if (CRITERION_TYPES.containsKey(type.getId())) {
-            Biolith.LOGGER.error("Cannot register two criterion types with same id: " + type.getId());
+            Biolith.LOGGER.error("Cannot register two criterion types with same id: {}", type.getId());
 
             return null;
         }

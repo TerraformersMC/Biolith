@@ -7,6 +7,7 @@ import com.terraformersmc.biolith.impl.noise.OpenSimplexNoise2;
 import net.minecraft.registry.RegistryEntryLookup;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.BiomeKeys;
@@ -41,8 +42,8 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     }
 
     @Override
-    protected void serverReplaced(@NotNull BiolithState state, long seed) {
-        super.serverReplaced(state, seed);
+    protected void serverReplaced(@NotNull BiolithState state, ServerWorld world) {
+        super.serverReplaced(state, world);
 
         // Update vanilla biome entries for the End
         RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();

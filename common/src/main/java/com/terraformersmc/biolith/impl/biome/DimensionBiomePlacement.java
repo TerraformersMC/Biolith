@@ -9,9 +9,11 @@ import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.noise.OpenSimplexNoise2;
 import net.minecraft.registry.*;
 import net.minecraft.registry.entry.RegistryEntry;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.dynamic.Range;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.Vec3i;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import org.jetbrains.annotations.NotNull;
@@ -23,6 +25,7 @@ import java.util.stream.Collectors;
 
 public abstract class DimensionBiomePlacement {
     protected boolean biomesInjected = false;
+    protected ServerWorld world;
     protected BiolithState state;
     protected OpenSimplexNoise2 replacementNoise;
     protected int[] seedlets = new int[8];
@@ -37,7 +40,14 @@ public abstract class DimensionBiomePlacement {
 
     public static final RegistryKey<Biome> VANILLA_PLACEHOLDER = RegistryKey.of(RegistryKeys.BIOME, Identifier.of(Biolith.MOD_ID, "vanilla"));
 
-    protected void serverReplaced(@NotNull BiolithState state, long seed) {
+    // TODO in Biolith 4: Move these together with existing args into a data record for sub-biome selection.
+    protected static final ThreadLocal<Vec3i> EVALUATING_BIOME_POS = new ThreadLocal<>();
+    protected static final ThreadLocal<ServerWorld> EVALUATING_WORLD = new ThreadLocal<>();
+
+    protected void serverReplaced(@NotNull BiolithState state, ServerWorld world) {
+        long seed = world.getSeed();
+
+        this.world = world;
         this.state = state;
         this.replacementNoise = new OpenSimplexNoise2(seed);
         this.seedRandom = new Random(seed);
@@ -54,6 +64,7 @@ public abstract class DimensionBiomePlacement {
     protected void serverStopped() {
         biomesInjected = false;
         state = null;
+        world = null;
 
         // Reopen completed request lists.
         replacementRequests.forEach((key, list) -> list.reopen());
@@ -127,6 +138,8 @@ public abstract class DimensionBiomePlacement {
             if (localNoise < 0D) {
                 localNoise = getLocalNoise(x, y, z);
             }
+            EVALUATING_BIOME_POS.set(new Vec3i(x, y, z));
+            EVALUATING_WORLD.set(this.world);
             SubBiomeRequest request = subBiomeRequests.get(biomeKey).selectSubBiome(fittestNodes, noisePoint, localRange, localNoise);
 
             if (request != null) {
@@ -174,6 +187,8 @@ public abstract class DimensionBiomePlacement {
             }
         }
 
+        EVALUATING_BIOME_POS.set(new Vec3i(x, y, z));
+        EVALUATING_WORLD.set(this.world);
         if (replacementRequest == null) {
             if (subBiomeRequests.containsKey(biomeKey)) {
                 subBiomeRequest = subBiomeRequests.get(biomeKey).
@@ -245,7 +260,31 @@ public abstract class DimensionBiomePlacement {
         return null;
     }
 
-    // Used by mixins to add new noise biome placements.
+    /**
+     * This is a temporary extension for Biolith 3.0 and 3.1 to allow evaluation of the biome position
+     * during sub-biome evaluation without having to modify the Criterion portion of the API.
+     *
+     * @return Vec3i containing the biome position (not block position) being evaluated
+     */
+    public static Vec3i getEvaluatingBiomePos() {
+        return EVALUATING_BIOME_POS.get();
+    }
+
+    /**
+     * This is a temporary extension for Biolith 3.0 and 3.1 to allow evaluation of the biome config
+     * during sub-biome evaluation without having to modify the Criterion portion of the API.
+     *
+     * @return ServerWorld being evaluated
+     */
+    public static ServerWorld getEvaluatingWorld() {
+        return EVALUATING_WORLD.get();
+    }
+
+    /**
+     *  Used by mixins to add new noise biome placements.
+     *
+     * @param parameters Consumer of noise-value pairs (parameters)
+     */
     public void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters) {
         biomesInjected = true;
         RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();

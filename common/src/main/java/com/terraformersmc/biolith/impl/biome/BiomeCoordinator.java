@@ -82,21 +82,21 @@ public class BiomeCoordinator {
             if (DimensionTypes.THE_END.equals(dimensionKey.get())) {
                 if (END_STATE == null) {
                     END_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType("end"));
-                    END.serverReplaced(END_STATE, world.getSeed());
+                    END.serverReplaced(END_STATE, world);
                 } else {
                     Biolith.LOGGER.warn("More than one End dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), END_STATE.getWorldId());
                 }
             } else if (DimensionTypes.THE_NETHER.equals(dimensionKey.get())) {
                 if (NETHER_STATE == null) {
                     NETHER_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType("nether"));
-                    NETHER.serverReplaced(NETHER_STATE, world.getSeed());
+                    NETHER.serverReplaced(NETHER_STATE, world);
                 } else {
                     Biolith.LOGGER.warn("More than one Nether dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), NETHER_STATE.getWorldId());
                 }
             } else if (DimensionTypes.OVERWORLD.equals(dimensionKey.get())) {
                 if (OVERWORLD_STATE == null) {
                     OVERWORLD_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType("overworld"));
-                    OVERWORLD.serverReplaced(OVERWORLD_STATE, world.getSeed());
+                    OVERWORLD.serverReplaced(OVERWORLD_STATE, world);
                 } else {
                     Biolith.LOGGER.warn("More than one Overworld dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), OVERWORLD_STATE.getWorldId());
                 }

@@ -1,8 +1,11 @@
 package com.terraformersmc.biolith.api.biome.sub;
 
 import com.mojang.serialization.Codec;
+import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.StringIdentifiable;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.biome.source.BiomeCoords;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
 /**
@@ -10,6 +13,7 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
  * <ul>
  * <li>CONTINENTALNESS</li>
  * <li>DEPTH</li>
+ * <li>DEPTH_OCEAN</li>
  * <li>EROSION</li>
  * <li>HUMIDITY</li>
  * <li>PEAKS_VALLEYS</li>
@@ -29,7 +33,8 @@ public enum BiomeParameterTargets implements StringIdentifiable {
     EROSION("erosion"),
     DEPTH("depth"),
     WEIRDNESS("weirdness"),
-    PEAKS_VALLEYS("peaks_valleys");
+    PEAKS_VALLEYS("peaks_valleys"),
+    DEPTH_OCEAN("depth_ocean");
 
     public static final Codec<BiomeParameterTargets> CODEC = StringIdentifiable.createCodec(BiomeParameterTargets::values);
     private final String name;
@@ -52,6 +57,7 @@ public enum BiomeParameterTargets implements StringIdentifiable {
                 case DEPTH -> noisePoint.depth();
                 case WEIRDNESS -> noisePoint.weirdnessNoise();
                 case PEAKS_VALLEYS -> BiomeParameterTargets.getPeaksValleysNoiseLong(noisePoint.weirdnessNoise());
+                case DEPTH_OCEAN -> BiomeParameterTargets.getDepthWithOceanSurfaceLong(noisePoint.depth());
             };
     }
 
@@ -79,6 +85,27 @@ public enum BiomeParameterTargets implements StringIdentifiable {
          *     }
          */
         return 10000L - Math.abs(Math.abs(weirdness * 3L) - 20000L);
+    }
+
+    /**
+     * Compromise method to provide a way to gauge how far below the ocean surface a position is.
+     *
+     * This method may be removed in a later API version (Biolith 4 or above) if new features make it redundant.
+     *
+     * @param depth A long-type depth noise value
+     * @return The long-type calculated depth with ocean surface
+     */
+    public static long getDepthWithOceanSurfaceLong(long depth) {
+        ServerWorld world = DimensionBiomePlacement.getEvaluatingWorld();
+        int seaLevel = world.getSeaLevel();
+        double bottom = world.getBottomY();
+        double top = world.getTopYInclusive();
+        double bottomNew = 15000;
+        double topNew = -15000;
+
+        return Math.max(depth,
+                (long) MathHelper.clampedMap(BiomeCoords.toBlock(DimensionBiomePlacement.getEvaluatingBiomePos().getY()), bottom, top, bottomNew, topNew) -
+                (long) MathHelper.clampedMap(seaLevel, bottom, top, bottomNew, topNew));
     }
 
     /**

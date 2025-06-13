@@ -36,11 +36,14 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive = false }
     shadowCommon(project(path: ":common", configuration: "transformProductionNeoForge")) { transitive = false }
 
+    // Terraform Surfaces API for OpenSimplexNoise
+    //include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
+
     // TerraBlender so we can use its API
     modCompileOnly "com.github.glitchfiend:TerraBlender-neoforge:${rootProject.terrablender_version}"
 
-    // Terraform Surfaces API for OpenSimplexNoise
-    //include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
+    // Moderner Beta so we can target it with mixins
+    modCompileOnly "maven.modrinth:moderner-beta:${rootProject.moderner_beta_version}-neoforge"
 }
 
 task idePostSync {

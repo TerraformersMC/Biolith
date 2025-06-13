@@ -64,12 +64,12 @@ public class BiolithDescribeCommand {
         }
         MultiNoiseUtil.MultiNoiseSampler noise = world.getChunkManager().getNoiseConfig().getMultiNoiseSampler();
 
-        // Describe Modern Beta worldgen if it's active.
-        if (BiolithCompat.COMPAT_MODERN_BETA) {
-            int mbStatus = Services.PLATFORM.describeModernBeta(context, biomeX, biomeY, biomeZ, world, biomeSource, biomeEntries, noise);
+        // Describe Moderner Beta worldgen if it's active.
+        if (BiolithCompat.COMPAT_MODERNER_BETA) {
+            int mbStatus = Services.PLATFORM.describeModernerBeta(context, biomeX, biomeY, biomeZ, world, biomeSource, biomeEntries, noise);
             if (mbStatus != 0) {
                 /*
-                 * mbStatus == 0 means Modern Beta although present is not generating this world
+                 * mbStatus == 0 means Moderner Beta although present is not generating this world
                  * Other values are the return value from our MB compat describe functionality
                  * (meaning, for better or worse, describe is done)
                  */

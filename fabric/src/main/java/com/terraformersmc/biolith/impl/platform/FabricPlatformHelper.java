@@ -3,7 +3,7 @@ package com.terraformersmc.biolith.impl.platform;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import com.terraformersmc.biolith.impl.compat.ModernBetaCompatFabric;
+import com.terraformersmc.biolith.impl.compat.ModernerBetaCompatFabric;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompat;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompatFabric;
 import com.terraformersmc.biolith.impl.platform.services.PlatformHelper;
@@ -44,8 +44,9 @@ public class FabricPlatformHelper implements PlatformHelper {
         return FabricLoader.getInstance().getConfigDir();
     }
 
-    public int describeModernBeta(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
-        return ModernBetaCompatFabric.describe(context, biomeX, biomeY, biomeZ, world, biomeSource, biomeEntries, noise);
+    @Override
+    public int describeModernerBeta(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
+        return ModernerBetaCompatFabric.describe(context, biomeX, biomeY, biomeZ, world, biomeSource, biomeEntries, noise);
     }
 
     @Override

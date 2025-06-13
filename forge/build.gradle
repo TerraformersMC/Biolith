@@ -45,11 +45,11 @@ dependencies {
     common(project(path: ":common", configuration: "namedElements")) { transitive = false }
     shadowCommon(project(path: ":common", configuration: "transformProductionForge")) { transitive = false }
 
-    // TerraBlender so we can use its API
-    modCompileOnly "com.github.glitchfiend:TerraBlender-forge:${rootProject.terrablender_version}"
-
     // Terraform Surfaces API for OpenSimplexNoise
     //include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
+
+    // TerraBlender so we can use its API
+    modCompileOnly "com.github.glitchfiend:TerraBlender-forge:${rootProject.terrablender_version}"
 }
 
 processResources {

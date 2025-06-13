@@ -6,7 +6,7 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
-import mod.bespectacled.modernbeta.world.biome.ModernBetaBiomeSource;
+import mod.bluestaggo.modernerbeta.world.biome.ModernBetaBiomeSource;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;
@@ -18,7 +18,7 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 
 import static com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand.textFromBiome;
 
-public class ModernBetaCompatFabric {
+public class ModernerBetaCompatNeoForge {
     public static int describe(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
         if (!(biomeSource instanceof ModernBetaBiomeSource)) {
             return 0;
@@ -43,7 +43,7 @@ public class ModernBetaCompatFabric {
 
         context.getSource().sendMessage(Text.literal(String.format("§6BR§r:%+05.3f", replacementNoise)));
 
-        context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.modern_beta")
+        context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.moderner_beta")
                 .append(textFromBiome(original)));
 
         if (describeBiomeData.replacementBiome() != null && describeBiomeData.replacementRange() == null) {

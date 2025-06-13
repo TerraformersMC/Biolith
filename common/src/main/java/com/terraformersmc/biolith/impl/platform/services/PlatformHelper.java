@@ -56,7 +56,7 @@ public interface PlatformHelper {
     Path getConfigDir();
 
     /**
-     * Sends the biolith describe output for Modern Beta biome sources.
+     * Sends the biolith describe output for Moderner Beta biome sources.
      *
      * @param context Command context
      * @param biomeX Biome X position
@@ -67,7 +67,7 @@ public interface PlatformHelper {
      * @param biomeEntries Biome entries if any
      * @return 0 to pass; otherwise the command return value
      */
-    default int describeModernBeta(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
+    default int describeModernerBeta(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
         return 0;
     }
 

@@ -27,8 +27,9 @@ to update here, the following features are present:
 * Override vanilla surfaces using custom surface builders.
 
 * Fully compatible with TerraBlender and Fabric Biome API biomes.
-* Somewhat compatible with BClib (biome placement will be modified by BClib).
+* Somewhat compatible with BCLib (biome placement will be modified by BCLib).
 * Can place biomes in Modern Beta worlds since 1.2.0-beta.1.
+* Can place biomes in Moderner Beta worlds since 3.0.3.
 
 ## Releases via Maven
 
@@ -61,7 +62,7 @@ If you wish to include Biolith in your mod for distribution, wrap the `modImplem
 Finally, set the Biolith version you want in `gradle.properties`:
 
 ```
-biolith_version=1.2.0-beta.3
+biolith_version=3.0.4
 ```
 
 For convenience, [Biolith can also be downloaded from Modrinth](https://modrinth.com/mod/biolith).

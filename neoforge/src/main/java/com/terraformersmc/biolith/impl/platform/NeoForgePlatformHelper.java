@@ -1,13 +1,20 @@
 package com.terraformersmc.biolith.impl.platform;
 
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.terraformersmc.biolith.impl.compat.ModernerBetaCompatNeoForge;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompat;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompatNeoForge;
 import com.terraformersmc.biolith.impl.platform.services.PlatformHelper;
 import net.minecraft.command.CommandRegistryAccess;
+import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.world.biome.Biome;
+import net.minecraft.world.biome.source.BiomeSource;
+import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.fml.loading.FMLLoader;
@@ -38,6 +45,11 @@ public class NeoForgePlatformHelper implements PlatformHelper {
     @Override
     public Path getConfigDir() {
         return Path.of(FMLConfig.defaultConfigPath());
+    }
+
+    @Override
+    public int describeModernerBeta(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
+        return ModernerBetaCompatNeoForge.describe(context, biomeX, biomeY, biomeZ, world, biomeSource, biomeEntries, noise);
     }
 
     @Override

@@ -15,6 +15,7 @@ public class BiolithNeoForgeMixinConfigPlugin implements IMixinConfigPlugin {
     private static final Supplier<Boolean> TRUE = () -> true;
 
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
+            "com.terraformersmc.biolith.impl.mixin.MixinMBBiomeSource", () -> LoadingModList.get().getModFileById("moderner_beta") != null,
             "com.terraformersmc.biolith.impl.mixin.MixinTBTheEndBiomeSource", () -> LoadingModList.get().getModFileById("terrablender") != null
     );
 

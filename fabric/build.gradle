@@ -34,8 +34,8 @@ dependencies {
     // TerraBlender so we can use its API
     modCompileOnly "com.github.glitchfiend:TerraBlender-fabric:${rootProject.terrablender_version}"
 
-    // Modern Beta so we can target it with mixins
-    modCompileOnly "curse.maven:modern_beta-410423:4836942"
+    // Moderner Beta so we can target it with mixins
+    modCompileOnly "maven.modrinth:moderner-beta:${rootProject.moderner_beta_version}-fabric"
 }
 
 processResources {

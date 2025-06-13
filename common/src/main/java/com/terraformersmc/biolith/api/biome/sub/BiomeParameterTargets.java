@@ -99,7 +99,7 @@ public enum BiomeParameterTargets implements StringIdentifiable {
         ServerWorld world = DimensionBiomePlacement.getEvaluatingWorld();
         int seaLevel = world.getSeaLevel();
         double bottom = world.getBottomY();
-        double top = world.getTopYInclusive();
+        double top = world.getTopY();
         double bottomNew = 15000;
         double topNew = -15000;
 

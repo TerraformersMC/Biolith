@@ -44,15 +44,16 @@ allprojects {
             url = 'https://maven.minecraftforge.net/'
         }
 
-        // for Modern Beta
+        // for Moderner Beta
         exclusiveContent {
             forRepository {
                 maven {
-                    url "https://cursemaven.com"
+                    name = 'Modrinth'
+                    url = 'https://api.modrinth.com/maven'
                 }
             }
             filter {
-                includeGroup "curse.maven"
+                includeGroup "maven.modrinth"
             }
         }
     }

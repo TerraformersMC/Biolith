@@ -215,7 +215,7 @@ public abstract class DimensionBiomePlacement {
     }
 
     /**
-     * Wrapper around the internals of replacement requests, so Modern Beta or other similar direct-only schemes
+     * Wrapper around the internals of replacement requests, so Moderner Beta or other similar direct-only schemes
      * can directly query replacements without needing access to the internal classes of DimensionBiomePlacement.
      *
      * @param x X coordinate of the targetet point

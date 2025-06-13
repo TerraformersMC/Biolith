@@ -15,7 +15,7 @@ public class BiolithFabricMixinConfigPlugin implements IMixinConfigPlugin {
     private static final Supplier<Boolean> TRUE = () -> true;
 
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            "com.terraformersmc.biolith.impl.mixin.MixinMBBiomeSource", () -> FabricLoader.getInstance().isModLoaded("modern_beta"),
+            "com.terraformersmc.biolith.impl.mixin.MixinMBBiomeSource", () -> FabricLoader.getInstance().isModLoaded("moderner_beta"),
             "com.terraformersmc.biolith.impl.mixin.MixinTBTheEndBiomeSource", () -> FabricLoader.getInstance().isModLoaded("terrablender")
     );
 

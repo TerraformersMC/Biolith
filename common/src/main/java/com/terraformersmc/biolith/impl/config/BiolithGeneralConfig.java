@@ -3,14 +3,20 @@ package com.terraformersmc.biolith.impl.config;
 import com.terraformersmc.biolith.impl.Biolith;
 import net.minecraft.util.math.MathHelper;
 
+@SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
 public class BiolithGeneralConfig {
 	private boolean enableCommands = true;
+	private boolean forceResilientFeatureIndexer = false;
 	private int overworldReplacementScale = 4;
 	private int netherReplacementScale = 2;
 	private int endReplacementScale = 1;
 
 	public boolean areCommandsEnabled() {
 		return enableCommands;
+	}
+
+	public boolean forceResilientFeatureIndexer() {
+		return forceResilientFeatureIndexer;
 	}
 
 	public int getOverworldReplacementScale() {

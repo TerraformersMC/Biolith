@@ -7,9 +7,11 @@ import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(BiomeSource.class)
 public class MixinBiomeSource implements InterfaceBiomeSource {
+    @Unique
     private RegistryKey<DimensionType> biolith$dimensionType = InterfaceBiomeSource.DIMENSION_TYPE_UNDEFINED;
 
     @Override

@@ -30,6 +30,7 @@ to update here, the following features are present:
 * Somewhat compatible with BCLib (biome placement will be modified by BCLib).
 * Can place biomes in Modern Beta worlds since 1.2.0-beta.1.
 * Can place biomes in Moderner Beta worlds since 3.0.3.
+* Automatically prevents feature order cycle crashes.
 
 ## Releases via Maven
 

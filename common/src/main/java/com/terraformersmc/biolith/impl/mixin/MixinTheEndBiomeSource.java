@@ -21,6 +21,7 @@ import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.minecraft.world.gen.densityfunction.DensityFunction;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
@@ -32,7 +33,9 @@ import java.util.stream.Stream;
 
 @Mixin(value = TheEndBiomeSource.class, priority = 990)
 public abstract class MixinTheEndBiomeSource extends BiomeSource {
+    @Unique
     private static RegistryEntryLookup<Biome> biolith$biomeLookup;
+    @Unique
     private static MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$biomeEntries;
 
     @Inject(method = "createVanilla", at = @At("HEAD"))

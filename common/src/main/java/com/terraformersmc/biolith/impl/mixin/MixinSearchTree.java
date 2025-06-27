@@ -14,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Iterator;
 
@@ -23,7 +24,9 @@ public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
     @Final
     private MultiNoiseUtil.SearchTree.TreeNode<T> firstNode;
 
+    @Unique
     private final ThreadLocal<MultiNoiseUtil.SearchTree.TreeLeafNode<T>> previousUltimateNode = new ThreadLocal<>();
+    @Unique
     private final ThreadLocal<MultiNoiseUtil.SearchTree.TreeLeafNode<T>> previousPenultimateNode = new ThreadLocal<>();
 
     /*
@@ -121,6 +124,7 @@ public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
         }
     }
 
+    @Unique
     private @NotNull RegistryKey<?> biolith$keyOf(@Nullable MultiNoiseUtil.SearchTree.TreeLeafNode<T> leafNode) {
         if (leafNode == null) {
             return RegistryKey.of(RegistryKeys.BIOME, Identifier.of(Biolith.MOD_ID, "null"));

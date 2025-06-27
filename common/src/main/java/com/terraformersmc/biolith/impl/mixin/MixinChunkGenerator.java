@@ -43,6 +43,7 @@ public class MixinChunkGenerator {
         List<PlacedFeatureIndexer.IndexedFeatures> features;
 
         if (Biolith.getConfigManager().getGeneralConfig().forceResilientFeatureIndexer()) {
+            Biolith.LOGGER.info("Using Biolith's resilient feature indexer (force_resilient_feature_indexer = true).");
             features = ResilientPlacedFeatureIndexer.collectIndexedFeatures(biomes, biomesToPlacedFeaturesList);
         } else {
             try {

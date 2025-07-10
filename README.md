@@ -35,7 +35,7 @@ to update here, the following features are present:
 ## Releases via Maven
 
 The instructions below are for Biolith 3.0.4 for Minecraft 1.21+.  If you are
-using versions of Biolith before 1.2.0, only Fabric/Quilt is supported, and
+using versions of Biolith before 1.0.1-alpha.1, only Fabric/Quilt is supported, and
 the artifact ID is just `biolith`.
 
 Much like Terraform API, add the Terraformers maven repository to your `build.gradle`:

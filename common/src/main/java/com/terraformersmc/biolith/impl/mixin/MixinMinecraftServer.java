@@ -10,7 +10,6 @@ import net.minecraft.registry.DynamicRegistryManager;
 import net.minecraft.registry.RegistryKey;
 import net.minecraft.registry.ServerDynamicRegistryType;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.WorldGenerationProgressListener;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.util.math.random.RandomSequencesState;
 import net.minecraft.world.World;
@@ -56,7 +55,7 @@ public abstract class MixinMinecraftServer {
             target = "net/minecraft/server/world/ServerWorld"
     ))
     @SuppressWarnings("unused")
-    private ServerWorld biolith$prependSurfaceRules(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, WorldGenerationProgressListener worldGenerationProgressListener, boolean debugWorld, long seed, List<SpecialSpawner> spawners, boolean shouldTickTime, @Nullable RandomSequencesState randomSequencesState, Operation<ServerWorld> operation) {
+    private ServerWorld biolith$prependSurfaceRules(MinecraftServer server, Executor workerExecutor, LevelStorage.Session session, ServerWorldProperties properties, RegistryKey<World> worldKey, DimensionOptions dimensionOptions, boolean debugWorld, long seed, List<SpecialSpawner> spawners, boolean shouldTickTime, @Nullable RandomSequencesState randomSequencesState, Operation<ServerWorld> operation) {
         Optional<RegistryKey<DimensionType>> dimensionKey = dimensionOptions.dimensionTypeEntry().getKey();
         MaterialRules.MaterialRule[] rulesType = new MaterialRules.MaterialRule[0];
         SurfaceRuleCollector surfaceRuleCollector = null;
@@ -85,6 +84,6 @@ public abstract class MixinMinecraftServer {
             }
         }
 
-        return operation.call(server, workerExecutor, session, properties, worldKey, dimensionOptions, worldGenerationProgressListener, debugWorld, seed, spawners, shouldTickTime, randomSequencesState);
+        return operation.call(server, workerExecutor, session, properties, worldKey, dimensionOptions, debugWorld, seed, spawners, shouldTickTime, randomSequencesState);
     }
 }

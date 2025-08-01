@@ -2,7 +2,6 @@ package com.terraformersmc.biolith.impl.data;
 
 import com.terraformersmc.biolith.impl.Biolith;
 import net.fabricmc.fabric.api.resource.IdentifiableResourceReloadListener;
-import net.minecraft.resource.ResourceManager;
 import net.minecraft.resource.ResourceReloader;
 import net.minecraft.util.Identifier;
 
@@ -18,8 +17,8 @@ public record IdentifiableResourceReloaderWrapper(Identifier identifier, Resourc
     }
 
     @Override
-    public CompletableFuture<Void> reload(Synchronizer synchronizer, ResourceManager manager, Executor prepareExecutor, Executor applyExecutor) {
-        return reloader.reload(synchronizer, manager, prepareExecutor, applyExecutor);
+    public CompletableFuture<Void> reload(class_11558 context, Executor executor, Synchronizer synchronizer, Executor applyExecutor) {
+        return reloader.reload(context, executor, synchronizer, applyExecutor);
     }
 
     @Override

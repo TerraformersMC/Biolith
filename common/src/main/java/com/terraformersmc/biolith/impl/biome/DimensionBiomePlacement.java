@@ -405,7 +405,7 @@ public abstract class DimensionBiomePlacement {
 
         public @Nullable ReplacementRequest selectReplacement(double localNoise) {
             for (ReplacementRequest request : requests) {
-                if (request.end > localNoise) {
+                if (request.end >= localNoise) {
                     return request;
                 }
             }

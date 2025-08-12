@@ -174,7 +174,7 @@ public abstract class DimensionBiomePlacement {
 
         if (replacementRequests.containsKey(biomeKey)) {
             for (ReplacementRequest request : replacementRequests.get(biomeKey).requests) {
-                if (request.end > localNoise) {
+                if (request.end >= localNoise) {
                     if (replacementRequest == null) {
                         replacementRequest = request;
                     } else {

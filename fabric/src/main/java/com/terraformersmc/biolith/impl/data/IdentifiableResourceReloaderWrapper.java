@@ -17,8 +17,8 @@ public record IdentifiableResourceReloaderWrapper(Identifier identifier, Resourc
     }
 
     @Override
-    public CompletableFuture<Void> reload(class_11558 context, Executor executor, Synchronizer synchronizer, Executor applyExecutor) {
-        return reloader.reload(context, executor, synchronizer, applyExecutor);
+    public CompletableFuture<Void> reload(Store store, Executor executor, Synchronizer synchronizer, Executor applyExecutor) {
+        return reloader.reload(store, executor, synchronizer, applyExecutor);
     }
 
     @Override

@@ -10,6 +10,7 @@
     "MixinDimensionOptions",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
+    "MixinPlacedFeatureIndexer",
     "MixinSearchTree",
     "MixinServerWorld",
     "MixinSurfaceBuilder",

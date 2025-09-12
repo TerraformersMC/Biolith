@@ -16,8 +16,8 @@ import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
 import net.minecraft.world.biome.source.util.MultiNoiseUtil;
 import net.neoforged.fml.ModList;
-import net.neoforged.fml.loading.FMLConfig;
 import net.neoforged.fml.loading.FMLLoader;
+import net.neoforged.fml.loading.FMLPaths;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import org.apache.commons.lang3.function.TriFunction;
@@ -44,7 +44,7 @@ public class NeoForgePlatformHelper implements PlatformHelper {
 
     @Override
     public Path getConfigDir() {
-        return Path.of(FMLConfig.defaultConfigPath());
+        return FMLPaths.CONFIGDIR.get();
     }
 
     @Override

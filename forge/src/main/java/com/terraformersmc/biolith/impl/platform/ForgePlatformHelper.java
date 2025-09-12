@@ -11,8 +11,8 @@ import net.minecraft.server.command.ServerCommandSource;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLConfig;
 import net.minecraftforge.fml.loading.FMLLoader;
+import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.nio.file.Path;
@@ -37,7 +37,7 @@ public class ForgePlatformHelper implements PlatformHelper {
 
     @Override
     public Path getConfigDir() {
-        return Path.of(FMLConfig.defaultConfigPath());
+        return FMLPaths.CONFIGDIR.get();
     }
 
     @Override

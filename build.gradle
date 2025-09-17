@@ -22,7 +22,7 @@ subprojects {
 }
 
 // Ferry for publishing; this has to be after arch dev plugin apply and before subproject version is set.
-apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0-beta/ferry-mpp.gradle'
+apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0/ferry-mpp.gradle'
 
 allprojects {
     apply plugin: "java"

@@ -8,7 +8,6 @@ import com.terraformersmc.biolith.impl.platform.services.PlatformHelper;
 import net.minecraft.command.CommandRegistryAccess;
 import net.minecraft.server.command.CommandManager;
 import net.minecraft.server.command.ServerCommandSource;
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
@@ -47,6 +46,6 @@ public class ForgePlatformHelper implements PlatformHelper {
 
     @Override
     public void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<ServerCommandSource>, CommandRegistryAccess, CommandManager.RegistrationEnvironment, LiteralCommandNode<ServerCommandSource>> callback) {
-        MinecraftForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> callback.apply(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
+        RegisterCommandsEvent.BUS.addListener(event -> callback.apply(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
     }
 }

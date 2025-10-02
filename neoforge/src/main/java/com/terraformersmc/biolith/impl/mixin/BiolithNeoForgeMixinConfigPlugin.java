@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.impl.mixin;
 
 import com.google.common.collect.ImmutableMap;
-import net.neoforged.fml.loading.LoadingModList;
+import net.neoforged.fml.loading.FMLLoader;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -15,8 +15,8 @@ public class BiolithNeoForgeMixinConfigPlugin implements IMixinConfigPlugin {
     private static final Supplier<Boolean> TRUE = () -> true;
 
     private static final Map<String, Supplier<Boolean>> CONDITIONS = ImmutableMap.of(
-            "com.terraformersmc.biolith.impl.mixin.MixinMBBiomeSource", () -> LoadingModList.get().getModFileById("moderner_beta") != null,
-            "com.terraformersmc.biolith.impl.mixin.MixinTBTheEndBiomeSource", () -> LoadingModList.get().getModFileById("terrablender") != null
+            "com.terraformersmc.biolith.impl.mixin.MixinMBBiomeSource", () -> FMLLoader.getCurrent().getLoadingModList().getModFileById("moderner_beta") != null,
+            "com.terraformersmc.biolith.impl.mixin.MixinTBTheEndBiomeSource", () -> FMLLoader.getCurrent().getLoadingModList().getModFileById("terrablender") != null
     );
 
     @Override

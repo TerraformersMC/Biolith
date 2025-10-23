@@ -66,7 +66,7 @@ public class TerraBlenderCompatNeoForge implements TerraBlenderCompat {
                     MaterialRules.MaterialRule rule = biolithRules.get(ruleOwner);
                     if (rule != null) {
                         if (namespace.equals("minecraft")) {
-                            Biolith.LOGGER.warn("Unable to modify surface rules of vanilla biomes via TerraBlender; dropping: {}", ruleOwner);
+                            SurfaceRuleManager.addToDefaultSurfaceRulesAtStage(terrablenderRuleCategory, SurfaceRuleManager.RuleStage.BEFORE_BEDROCK, 0, rule);
                             continue;
                         }
                         try {

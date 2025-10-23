@@ -27,7 +27,7 @@ public class BiolithState extends PersistentState {
         return entryCodec.listOf().xmap(LinkedHashSet::new, lhs -> lhs.stream().toList());
     }
 
-    public static Codec<BiolithState> getCodec(PersistentState.Context context) {
+    public static Codec<BiolithState> getCodec(ServerWorld world) {
         return RecordCodecBuilder.create(
                 (instance) -> instance.group(
                                 Codec.unboundedMap(RegistryKey.createCodec(RegistryKeys.BIOME), getLinkedHashSetCodec(RegistryKey.createCodec(RegistryKeys.BIOME))).optionalFieldOf("biome_replacements", Map.of())
@@ -37,32 +37,32 @@ public class BiolithState extends PersistentState {
                         )
                         .apply(instance, (replacements, biomeReplacementsList) -> {
                             if (!replacements.isEmpty()) {
-                                return unmarshall_v1(context, replacements);
+                                return unmarshall_v1(world, replacements);
                             } else if (!biomeReplacementsList.isEmpty()) {
-                                return unmarshall_v0(context, biomeReplacementsList);
+                                return unmarshall_v0(world, biomeReplacementsList);
                             } else {
-                                return new BiolithState(context);
+                                return new BiolithState(world);
                             }
                         }));
     }
 
-    public static PersistentStateType<BiolithState> getPersistentStateType(String name) {
+    public static PersistentStateType<BiolithState> getPersistentStateType(ServerWorld world) {
         return new PersistentStateType<>(
-                Biolith.MOD_ID + "_" + name + "_state",
-                BiolithState::new,
-                BiolithState::getCodec,
+                Biolith.MOD_ID + "_state__" + world.getRegistryKey().getValue().toUnderscoreSeparatedString(),
+                () -> new BiolithState(world),
+                BiolithState.getCodec(world),
                 null
         );
     }
 
-    public BiolithState(PersistentState.Context context) {
-        this.world = context.getWorldOrThrow();
+    public BiolithState(ServerWorld world) {
+        this.world = world;
     }
 
     // Legacy unmarshaller for upgrading from v0 to v1
     // Each map was stored as a flat ordered list with the key in position 0.
-    private static BiolithState unmarshall_v0(PersistentState.Context context, List<LinkedHashSet<RegistryKey<Biome>>> biomeReplacementsList) {
-        BiolithState state = new BiolithState(context);
+    private static BiolithState unmarshall_v0(ServerWorld world, List<LinkedHashSet<RegistryKey<Biome>>> biomeReplacementsList) {
+        BiolithState state = new BiolithState(world);
 
         state.biomeReplacements.clear();
         biomeReplacementsList.forEach(list -> {
@@ -76,8 +76,8 @@ public class BiolithState extends PersistentState {
         return state;
     }
 
-    private static BiolithState unmarshall_v1(PersistentState.Context context, Map<RegistryKey<Biome>, LinkedHashSet<RegistryKey<Biome>>> replacements) {
-        BiolithState state = new BiolithState(context);
+    private static BiolithState unmarshall_v1(ServerWorld world, Map<RegistryKey<Biome>, LinkedHashSet<RegistryKey<Biome>>> replacements) {
+        BiolithState state = new BiolithState(world);
 
         state.biomeReplacements.clear();
         state.biomeReplacements.putAll(replacements);

@@ -59,6 +59,7 @@ public class BiomeCoordinator {
 
         // When TerraBlender is present, it ignores our surface rules.
         // To avoid this, we submit a duplicate registration to TerraBlender (but only once).
+        // TODO: Pretty sure this breaks for datapack surface rules added after first startup...
         if (BiolithCompat.COMPAT_TERRABLENDER && !registeredWithTerrablender) {
             Services.PLATFORM.getTerraBlenderCompat().registerSurfaceRules();
             registeredWithTerrablender = true;
@@ -81,21 +82,21 @@ public class BiomeCoordinator {
         if (dimensionKey.isPresent()) {
             if (DimensionTypes.THE_END.equals(dimensionKey.get())) {
                 if (END_STATE == null) {
-                    END_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType("end"));
+                    END_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType(world));
                     END.serverReplaced(END_STATE, world);
                 } else {
                     Biolith.LOGGER.warn("More than one End dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), END_STATE.getWorldId());
                 }
             } else if (DimensionTypes.THE_NETHER.equals(dimensionKey.get())) {
                 if (NETHER_STATE == null) {
-                    NETHER_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType("nether"));
+                    NETHER_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType(world));
                     NETHER.serverReplaced(NETHER_STATE, world);
                 } else {
                     Biolith.LOGGER.warn("More than one Nether dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), NETHER_STATE.getWorldId());
                 }
             } else if (DimensionTypes.OVERWORLD.equals(dimensionKey.get())) {
                 if (OVERWORLD_STATE == null) {
-                    OVERWORLD_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType("overworld"));
+                    OVERWORLD_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType(world));
                     OVERWORLD.serverReplaced(OVERWORLD_STATE, world);
                 } else {
                     Biolith.LOGGER.warn("More than one Overworld dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), OVERWORLD_STATE.getWorldId());

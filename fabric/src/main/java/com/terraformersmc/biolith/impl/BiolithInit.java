@@ -3,11 +3,10 @@ package com.terraformersmc.biolith.impl;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.data.BiomePlacementLoader;
-import com.terraformersmc.biolith.impl.data.IdentifiableResourceReloaderWrapper;
 import com.terraformersmc.biolith.impl.data.SurfaceGenerationLoader;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.resource.ResourceManagerHelper;
+import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
 import net.minecraft.resource.ResourceType;
 
 public class BiolithInit implements ModInitializer {
@@ -24,8 +23,9 @@ public class BiolithInit implements ModInitializer {
             ServerLifecycleEvents.SERVER_STOPPED.register(BiomeCoordinator::handleServerStopped);
 
             // Implement our resource reloaders The Fabric Way (tm).
-            ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloaderWrapper("biome_placement_loader", new BiomePlacementLoader()));
-            ResourceManagerHelper.get(ResourceType.SERVER_DATA).registerReloadListener(new IdentifiableResourceReloaderWrapper("surface_generation_loader", new SurfaceGenerationLoader()));
+            ResourceLoader serverDataLoader = ResourceLoader.get(ResourceType.SERVER_DATA);
+            serverDataLoader.registerReloader(Biolith.id("biome_placement_loader"), new BiomePlacementLoader());
+            serverDataLoader.registerReloader(Biolith.id("surface_generation_loader"), new SurfaceGenerationLoader());
 
             // Call loader-agnostic init.
             Biolith.init();

@@ -5,6 +5,7 @@
   "compatibilityLevel": "JAVA_17",
   "plugin": "com.terraformersmc.biolith.impl.mixin.BiolithFabricMixinConfigPlugin",
   "mixins": [
+    "MixinFapiTheEndBiomeDataOverrides",
     "MixinFapiTheEndBiomes",
     "MixinMBBiomeSource",
     "MixinSaveLoader",

@@ -6,7 +6,7 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
-import mod.bluestaggo.modernerbeta.world.biome.ModernBetaBiomeSource;
+import mod.bluestaggo.modernerbeta.level.biome.ModernBetaBiomeSource;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.server.command.ServerCommandSource;
 import net.minecraft.server.world.ServerWorld;

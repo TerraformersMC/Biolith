@@ -6,10 +6,10 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
-import mod.bluestaggo.modernerbeta.api.world.biome.BiomeProvider;
-import mod.bluestaggo.modernerbeta.api.world.biome.BiomeResolverBlock;
-import mod.bluestaggo.modernerbeta.api.world.cavebiome.CaveBiomeProvider;
-import mod.bluestaggo.modernerbeta.world.biome.ModernBetaBiomeSource;
+import mod.bluestaggo.modernerbeta.api.level.biome.BiomeProvider;
+import mod.bluestaggo.modernerbeta.api.level.biome.BiomeResolverBlock;
+import mod.bluestaggo.modernerbeta.api.level.cavebiome.CaveBiomeProvider;
+import mod.bluestaggo.modernerbeta.level.biome.ModernBetaBiomeSource;
 import net.minecraft.registry.entry.RegistryEntry;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.biome.source.BiomeSource;
@@ -34,7 +34,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
     @WrapOperation(method = {"getBiome", "getOceanBiome", "getDeepOceanBiome", "getCaveBiome", "getBiomeForSpawn", "getBiomeForHeightGen"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lmod/bluestaggo/modernerbeta/api/world/biome/BiomeProvider;getBiome(III)Lnet/minecraft/registry/entry/RegistryEntry;"
+                    target = "Lmod/bluestaggo/modernerbeta/api/level/biome/BiomeProvider;getBiome(III)Lnet/minecraft/registry/entry/RegistryEntry;"
             )
     )
     @SuppressWarnings("unused")
@@ -47,7 +47,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
     @WrapOperation(method = {"getCaveBiome"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lmod/bluestaggo/modernerbeta/api/world/cavebiome/CaveBiomeProvider;getBiome(III)Lnet/minecraft/registry/entry/RegistryEntry;"
+                    target = "Lmod/bluestaggo/modernerbeta/api/level/cavebiome/CaveBiomeProvider;getBiome(III)Lnet/minecraft/registry/entry/RegistryEntry;"
             )
     )
     @SuppressWarnings("unused")
@@ -65,7 +65,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
     @WrapOperation(method = {"getBiomeForSpawn", "getBiomeForSurfaceGen"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lmod/bluestaggo/modernerbeta/api/world/biome/BiomeResolverBlock;getBiomeBlock(III)Lnet/minecraft/registry/entry/RegistryEntry;"
+                    target = "Lmod/bluestaggo/modernerbeta/api/level/biome/BiomeResolverBlock;getBiomeBlock(III)Lnet/minecraft/registry/entry/RegistryEntry;"
             )
     )
     @SuppressWarnings("unused")

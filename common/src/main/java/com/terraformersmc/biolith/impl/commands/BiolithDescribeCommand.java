@@ -9,60 +9,60 @@ import com.terraformersmc.biolith.impl.biome.*;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import com.terraformersmc.biolith.impl.platform.Services;
-import net.minecraft.command.argument.BlockPosArgumentType;
-import net.minecraft.command.argument.EntityArgumentType;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.MutableText;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.util.dynamic.Range;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeCoords;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import net.minecraft.world.dimension.DimensionTypes;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.coordinates.BlockPosArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import org.jetbrains.annotations.Nullable;
 
 public class BiolithDescribeCommand {
-    protected static int atCaller(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        if (!context.getSource().isExecutedByPlayer()) {
-            context.getSource().sendMessage(Text.translatable("biolith.command.describe.nonPlayer").formatted(Formatting.RED));
+    protected static int atCaller(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        if (!context.getSource().isPlayer()) {
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.nonPlayer").withStyle(ChatFormatting.RED));
 
             return -1;
         }
 
-        return atBlockPos(context, context.getSource().getPlayerOrThrow().getBlockPos());
+        return atBlockPos(context, context.getSource().getPlayerOrException().blockPosition());
     }
 
-    protected static int atEntity(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        return atBlockPos(context, EntityArgumentType.getEntity(context, "entity").getBlockPos());
+    protected static int atEntity(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        return atBlockPos(context, EntityArgument.getEntity(context, "entity").blockPosition());
     }
 
-    protected static int atPosition(CommandContext<ServerCommandSource> context) throws CommandSyntaxException {
-        return atBlockPos(context, BlockPosArgumentType.getValidBlockPos(context, "position"));
+    protected static int atPosition(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+        return atBlockPos(context, BlockPosArgument.getSpawnablePos(context, "position"));
     }
 
-    private static int atBlockPos(CommandContext<ServerCommandSource> context, BlockPos pos) {
-        int biomeX = BiomeCoords.fromBlock(pos.getX());
-        int biomeY = BiomeCoords.fromBlock(pos.getY());
-        int biomeZ = BiomeCoords.fromBlock(pos.getZ());
+    private static int atBlockPos(CommandContext<CommandSourceStack> context, BlockPos pos) {
+        int biomeX = QuartPos.fromBlock(pos.getX());
+        int biomeY = QuartPos.fromBlock(pos.getY());
+        int biomeZ = QuartPos.fromBlock(pos.getZ());
 
-        ServerWorld world = context.getSource().getWorld();
+        ServerLevel world = context.getSource().getLevel();
         if (world == null) {
-            world = context.getSource().getServer().getOverworld();
+            world = context.getSource().getServer().overworld();
         }
-        BiomeSource biomeSource = world.getChunkManager().getChunkGenerator().getBiomeSource();
-        MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries = biomeSource.biolith$getBiomeEntries();
+        BiomeSource biomeSource = world.getChunkSource().getGenerator().getBiomeSource();
+        Climate.ParameterList<Holder<Biome>> biomeEntries = biomeSource.biolith$getBiomeEntries();
         if (biomeEntries == null) {
-            context.getSource().sendMessage(Text.translatable("biolith.command.describe.notOurs").formatted(Formatting.RED));
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.notOurs").withStyle(ChatFormatting.RED));
 
             return -1;
         }
-        MultiNoiseUtil.MultiNoiseSampler noise = world.getChunkManager().getNoiseConfig().getMultiNoiseSampler();
+        Climate.Sampler noise = world.getChunkSource().randomState().sampler();
 
         // Describe Moderner Beta worldgen if it's active.
         if (BiolithCompat.COMPAT_MODERNER_BETA) {
@@ -81,16 +81,16 @@ public class BiolithDescribeCommand {
          * Gather data
          */
 
-        MultiNoiseUtil.NoiseValuePoint noisePoint;
+        Climate.TargetPoint noisePoint;
         double replacementNoise;
         int replacementScale;
 
-        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = null;
-        BiolithFittestNodes<RegistryEntry<Biome>> terrablenderFittestNodes = null;
-        BiolithFittestNodes<RegistryEntry<Biome>> vanillaFittestNodes;
+        BiolithFittestNodes<Holder<Biome>> fittestNodes = null;
+        BiolithFittestNodes<Holder<Biome>> terrablenderFittestNodes = null;
+        BiolithFittestNodes<Holder<Biome>> vanillaFittestNodes;
         DescribeBiomeData describeBiomeData;
 
-        if (world.getDimensionEntry().matchesKey(DimensionTypes.OVERWORLD)) {
+        if (world.dimensionTypeRegistration().is(BuiltinDimensionTypes.OVERWORLD)) {
             noisePoint = noise.sample(biomeX, biomeY, biomeZ);
             vanillaFittestNodes = VanillaCompat.getBiome(noisePoint, biomeEntries);
             if (BiolithCompat.COMPAT_TERRABLENDER) {
@@ -102,7 +102,7 @@ public class BiolithDescribeCommand {
             replacementNoise = BiomeCoordinator.OVERWORLD.getLocalNoise(biomeX, biomeY, biomeZ);
             replacementScale = Biolith.getConfigManager().getGeneralConfig().getOverworldReplacementScale();
             describeBiomeData = BiomeCoordinator.OVERWORLD.getBiomeData(biomeX, biomeY, biomeZ, noisePoint, fittestNodes);
-        } else if (world.getDimensionEntry().matchesKey(DimensionTypes.THE_NETHER)) {
+        } else if (world.dimensionTypeRegistration().is(BuiltinDimensionTypes.NETHER)) {
             noisePoint = noise.sample(biomeX, biomeY, biomeZ);
             vanillaFittestNodes = VanillaCompat.getBiome(noisePoint, biomeEntries);
             if (BiolithCompat.COMPAT_TERRABLENDER) {
@@ -114,15 +114,15 @@ public class BiolithDescribeCommand {
             replacementNoise = BiomeCoordinator.NETHER.getLocalNoise(biomeX, biomeY, biomeZ);
             replacementScale = Biolith.getConfigManager().getGeneralConfig().getNetherReplacementScale();
             describeBiomeData = BiomeCoordinator.NETHER.getBiomeData(biomeX, biomeY, biomeZ, noisePoint, fittestNodes);
-        } else if (world.getDimensionEntry().matchesKey(DimensionTypes.THE_END)) {
-            RegistryEntry<Biome> original = VanillaCompat.getOriginalEndBiome(biomeX, biomeY, biomeZ, noise);
+        } else if (world.dimensionTypeRegistration().is(BuiltinDimensionTypes.END)) {
+            Holder<Biome> original = VanillaCompat.getOriginalEndBiome(biomeX, biomeY, biomeZ, noise);
             noisePoint = BiomeCoordinator.END.sampleEndNoise(biomeX, biomeY, biomeZ, noise, original);
             vanillaFittestNodes = VanillaCompat.getEndBiome(noisePoint, biomeEntries, original);
             if (BiolithCompat.COMPAT_TERRABLENDER) {
                 biomeSource.biolith$setBypass(true);
                 fittestNodes = terrablenderFittestNodes = new BiolithFittestNodes<>(
-                        new MultiNoiseUtil.SearchTree.TreeLeafNode<>(DimensionBiomePlacement.OUT_OF_RANGE,
-                                biomeSource.getBiome(biomeX, biomeY, biomeZ, noise)), 0L);
+                        new Climate.RTree.Leaf<>(DimensionBiomePlacement.OUT_OF_RANGE,
+                                biomeSource.getNoiseBiome(biomeX, biomeY, biomeZ, noise)), 0L);
                 biomeSource.biolith$setBypass(false);
             }
             if (fittestNodes == null) {
@@ -132,13 +132,13 @@ public class BiolithDescribeCommand {
             replacementScale = Biolith.getConfigManager().getGeneralConfig().getEndReplacementScale();
             describeBiomeData = BiomeCoordinator.END.getBiomeData(biomeX, biomeY, biomeZ, noisePoint, fittestNodes);
         } else {
-            context.getSource().sendMessage(Text.translatable("biolith.command.describe.notOurs").formatted(Formatting.RED));
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.notOurs").withStyle(ChatFormatting.RED));
 
             return -1;
         }
 
         // Minecraft does not provide translations for their dimensions.
-        String worldTranslationKey = world.getRegistryKey().getValue().toTranslationKey();
+        String worldTranslationKey = world.dimension().identifier().toLanguageKey();
         //noinspection IfCanBeSwitch
         if (worldTranslationKey.equals("minecraft.overworld")) {
             worldTranslationKey = "biolith.world.minecraft.overworld";
@@ -152,33 +152,33 @@ public class BiolithDescribeCommand {
          * Format output
          */
 
-        context.getSource().sendMessage(Text.literal("§nBiolith ")
-                .append(Text.translatable(worldTranslationKey).formatted(Formatting.UNDERLINE))
-                .append(Text.literal("§n ("))
-                .append(Text.translatable("biolith.command.describe.biome.scale").formatted(Formatting.UNDERLINE))
-                .append(Text.literal("§n: " + replacementScale + ") "))
-                .append(Text.translatable("biolith.command.describe.header").formatted(Formatting.UNDERLINE)));
+        context.getSource().sendSystemMessage(Component.literal("§nBiolith ")
+                .append(Component.translatable(worldTranslationKey).withStyle(ChatFormatting.UNDERLINE))
+                .append(Component.literal("§n ("))
+                .append(Component.translatable("biolith.command.describe.biome.scale").withStyle(ChatFormatting.UNDERLINE))
+                .append(Component.literal("§n: " + replacementScale + ") "))
+                .append(Component.translatable("biolith.command.describe.header").withStyle(ChatFormatting.UNDERLINE)));
 
-        context.getSource().sendMessage(Text.literal(
+        context.getSource().sendSystemMessage(Component.literal(
                 String.format("§2Co§r:%+05.3f  §8De§r:%+05.3f  §cEr§r:%+05.3f  §1Hu§r:%+05.3f",
-                        MultiNoiseUtil.toFloat(noisePoint.continentalnessNoise()),
-                        MultiNoiseUtil.toFloat(noisePoint.depth()),
-                        MultiNoiseUtil.toFloat(noisePoint.erosionNoise()),
-                        MultiNoiseUtil.toFloat(noisePoint.humidityNoise())
+                        Climate.unquantizeCoord(noisePoint.continentalness()),
+                        Climate.unquantizeCoord(noisePoint.depth()),
+                        Climate.unquantizeCoord(noisePoint.erosion()),
+                        Climate.unquantizeCoord(noisePoint.humidity())
                 )));
-        context.getSource().sendMessage(Text.literal(
+        context.getSource().sendSystemMessage(Component.literal(
                 String.format("§7PV§r:%+05.3f  §4Te§r:%+05.3f  §5We§r:%+05.3f  §6BR§r:%+05.3f",
-                        MultiNoiseUtil.toFloat(BiomeParameterTargets.getPeaksValleysNoiseLong(noisePoint.weirdnessNoise())),
-                        MultiNoiseUtil.toFloat(noisePoint.temperatureNoise()),
-                        MultiNoiseUtil.toFloat(noisePoint.weirdnessNoise()),
+                        Climate.unquantizeCoord(BiomeParameterTargets.getPeaksValleysNoiseLong(noisePoint.weirdness())),
+                        Climate.unquantizeCoord(noisePoint.temperature()),
+                        Climate.unquantizeCoord(noisePoint.weirdness()),
                         replacementNoise
                 )));
 
-        context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.vanilla")
+        context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.biome.vanilla")
                 .append(textFromFittestNodes(vanillaFittestNodes)));
 
         if (terrablenderFittestNodes != null) {
-            context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.terrablender")
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.biome.terrablender")
                     .append(textFromFittestNodes(terrablenderFittestNodes)));
         }
 
@@ -188,38 +188,38 @@ public class BiolithDescribeCommand {
         }
 
         if (describeBiomeData.replacementBiome != null) {
-            context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.replacement")
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.biome.replacement")
                     .append(textFromBiome(describeBiomeData.replacementBiome))
-                    .append(Text.literal("\n    "))
+                    .append(Component.literal("\n    "))
                     .append(describeBiomeData.lowerBiome == null ?
-                            Text.translatable("biolith.command.describe.biome.none") :
+                            Component.translatable("biolith.command.describe.biome.none") :
                             textFromBiome(describeBiomeData.lowerBiome))
-                    .append(Text.literal(" < "))
+                    .append(Component.literal(" < "))
                     .append(textFromBiome(describeBiomeData.replacementBiome))
-                    .append(Text.literal(" < "))
+                    .append(Component.literal(" < "))
                     .append(describeBiomeData.higherBiome == null ?
-                            Text.translatable("biolith.command.describe.biome.none") :
+                            Component.translatable("biolith.command.describe.biome.none") :
                             textFromBiome(describeBiomeData.higherBiome))
-                    .append(Text.literal(String.format("\n    %+05.3f < %+05.3f < %+05.3f ",
+                    .append(Component.literal(String.format("\n    %+05.3f < %+05.3f < %+05.3f ",
                             describeBiomeData.replacementRange.minInclusive(),
                             replacementNoise,
                             describeBiomeData.replacementRange.maxInclusive()))));
         }
 
         if (describeBiomeData.subBiome != null) {
-            context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.sub")
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.biome.sub")
                     .append(textFromBiome(describeBiomeData.subBiome)));
         }
 
         return 1;
     }
 
-    public static MutableText textFromFittestNodes(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
-        MutableText text = textFromBiome(fittestNodes.ultimate());
+    public static MutableComponent textFromFittestNodes(BiolithFittestNodes<Holder<Biome>> fittestNodes) {
+        MutableComponent text = textFromBiome(fittestNodes.ultimate());
 
         if (fittestNodes.penultimate() != null) {
-            text = text.append(Text.literal("\n    "))
-                    .append(Text.translatable("biolith.command.describe.biome.nearest"))
+            text = text.append(Component.literal("\n    "))
+                    .append(Component.translatable("biolith.command.describe.biome.nearest"))
                     .append(textFromBiome(fittestNodes.penultimate()))
                     .append(" (+" + (fittestNodes.penultimateDistance() - fittestNodes.ultimateDistance()) + ")");
         }
@@ -227,24 +227,24 @@ public class BiolithDescribeCommand {
         return text;
     }
 
-    public static MutableText textFromBiome(MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> leafNode) {
-        return textFromBiome(leafNode.value.getKey().orElseThrow());
+    public static MutableComponent textFromBiome(Climate.RTree.Leaf<Holder<Biome>> leafNode) {
+        return textFromBiome(leafNode.value.unwrapKey().orElseThrow());
     }
 
-    public static MutableText textFromBiome(RegistryEntry<Biome> biome) {
-        return textFromBiome(biome.getKey().orElseThrow());
+    public static MutableComponent textFromBiome(Holder<Biome> biome) {
+        return textFromBiome(biome.unwrapKey().orElseThrow());
     }
 
-    public static MutableText textFromBiome(RegistryKey<Biome> biome) {
-        return Text.translatable(biome.getValue().toTranslationKey("biome"));
+    public static MutableComponent textFromBiome(ResourceKey<Biome> biome) {
+        return Component.translatable(biome.identifier().toLanguageKey("biome"));
     }
 
     // Ferries back data from DimensionalBiomePlacement.getBiomeData().
     public record DescribeBiomeData(
-            @Nullable Range<Float> replacementRange,
-            @Nullable RegistryKey<Biome> replacementBiome,
-            @Nullable RegistryKey<Biome> lowerBiome,
-            @Nullable RegistryKey<Biome> higherBiome,
-            @Nullable RegistryKey<Biome> subBiome
+            @Nullable InclusiveRange<Float> replacementRange,
+            @Nullable ResourceKey<Biome> replacementBiome,
+            @Nullable ResourceKey<Biome> lowerBiome,
+            @Nullable ResourceKey<Biome> higherBiome,
+            @Nullable ResourceKey<Biome> subBiome
     ) {}
 }

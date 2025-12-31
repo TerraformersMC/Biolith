@@ -6,15 +6,15 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.api.biome.sub.Criterion;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.world.biome.Biome;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Function;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.biome.Biome;
 
 public abstract class AbstractBiomeCriterion implements Criterion {
     protected final BiomeTarget biomeTarget;
@@ -36,10 +36,10 @@ public abstract class AbstractBiomeCriterion implements Criterion {
         return biomeTarget;
     }
 
-    public record BiomeTarget(@Nullable RegistryKey<Biome> biome, @Nullable TagKey<Biome> tag) {
+    public record BiomeTarget(@Nullable ResourceKey<Biome> biome, @Nullable TagKey<Biome> tag) {
         public static final Codec<BiomeTarget> CODEC = Codec.either(
-                        RegistryKey.createCodec(RegistryKeys.BIOME),
-                        TagKey.codec(RegistryKeys.BIOME)
+                        ResourceKey.codec(Registries.BIOME),
+                        TagKey.hashedCodec(Registries.BIOME)
                 )
                 .flatComapMap(BiomeTarget::fromEither, BiomeTarget::toEither);
 
@@ -49,7 +49,7 @@ public abstract class AbstractBiomeCriterion implements Criterion {
             }
         }
 
-        public static BiomeTarget of(@NotNull RegistryKey<Biome> biome) {
+        public static BiomeTarget of(@NotNull ResourceKey<Biome> biome) {
             return new BiomeTarget(biome, null);
         }
 
@@ -57,27 +57,27 @@ public abstract class AbstractBiomeCriterion implements Criterion {
             return new BiomeTarget(null, tag);
         }
 
-        public static BiomeTarget fromEither(Either<RegistryKey<Biome>, TagKey<Biome>> either) {
+        public static BiomeTarget fromEither(Either<ResourceKey<Biome>, TagKey<Biome>> either) {
             return new BiomeTarget(either.left().orElse(null), either.right().orElse(null));
         }
 
-        public DataResult<Either<RegistryKey<Biome>, TagKey<Biome>>> toEither() {
+        public DataResult<Either<ResourceKey<Biome>, TagKey<Biome>>> toEither() {
             return DataResult.success(this.biome != null ?
                     Either.left(this.biome) :
                     Either.right(this.tag)
             );
         }
 
-        public boolean matches(@Nullable RegistryEntry<Biome> biome) {
+        public boolean matches(@Nullable Holder<Biome> biome) {
             if (biome == null) {
                 return false;
             }
 
-            if (this.biome != null && biome.matchesKey(this.biome)) {
+            if (this.biome != null && biome.is(this.biome)) {
                 return true;
             }
 
-            return (this.tag != null && biome.isIn(this.tag));
+            return (this.tag != null && biome.is(this.tag));
         }
     }
 }

@@ -6,13 +6,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.dynamic.Range;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import org.jetbrains.annotations.Nullable;
 
 public class AlternateCriterion extends AbstractBiomeCriterion {
@@ -20,20 +20,20 @@ public class AlternateCriterion extends AbstractBiomeCriterion {
             (instance) -> instance.group(
                             BiomeTarget.CODEC.fieldOf("biome")
                                     .forGetter(AbstractBiomeCriterion::biomeTarget),
-                            RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("alternate")
+                            ResourceKey.codec(Registries.BIOME).fieldOf("alternate")
                                     .forGetter(AlternateCriterion::alternate)
                     )
                     .apply(instance, AlternateCriterion::new));
 
-    private final RegistryKey<Biome> alternate;
-    private RegistryEntry<Biome> alternateEntry;
+    private final ResourceKey<Biome> alternate;
+    private Holder<Biome> alternateEntry;
 
-    public AlternateCriterion(BiomeTarget biomeTarget, RegistryKey<Biome> alternate) {
+    public AlternateCriterion(BiomeTarget biomeTarget, ResourceKey<Biome> alternate) {
         super(biomeTarget);
         this.alternate = alternate;
     }
 
-    public RegistryKey<Biome> alternate() {
+    public ResourceKey<Biome> alternate() {
         return alternate;
     }
 
@@ -48,8 +48,8 @@ public class AlternateCriterion extends AbstractBiomeCriterion {
     }
 
     @Override
-    public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> replacementRange, float replacementNoise) {
-        Pair<RegistryKey<Biome>, RegistryEntry<Biome>> replacement = biomePlacement.getReplacementPair(alternate, replacementNoise);
+    public boolean matches(BiolithFittestNodes<Holder<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, Climate.TargetPoint noisePoint, @Nullable InclusiveRange<Float> replacementRange, float replacementNoise) {
+        Pair<ResourceKey<Biome>, Holder<Biome>> replacement = biomePlacement.getReplacementPair(alternate, replacementNoise);
 
         if (replacement == null || replacement.getFirst().equals(DimensionBiomePlacement.VANILLA_PLACEHOLDER)) {
             return biomeTarget.matches(alternateEntry);
@@ -59,7 +59,7 @@ public class AlternateCriterion extends AbstractBiomeCriterion {
     }
 
     @Override
-    public void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
+    public void complete(HolderGetter<Biome> biomeEntryGetter) {
         alternateEntry = biomeEntryGetter.getOrThrow(alternate);
     }
 

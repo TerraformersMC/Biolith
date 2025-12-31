@@ -6,9 +6,9 @@ import com.terraformersmc.biolith.impl.platform.Services;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static net.minecraft.command.argument.BlockPosArgumentType.blockPos;
-import static net.minecraft.command.argument.EntityArgumentType.entity;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos;
+import static net.minecraft.commands.arguments.EntityArgument.entity;
+import static net.minecraft.commands.Commands.*;
 
 public class BiolithCommands {
     protected static List<String> COMMANDS = List.of("help", "describe");

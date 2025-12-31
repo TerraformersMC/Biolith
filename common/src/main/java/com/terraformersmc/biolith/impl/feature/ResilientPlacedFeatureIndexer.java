@@ -3,22 +3,22 @@ package com.terraformersmc.biolith.impl.feature;
 import com.google.common.collect.ImmutableList;
 import com.google.common.graph.*;
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.world.gen.feature.PlacedFeature;
-import net.minecraft.world.gen.feature.util.PlacedFeatureIndexer;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.level.biome.FeatureSorter;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 @SuppressWarnings("UnstableApiUsage")
 public class ResilientPlacedFeatureIndexer {
-    private static final IndexedFeature ROOT_FEATURE = new IndexedFeature(RegistryEntry.of(new PlacedFeature(null, null)), -1);
+    private static final IndexedFeature ROOT_FEATURE = new IndexedFeature(Holder.direct(new PlacedFeature(null, null)), -1);
 
-    public static <T> List<PlacedFeatureIndexer.IndexedFeatures> collectIndexedFeatures(List<T> biomes, Function<T, List<RegistryEntryList<PlacedFeature>>> biomesToPlacedFeaturesList) {
+    public static <T> List<FeatureSorter.StepFeatureData> collectIndexedFeatures(List<T> biomes, Function<T, List<HolderSet<PlacedFeature>>> biomesToPlacedFeaturesList) {
         int featureSteps = 0;
 
         MutableGraph<IndexedFeature> graph = GraphBuilder
@@ -32,12 +32,12 @@ public class ResilientPlacedFeatureIndexer {
         // Generate DAG including all non-cycle-forming edges representing ordering relationships.
         graph.addNode(ROOT_FEATURE);
         for (T biome : biomes) {
-            List<RegistryEntryList<PlacedFeature>> featureEntryLists = biomesToPlacedFeaturesList.apply(biome);
+            List<HolderSet<PlacedFeature>> featureEntryLists = biomesToPlacedFeaturesList.apply(biome);
             featureSteps = Math.max(featureSteps, featureEntryLists.size());
             IndexedFeature previous = ROOT_FEATURE;
 
             for (int step = 0; step < featureEntryLists.size(); ++step) {
-                for (RegistryEntry<PlacedFeature> featureEntry : featureEntryLists.get(step)) {
+                for (Holder<PlacedFeature> featureEntry : featureEntryLists.get(step)) {
                     IndexedFeature current = new IndexedFeature(featureEntry, step);
 
                     if (graph.nodes().contains(current) && Graphs.reachableNodes(graph, current).contains(previous)) {
@@ -72,17 +72,17 @@ public class ResilientPlacedFeatureIndexer {
 
         // Depth first post-order generates a reversed list.
         // Ignore the compiler warning about access; it's wrong about that and I can't find the suppression.
-        ImmutableList.Builder<PlacedFeatureIndexer.IndexedFeatures> builder = ImmutableList.builder();
+        ImmutableList.Builder<FeatureSorter.StepFeatureData> builder = ImmutableList.builder();
         for (int step = 0; step < featureSteps; ++step) {
             Collections.reverse(stepwiseLists[step]);
-            builder.add(new PlacedFeatureIndexer.IndexedFeatures(stepwiseLists[step]));
+            builder.add(new FeatureSorter.StepFeatureData(stepwiseLists[step]));
         }
 
         return builder.build();
     }
 
     // Data record for indexing features; provides convenience methods.
-    record IndexedFeature(RegistryEntry<PlacedFeature> featureEntry, int step) {
+    record IndexedFeature(Holder<PlacedFeature> featureEntry, int step) {
         @Override
         public boolean equals(Object o) {
             //noinspection DeconstructionCanBeUsed
@@ -98,14 +98,14 @@ public class ResilientPlacedFeatureIndexer {
 
         @Override
         public @NotNull String toString() {
-            return featureEntry.getIdAsString();
+            return featureEntry.getRegisteredName();
         }
     }
 
     // Deal with annoying templating in these classes.
     private static <T> String getEntryString(T thing) {
-        if (thing instanceof RegistryEntry<?> entry) {
-            return entry.getIdAsString();
+        if (thing instanceof Holder<?> entry) {
+            return entry.getRegisteredName();
         } else {
             return thing.toString();
         }

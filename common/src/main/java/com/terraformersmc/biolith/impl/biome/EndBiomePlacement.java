@@ -4,28 +4,28 @@ import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.noise.OpenSimplexNoise2;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.biome.source.BiomeCoords;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Consumer;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.QuartPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.levelgen.DensityFunction;
 
 public class EndBiomePlacement extends DimensionBiomePlacement {
     private final double[] scale = new double[4];
 
-    public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeTheEnd;
-    public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeSmallEndIslands;
-    public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeEndBarrens;
-    public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeEndMidlands;
-    public MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> nodeEndHighlands;
+    public Climate.RTree.Leaf<Holder<Biome>> nodeTheEnd;
+    public Climate.RTree.Leaf<Holder<Biome>> nodeSmallEndIslands;
+    public Climate.RTree.Leaf<Holder<Biome>> nodeEndBarrens;
+    public Climate.RTree.Leaf<Holder<Biome>> nodeEndMidlands;
+    public Climate.RTree.Leaf<Holder<Biome>> nodeEndHighlands;
 
     private OpenSimplexNoise2 humidityNoise;
     private OpenSimplexNoise2 temperatureNoise;
@@ -42,16 +42,16 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     }
 
     @Override
-    protected void serverReplaced(@NotNull BiolithState state, ServerWorld world) {
+    protected void serverReplaced(@NotNull BiolithState state, ServerLevel world) {
         super.serverReplaced(state, world);
 
         // Update vanilla biome entries for the End
-        RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
-        nodeTheEnd          = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(OUT_OF_RANGE,                                      biomeEntryGetter.getOrThrow(BiomeKeys.THE_END));
-        nodeSmallEndIslands = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(VanillaEndBiomeParameters.NOISE_SMALL_END_ISLANDS, biomeEntryGetter.getOrThrow(BiomeKeys.SMALL_END_ISLANDS));
-        nodeEndBarrens      = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(VanillaEndBiomeParameters.NOISE_END_BARRENS,       biomeEntryGetter.getOrThrow(BiomeKeys.END_BARRENS));
-        nodeEndMidlands     = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(VanillaEndBiomeParameters.NOISE_END_MIDLANDS,      biomeEntryGetter.getOrThrow(BiomeKeys.END_MIDLANDS));
-        nodeEndHighlands    = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(VanillaEndBiomeParameters.NOISE_END_HIGHLANDS,     biomeEntryGetter.getOrThrow(BiomeKeys.END_HIGHLANDS));
+        HolderGetter<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
+        nodeTheEnd          = new Climate.RTree.Leaf<>(OUT_OF_RANGE,                                      biomeEntryGetter.getOrThrow(Biomes.THE_END));
+        nodeSmallEndIslands = new Climate.RTree.Leaf<>(VanillaEndBiomeParameters.NOISE_SMALL_END_ISLANDS, biomeEntryGetter.getOrThrow(Biomes.SMALL_END_ISLANDS));
+        nodeEndBarrens      = new Climate.RTree.Leaf<>(VanillaEndBiomeParameters.NOISE_END_BARRENS,       biomeEntryGetter.getOrThrow(Biomes.END_BARRENS));
+        nodeEndMidlands     = new Climate.RTree.Leaf<>(VanillaEndBiomeParameters.NOISE_END_MIDLANDS,      biomeEntryGetter.getOrThrow(Biomes.END_MIDLANDS));
+        nodeEndHighlands    = new Climate.RTree.Leaf<>(VanillaEndBiomeParameters.NOISE_END_HIGHLANDS,     biomeEntryGetter.getOrThrow(Biomes.END_HIGHLANDS));
 
         // Seed the End simplex noises based on the game seed
         humidityNoise    = new OpenSimplexNoise2(seedlets[7]);
@@ -88,7 +88,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
 
     // TODO: Should use DimensionBiomePlacement method instead,
     //       but availability of biomeEntryGetter must be thoroughly validated first.
-    public void writeBiomeParameters(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>>> parameters) {
+    public void writeBiomeParameters(Consumer<Pair<Climate.ParameterPoint, ResourceKey<Biome>>> parameters) {
         biomesInjected = true;
 
         // End biomes are merged during construction of the End Biome stream.
@@ -114,20 +114,20 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     }
 
     // TODO: This should be replaced with a more robust noise implementation, perhaps also more similar to vanilla.
-    public MultiNoiseUtil.NoiseValuePoint sampleEndNoise(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler originalNoise, RegistryEntry<Biome> originalBiome) {
-        double erosion = originalNoise.erosion().sample(new DensityFunction.UnblendedNoisePos(
-                BiomeCoords.toBlock(x),
-                BiomeCoords.toBlock(y),
-                BiomeCoords.toBlock(z)
+    public Climate.TargetPoint sampleEndNoise(int x, int y, int z, Climate.Sampler originalNoise, Holder<Biome> originalBiome) {
+        double erosion = originalNoise.erosion().compute(new DensityFunction.SinglePointContext(
+                QuartPos.toBlock(x),
+                QuartPos.toBlock(y),
+                QuartPos.toBlock(z)
         ));
 
-        return new MultiNoiseUtil.NoiseValuePoint(
-                MultiNoiseUtil.toLong(temperatureNoise.sample(x / 576d, z / 576d)),
-                MultiNoiseUtil.toLong(humidityNoise.sample(x / 448d, z / 448d)),
-                originalBiome.matchesKey(BiomeKeys.THE_END) ? 0L : MultiNoiseUtil.toLong(MathHelper.clamp((float) erosion + 0.0625f, -1f, 1f)),
-                MultiNoiseUtil.toLong((float) erosion),
+        return new Climate.TargetPoint(
+                Climate.quantizeCoord(temperatureNoise.sample(x / 576d, z / 576d)),
+                Climate.quantizeCoord(humidityNoise.sample(x / 448d, z / 448d)),
+                originalBiome.is(Biomes.THE_END) ? 0L : Climate.quantizeCoord(Mth.clamp((float) erosion + 0.0625f, -1f, 1f)),
+                Climate.quantizeCoord((float) erosion),
                 156L * (56 - y),
-                MultiNoiseUtil.toLong(weirdnessNoise.sample(x / 192d, z / 192d))
+                Climate.quantizeCoord(weirdnessNoise.sample(x / 192d, z / 192d))
         );
     }
 }

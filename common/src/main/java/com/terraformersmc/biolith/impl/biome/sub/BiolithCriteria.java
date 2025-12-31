@@ -5,7 +5,7 @@ import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.sub.CriterionTypes;
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.util.Identifier;
+import net.minecraft.resources.Identifier;
 
 public final class BiolithCriteria {
     static final CriterionType<NotCriterion> NOT = register(NotCriterion.CODEC, "not");
@@ -19,7 +19,7 @@ public final class BiolithCriteria {
     static final CriterionType<AlternateCriterion> ALTERNATE = register(AlternateCriterion.CODEC, "alternate");
 
     private static <T extends Criterion> CriterionType<T> register(MapCodec<T> codec, String name) {
-        return CriterionTypes.add(CriterionType.createType(codec, Identifier.of(Biolith.MOD_ID, name)));
+        return CriterionTypes.add(CriterionType.createType(codec, Identifier.fromNamespaceAndPath(Biolith.MOD_ID, name)));
     }
 
     public static void init() {}

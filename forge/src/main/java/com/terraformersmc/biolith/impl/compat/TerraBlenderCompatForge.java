@@ -3,24 +3,24 @@ package com.terraformersmc.biolith.impl.compat;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
 import org.jetbrains.annotations.Nullable;
 import terrablender.api.Region;
 import terrablender.api.SurfaceRuleManager;
 import terrablender.worldgen.IExtendedParameterList;
 
 import java.util.Map;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public class TerraBlenderCompatForge implements TerraBlenderCompat {
     @Override
     @SuppressWarnings("unchecked")
     // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
-    public @Nullable BiolithFittestNodes<RegistryEntry<Biome>> getBiome(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries) {
-        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes;
+    public @Nullable BiolithFittestNodes<Holder<Biome>> getBiome(int x, int y, int z, Climate.TargetPoint noisePoint, Climate.ParameterList<Holder<Biome>> biomeEntries) {
+        BiolithFittestNodes<Holder<Biome>> fittestNodes;
 
         // We have to hide this cast from the mixin; otherwise without TerraBlender it will crash during transformation...
         if (!(biomeEntries instanceof IExtendedParameterList<?> entries)) {
@@ -34,7 +34,7 @@ public class TerraBlenderCompatForge implements TerraBlenderCompat {
         }
 
         // Get TerraBlender's Region-specific search tree for the (x,z) coordinates.
-        MultiNoiseUtil.SearchTree<RegistryEntry<Biome>> searchTree = entries.getTree(entries.getUniqueness(x, y, z));
+        Climate.RTree<Holder<Biome>> searchTree = entries.getTree(entries.getUniqueness(x, y, z));
 
         // Fall back to Vanilla if TerraBlender has no SearchTree.
         if (searchTree == null) {
@@ -42,12 +42,12 @@ public class TerraBlenderCompatForge implements TerraBlenderCompat {
         }
 
         // Apply our RTree search implementation to TerraBlender's search tree.
-        fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+        fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
 
         // TerraBlender requires a second search if the first returned their placeholder biome.
-        if (fittestNodes.ultimate().value.matchesKey(Region.DEFERRED_PLACEHOLDER)) {
+        if (fittestNodes.ultimate().value.is(Region.DEFERRED_PLACEHOLDER)) {
             searchTree = entries.getTree(0);
-            fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+            fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
         }
 
         return fittestNodes;
@@ -63,7 +63,7 @@ public class TerraBlenderCompatForge implements TerraBlenderCompat {
             if (biolithRules.getRuleCount() > 0) {
                 for (Identifier ruleOwner : biolithRules.getRuleOwners()) {
                     String namespace = ruleOwner.getNamespace();
-                    MaterialRules.MaterialRule rule = biolithRules.get(ruleOwner);
+                    SurfaceRules.RuleSource rule = biolithRules.get(ruleOwner);
                     if (rule != null) {
                         if (namespace.equals("minecraft")) {
                             SurfaceRuleManager.addToDefaultSurfaceRulesAtStage(terrablenderRuleCategory, SurfaceRuleManager.RuleStage.BEFORE_BEDROCK, 0, rule);

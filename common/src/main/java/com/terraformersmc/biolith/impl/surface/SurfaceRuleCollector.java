@@ -2,21 +2,21 @@ package com.terraformersmc.biolith.impl.surface;
 
 import com.google.common.collect.Sets;
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public class SurfaceRuleCollector {
     public static final SurfaceRuleCollector END = new SurfaceRuleCollector();
     public static final SurfaceRuleCollector NETHER = new SurfaceRuleCollector();
     public static final SurfaceRuleCollector OVERWORLD = new SurfaceRuleCollector();
 
-    private final HashMap<Identifier, List<MaterialRules.MaterialRule>> MATERIAL_RULES_DATA = new HashMap<>(16);
-    private final HashMap<Identifier, List<MaterialRules.MaterialRule>> MATERIAL_RULES_MODS = new HashMap<>(16);
+    private final HashMap<Identifier, List<SurfaceRules.RuleSource>> MATERIAL_RULES_DATA = new HashMap<>(16);
+    private final HashMap<Identifier, List<SurfaceRules.RuleSource>> MATERIAL_RULES_MODS = new HashMap<>(16);
 
-    public void addFromData(Identifier ruleOwner, MaterialRules.MaterialRule... materialRules) {
+    public void addFromData(Identifier ruleOwner, SurfaceRules.RuleSource... materialRules) {
         if (materialRules.length > 0) {
             MATERIAL_RULES_DATA.computeIfAbsent(ruleOwner, ignored -> new ArrayList<>(4))
                     .addAll(Arrays.stream(materialRules).toList());
@@ -25,7 +25,7 @@ public class SurfaceRuleCollector {
         }
     }
 
-    public void addFromMods(Identifier ruleOwner, MaterialRules.MaterialRule... materialRules) {
+    public void addFromMods(Identifier ruleOwner, SurfaceRules.RuleSource... materialRules) {
         if (materialRules.length > 0) {
             MATERIAL_RULES_MODS.computeIfAbsent(ruleOwner, ignored -> new ArrayList<>(4))
                     .addAll(Arrays.stream(materialRules).toList());
@@ -42,18 +42,18 @@ public class SurfaceRuleCollector {
         MATERIAL_RULES_MODS.clear();
     }
 
-    public @Nullable MaterialRules.MaterialRule get(Identifier ruleOwner) {
+    public @Nullable SurfaceRules.RuleSource get(Identifier ruleOwner) {
         if (MATERIAL_RULES_DATA.containsKey(ruleOwner)) {
             if (MATERIAL_RULES_DATA.get(ruleOwner).size() > 1) {
-                MaterialRules.MaterialRule[] rules = new MaterialRules.MaterialRule[0];
-                return MaterialRules.sequence(MATERIAL_RULES_DATA.get(ruleOwner).toArray(rules));
+                SurfaceRules.RuleSource[] rules = new SurfaceRules.RuleSource[0];
+                return SurfaceRules.sequence(MATERIAL_RULES_DATA.get(ruleOwner).toArray(rules));
             } else {
                 return MATERIAL_RULES_DATA.get(ruleOwner).get(0);
             }
         } else if (MATERIAL_RULES_MODS.containsKey(ruleOwner)) {
             if (MATERIAL_RULES_MODS.get(ruleOwner).size() > 1) {
-                MaterialRules.MaterialRule[] rules = new MaterialRules.MaterialRule[0];
-                return MaterialRules.sequence(MATERIAL_RULES_MODS.get(ruleOwner).toArray(rules));
+                SurfaceRules.RuleSource[] rules = new SurfaceRules.RuleSource[0];
+                return SurfaceRules.sequence(MATERIAL_RULES_MODS.get(ruleOwner).toArray(rules));
             } else {
                 return MATERIAL_RULES_MODS.get(ruleOwner).get(0);
             }
@@ -62,26 +62,26 @@ public class SurfaceRuleCollector {
         return null;
     }
 
-    private MaterialRules.MaterialRule getFromData(Identifier ruleOwner) {
+    private SurfaceRules.RuleSource getFromData(Identifier ruleOwner) {
         if (MATERIAL_RULES_DATA.get(ruleOwner).size() > 1) {
-            MaterialRules.MaterialRule[] rules = new MaterialRules.MaterialRule[0];
-            return MaterialRules.sequence(MATERIAL_RULES_DATA.get(ruleOwner).toArray(rules));
+            SurfaceRules.RuleSource[] rules = new SurfaceRules.RuleSource[0];
+            return SurfaceRules.sequence(MATERIAL_RULES_DATA.get(ruleOwner).toArray(rules));
         }
 
         return MATERIAL_RULES_DATA.get(ruleOwner).get(0);
     }
 
-    private MaterialRules.MaterialRule getFromMods(Identifier ruleOwner) {
+    private SurfaceRules.RuleSource getFromMods(Identifier ruleOwner) {
         if (MATERIAL_RULES_MODS.get(ruleOwner).size() > 1) {
-            MaterialRules.MaterialRule[] rules = new MaterialRules.MaterialRule[0];
-            return MaterialRules.sequence(MATERIAL_RULES_MODS.get(ruleOwner).toArray(rules));
+            SurfaceRules.RuleSource[] rules = new SurfaceRules.RuleSource[0];
+            return SurfaceRules.sequence(MATERIAL_RULES_MODS.get(ruleOwner).toArray(rules));
         }
 
         return MATERIAL_RULES_MODS.get(ruleOwner).get(0);
     }
 
-    public MaterialRules.MaterialRule[] getAll() {
-        MaterialRules.MaterialRule[] rulesType = new MaterialRules.MaterialRule[0];
+    public SurfaceRules.RuleSource[] getAll() {
+        SurfaceRules.RuleSource[] rulesType = new SurfaceRules.RuleSource[0];
         return getRuleOwners().stream()
                 .map((key) -> MATERIAL_RULES_DATA.containsKey(key) ? getFromData(key) : getFromMods(key))
                 .toList().toArray(rulesType);

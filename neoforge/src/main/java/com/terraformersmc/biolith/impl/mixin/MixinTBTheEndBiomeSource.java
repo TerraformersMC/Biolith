@@ -3,11 +3,11 @@ package com.terraformersmc.biolith.impl.mixin;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.biome.source.TheEndBiomeSource;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -38,8 +38,8 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
         bypass.set(value);
     }
 
-    @Inject(method = "getBiome", at = @At("HEAD"), cancellable = true)
-    private void biolith$getBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise, CallbackInfoReturnable<RegistryEntry<Biome>> cir) {
+    @Inject(method = "getNoiseBiome", at = @At("HEAD"), cancellable = true)
+    private void biolith$getBiome(int x, int y, int z, Climate.Sampler noise, CallbackInfoReturnable<Holder<Biome>> cir) {
         // Allows us to call unmodified (by us) getBiome() to get TerraBlender values.
         if (bypass.get()) {
             return;
@@ -47,14 +47,14 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
 
         // Fetch whatever TerraBlender thinks the biome should be, which we will call the original biome.
         bypass.set(true);
-        RegistryEntry<Biome> original = this.getBiome(x, y, z, noise);
+        Holder<Biome> original = this.getNoiseBiome(x, y, z, noise);
         bypass.set(false);
 
         // Fake up a noise point for sub biome placement.
-        MultiNoiseUtil.NoiseValuePoint noisePoint = BiomeCoordinator.END.sampleEndNoise(x, y, z, noise, original);
+        Climate.TargetPoint noisePoint = BiomeCoordinator.END.sampleEndNoise(x, y, z, noise, original);
 
         // Select noise biome
-        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, this.biolith$getBiomeEntries(), original);
+        BiolithFittestNodes<Holder<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, this.biolith$getBiomeEntries(), original);
 
         // Process any replacements or sub-biomes.
         cir.setReturnValue(BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes));
@@ -64,8 +64,8 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
      * Under normal conditions, TerraBlender will have already canceled, but if bclib is present, it may not.
      * This ensures our main getBiome() mixin will not be called when bypass is true.
      */
-    @Inject(method = "getBiome", at = @At("RETURN"), cancellable = true)
-    private void biolith$cancelGetBiome(int x, int y, int z, MultiNoiseUtil.MultiNoiseSampler noise, CallbackInfoReturnable<RegistryEntry<Biome>> cir) {
+    @Inject(method = "getNoiseBiome", at = @At("RETURN"), cancellable = true)
+    private void biolith$cancelGetBiome(int x, int y, int z, Climate.Sampler noise, CallbackInfoReturnable<Holder<Biome>> cir) {
         // Allows us to call unmodified (by us) getBiome() to get TerraBlender values.
         if (bypass.get()) {
             cir.setReturnValue(cir.getReturnValue());

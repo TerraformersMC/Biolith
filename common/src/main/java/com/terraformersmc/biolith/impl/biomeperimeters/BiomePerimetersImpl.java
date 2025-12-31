@@ -8,13 +8,17 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import it.unimi.dsi.fastutil.ints.*;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.math.*;
-import net.minecraft.world.ChunkRegion;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeAccess;
-import net.minecraft.world.biome.source.BiomeCoords;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction8;
+import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
+import net.minecraft.core.Vec3i;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.WorldGenRegion;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.ChunkPos;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -112,7 +116,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 	 * @param pos         BlockPos - The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
 	 * @return int - The perimeter distance value resolved for the target voxel.
 	 */
-	public int getPerimeterDistance(BiomeAccess biomeAccess, BlockPos pos) {
+	public int getPerimeterDistance(BiomeManager biomeAccess, BlockPos pos) {
 		float minimum = cardinalHorizon + 1;
 		BlockPos iterPos;
 		int horizon;
@@ -122,19 +126,19 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		final var threadLocalCache = threadLocalCaches.get();
 
 		// Work around Mojang making it illegal to access nascent chunks for biome lookup.
-		Function<BlockPos, RegistryEntry<Biome>> getBiomeFunction = biomeAccess::getBiome;
-		if (biomeAccess.storage instanceof ChunkRegion chunkRegion) {
-			ServerWorld world = chunkRegion.world;
-			getBiomeFunction = (blockPos) -> world.getGeneratorStoredBiome(
-					BiomeCoords.fromBlock(blockPos.getX()),
-					BiomeCoords.fromBlock(blockPos.getY()),
-					BiomeCoords.fromBlock(blockPos.getZ())
+		Function<BlockPos, Holder<Biome>> getBiomeFunction = biomeAccess::getBiome;
+		if (biomeAccess.noiseBiomeSource instanceof WorldGenRegion chunkRegion) {
+			ServerLevel world = chunkRegion.level;
+			getBiomeFunction = (blockPos) -> world.getUncachedNoiseBiome(
+					QuartPos.fromBlock(blockPos.getX()),
+					QuartPos.fromBlock(blockPos.getY()),
+					QuartPos.fromBlock(blockPos.getZ())
 			);
 		}
 
 		// If we are on the perimeter, avoid some difficult "edge" cases (har har) by short-circuiting.
-		for (EightWayDirection direction : EightWayDirection.values()) {
-			if (!checkBiome(getBiomeFunction, pos.add(direction.getOffsetX(), 0, direction.getOffsetZ()), threadLocalCache)) {
+		for (Direction8 direction : Direction8.values()) {
+			if (!checkBiome(getBiomeFunction, pos.offset(direction.getStepX(), 0, direction.getStepZ()), threadLocalCache)) {
 				return 0;
 			}
 		}
@@ -152,15 +156,15 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		}
 
 		// Try to find our closest perimeter point.
-		for (EightWayDirection direction : EightWayDirection.values()) {
+		for (Direction8 direction : Direction8.values()) {
 			horizon = (direction.ordinal() % 2 == 0) ? cardinalHorizon : ordinalHorizon;
-			dx = direction.getOffsetX();
-			dz = direction.getOffsetZ();
+			dx = direction.getStepX();
+			dz = direction.getStepZ();
 
 			for (int radius = 0; radius < horizon; radius++) {
-				iterPos = pos.add(dx * radius, 0, dz * radius);
+				iterPos = pos.offset(dx * radius, 0, dz * radius);
 				final CacheRecord cache = getCache(threadLocalCache, new ChunkPos(iterPos));
-				if (cache.perimeters.containsKey(CacheRecord.getIndex(iterPos)) || !checkBiome(getBiomeFunction, iterPos.add(dx, 0, dz), threadLocalCache)) {
+				if (cache.perimeters.containsKey(CacheRecord.getIndex(iterPos)) || !checkBiome(getBiomeFunction, iterPos.offset(dx, 0, dz), threadLocalCache)) {
 					int localMinimum = this.checkPerimeter(getBiomeFunction, pos, iterPos, direction, threadLocalCache);
 					if (localMinimum >= 0) {
 						minimum = Math.min(minimum, localMinimum);
@@ -168,7 +172,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 					} else {
 						// Power on through a small biome inclusion we found.
 						for (++radius; radius < horizon; radius++) {
-							if (checkBiome(getBiomeFunction, pos.add(dx * radius, 0, dz * radius), threadLocalCache)) {
+							if (checkBiome(getBiomeFunction, pos.offset(dx * radius, 0, dz * radius), threadLocalCache)) {
 								++radius;
 								break;
 							}
@@ -182,9 +186,9 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		return rationalizeDistance(pos, minimum, threadLocalCache);
 	}
 
-	private int checkPerimeter(Function<BlockPos, RegistryEntry<Biome>> getBiomeFunction, BlockPos centerPos, BlockPos perimeterPos, EightWayDirection direction, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
+	private int checkPerimeter(Function<BlockPos, Holder<Biome>> getBiomeFunction, BlockPos centerPos, BlockPos perimeterPos, Direction8 direction, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
 		BiomePerimeterPoint current;
-		EightWayDirection orientation;
+		Direction8 orientation;
 		double minimum;
 		int localCheckDistance;
 
@@ -205,9 +209,9 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 				orientation = getEightWayClockwiseRotation(orientation, 5);
 				for (int rotation = 2; rotation < 8; rotation++) {
 					orientation = getEightWayClockwiseRotation(orientation, 1);
-					if (!checkBiome(getBiomeFunction, current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ()), threadLocalCache)) {
+					if (!checkBiome(getBiomeFunction, current.pos.offset(orientation.getStepX(), 0, orientation.getStepZ()), threadLocalCache)) {
 						orientation = getEightWayClockwiseRotation(orientation, -1);
-						BlockPos prospect = current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ());
+						BlockPos prospect = current.pos.offset(orientation.getStepX(), 0, orientation.getStepZ());
 						BiomePerimeterPoint prospectPoint = getCache(threadLocalCache, new ChunkPos(prospect)).perimeters.get(CacheRecord.getIndex(prospect));
 						if (prospectPoint != null) {
 							prospectPoint.setRight(current);
@@ -251,9 +255,9 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 				orientation = getEightWayClockwiseRotation(orientation, 3);
 				for (int rotation = 2; rotation < 8; rotation++) {
 					orientation = getEightWayClockwiseRotation(orientation, -1);
-					if (!checkBiome(getBiomeFunction, current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ()), threadLocalCache)) {
+					if (!checkBiome(getBiomeFunction, current.pos.offset(orientation.getStepX(), 0, orientation.getStepZ()), threadLocalCache)) {
 						orientation = getEightWayClockwiseRotation(orientation, 1);
-						BlockPos prospect = current.pos.add(orientation.getOffsetX(), 0, orientation.getOffsetZ());
+						BlockPos prospect = current.pos.offset(orientation.getStepX(), 0, orientation.getStepZ());
 						BiomePerimeterPoint prospectPoint = getCache(threadLocalCache, new ChunkPos(prospect)).perimeters.get(CacheRecord.getIndex(prospect));
 						if (prospectPoint != null) {
 							// Detect when we are passing through the same path we passed through on the left.
@@ -286,35 +290,35 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		return (int) minimum;
 	}
 
-	private EightWayDirection getEightWayClockwiseRotation(EightWayDirection direction, int increment) {
+	private Direction8 getEightWayClockwiseRotation(Direction8 direction, int increment) {
 		assert (increment >= -8);
-		return EightWayDirection.values()[(direction.ordinal() + increment + 8) % 8];
+		return Direction8.values()[(direction.ordinal() + increment + 8) % 8];
 	}
 
-	private EightWayDirection getEightWayRelation(BlockPos posA, BlockPos posB) {
+	private Direction8 getEightWayRelation(BlockPos posA, BlockPos posB) {
 		BlockPos diff = posA.subtract(posB);
 		if (diff.getX() < 0) {
 			if (diff.getZ() < 0) {
-				return EightWayDirection.NORTH_WEST;
+				return Direction8.NORTH_WEST;
 			} else if (diff.getZ() > 0) {
-				return EightWayDirection.SOUTH_WEST;
+				return Direction8.SOUTH_WEST;
 			} else {
-				return EightWayDirection.WEST;
+				return Direction8.WEST;
 			}
 		} else if (diff.getX() > 0) {
 			if (diff.getZ() < 0) {
-				return EightWayDirection.NORTH_EAST;
+				return Direction8.NORTH_EAST;
 			} else if (diff.getZ() > 0) {
-				return EightWayDirection.SOUTH_EAST;
+				return Direction8.SOUTH_EAST;
 			} else {
-				return EightWayDirection.EAST;
+				return Direction8.EAST;
 			}
 		} else {
-			return diff.getZ() < 0 ? EightWayDirection.NORTH : EightWayDirection.SOUTH;
+			return diff.getZ() < 0 ? Direction8.NORTH : Direction8.SOUTH;
 		}
 	}
 
-	private boolean checkBiome(Function<BlockPos, RegistryEntry<Biome>> getBiomeFunction, BlockPos pos, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
+	private boolean checkBiome(Function<BlockPos, Holder<Biome>> getBiomeFunction, BlockPos pos, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
 		/* Distance values in biomeCache:
 		 * -1:  special value indicating pos is in-biome but the perimeter distance is unknown
 		 *  0:  value indicating pos is not in-biome
@@ -328,8 +332,8 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		float lower = 0;
 		float upper = MAX_HORIZON;
 
-		for (EightWayDirection direction : EightWayDirection.values()) {
-			final BlockPos neighborPos = pos.add(direction.getOffsetX(), 0, direction.getOffsetZ());
+		for (Direction8 direction : Direction8.values()) {
+			final BlockPos neighborPos = pos.offset(direction.getStepX(), 0, direction.getStepZ());
 			int neighbor = getCache(threadLocalCache, new ChunkPos(neighborPos)).biomeCache.getOrDefault(CacheRecord.getIndex(neighborPos), -1);
 
 			if (neighbor > 0) {
@@ -339,22 +343,22 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 			}
 		}
 
-		distance = Math.round(MathHelper.clamp(proposed, lower, upper));
+		distance = Math.round(Mth.clamp(proposed, lower, upper));
 		getCache(threadLocalCache, new ChunkPos(pos)).biomeCache.put(CacheRecord.getIndex(pos), distance);
 
 		return distance;
 	}
 
-	private static Function<BlockPos, RegistryEntry<Biome>> selectGetBiomeFunction(BiomeAccess biomeAccess) {
+	private static Function<BlockPos, Holder<Biome>> selectGetBiomeFunction(BiomeManager biomeAccess) {
 		/*
 		 * When the BiomeAccess uses a ChunkRegion, it will deny lookup rather than creating a Chunk.
 		 * This implementation bypasses the BiomeAccess to use direct biome lookups.
 		 * We are forced to reimplement the getBiome smoothing function.
 		 */
-		if (biomeAccess.storage instanceof ChunkRegion chunkRegion) {
-			ServerWorld world = chunkRegion.world;
+		if (biomeAccess.noiseBiomeSource instanceof WorldGenRegion chunkRegion) {
+			ServerLevel world = chunkRegion.level;
 
-			return (pos) -> VanillaCompat.callFunctionWithSmoothedBiomeCoords(world::getGeneratorStoredBiome, pos, world.getSeed());
+			return (pos) -> VanillaCompat.callFunctionWithSmoothedBiomeCoords(world::getUncachedNoiseBiome, pos, world.getSeed());
 		}
 
 		// Fall back to the vanilla getBiome, which may work with some other biome access implementations...
@@ -388,7 +392,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		BiomePerimeterPoint right;
 
 		public BiomePerimeterPoint(@NotNull BlockPos pos, @Nullable BiomePerimeterPoint left, @Nullable BiomePerimeterPoint right) {
-			this.pos = pos.toImmutable();
+			this.pos = pos.immutable();
 			this.left = left;
 			this.right = right;
 		}
@@ -425,7 +429,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		}
 
 		public @NotNull BlockPos getPos() {
-			return pos.mutableCopy();
+			return pos.mutable();
 		}
 
 		public @Nullable BiomePerimeterPoint getLeft() {
@@ -453,7 +457,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		 * @return double - The distance "as the crow flies" between this BiomePerimeterPoint and pos
 		 */
 		public double getDistance(@NotNull BlockPos pos) {
-			return Math.sqrt(this.pos.getSquaredDistance(pos));
+			return Math.sqrt(this.pos.distSqr(pos));
 		}
 
 		/**
@@ -466,7 +470,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		 * @return int - The distance "as a taxi drives" between this BiomePerimeterPoint and pos
 		 */
 		public int getTaxicab(@NotNull Vec3i pos) {
-			return this.pos.getManhattanDistance(pos);
+			return this.pos.distManhattan(pos);
 		}
 	}
 

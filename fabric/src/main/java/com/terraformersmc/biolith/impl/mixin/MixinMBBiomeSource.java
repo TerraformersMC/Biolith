@@ -10,10 +10,10 @@ import mod.bluestaggo.modernerbeta.api.level.biome.BiomeProvider;
 import mod.bluestaggo.modernerbeta.api.level.biome.BiomeResolverBlock;
 import mod.bluestaggo.modernerbeta.api.level.cavebiome.CaveBiomeProvider;
 import mod.bluestaggo.modernerbeta.level.biome.ModernBetaBiomeSource;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Climate;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -25,21 +25,21 @@ import java.util.stream.Stream;
 @Mixin(ModernBetaBiomeSource.class)
 public abstract class MixinMBBiomeSource extends BiomeSource {
     @Override
-    public @Nullable MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
-        return new MultiNoiseUtil.Entries<>(this.getBiomes().stream().map(
+    public @Nullable Climate.ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
+        return new Climate.ParameterList<>(this.possibleBiomes().stream().map(
                 biomeEntry -> Pair.of(DimensionBiomePlacement.OUT_OF_RANGE, biomeEntry)
                 ).toList());
     }
 
-    @WrapOperation(method = {"getBiome", "getOceanBiome", "getDeepOceanBiome", "getCaveBiome", "getBiomeForSpawn", "getBiomeForHeightGen"},
+    @WrapOperation(method = {"getNoiseBiome", "getOceanBiome", "getDeepOceanBiome", "getCaveBiome", "getBiomeForSpawn", "getBiomeForHeightGen"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lmod/bluestaggo/modernerbeta/api/level/biome/BiomeProvider;getBiome(III)Lnet/minecraft/registry/entry/RegistryEntry;"
+                    target = "Lmod/bluestaggo/modernerbeta/api/level/biome/BiomeProvider;getBiome(III)Lnet/minecraft/core/Holder;"
             )
     )
     @SuppressWarnings("unused")
-    private RegistryEntry<Biome> biolith$getBiome(BiomeProvider instance, int biomeX, int biomeY, int biomeZ, Operation<RegistryEntry<Biome>> operation) {
-        RegistryEntry<Biome> original = operation.call(instance, biomeX, biomeY, biomeZ);
+    private Holder<Biome> biolith$getBiome(BiomeProvider instance, int biomeX, int biomeY, int biomeZ, Operation<Holder<Biome>> operation) {
+        Holder<Biome> original = operation.call(instance, biomeX, biomeY, biomeZ);
 
         return BiomeCoordinator.OVERWORLD.getReplacementEntry(biomeX, biomeY, biomeZ, original);
     }
@@ -51,8 +51,8 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
             )
     )
     @SuppressWarnings("unused")
-    private RegistryEntry<Biome> biolith$getCaveBiome(CaveBiomeProvider instance, int biomeX, int biomeY, int biomeZ, Operation<RegistryEntry<Biome>> operation) {
-        RegistryEntry<Biome> original = operation.call(instance, biomeX, biomeY, biomeZ);
+    private Holder<Biome> biolith$getCaveBiome(CaveBiomeProvider instance, int biomeX, int biomeY, int biomeZ, Operation<Holder<Biome>> operation) {
+        Holder<Biome> original = operation.call(instance, biomeX, biomeY, biomeZ);
 
         // Apparently, Modern(er) Beta uses null here to indicate no cave biome was found.
         if (original == null) {
@@ -69,8 +69,8 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
             )
     )
     @SuppressWarnings("unused")
-    private RegistryEntry<Biome> biolith$getBiomeBlock(BiomeResolverBlock instance, int x, int y, int z, Operation<RegistryEntry<Biome>> operation) {
-        RegistryEntry<Biome> original = operation.call(instance, x, y, z);
+    private Holder<Biome> biolith$getBiomeBlock(BiomeResolverBlock instance, int x, int y, int z, Operation<Holder<Biome>> operation) {
+        Holder<Biome> original = operation.call(instance, x, y, z);
         int biomeX = x >> 2;
         int biomeY = y >> 2;
         int biomeZ = z >> 2;
@@ -78,10 +78,10 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
         return BiomeCoordinator.OVERWORLD.getReplacementEntry(biomeX, biomeY, biomeZ, original);
     }
 
-    @ModifyReturnValue(method = "biomeStream", at = @At("RETURN"))
+    @ModifyReturnValue(method = "collectPossibleBiomes", at = @At("RETURN"))
     @SuppressWarnings("unused")
-    private Stream<RegistryEntry<Biome>> biolith$injectBiomes(Stream<RegistryEntry<Biome>> original) {
-        Set<RegistryEntry<Biome>> entrySet = original.collect(Collectors.toSet());
+    private Stream<Holder<Biome>> biolith$injectBiomes(Stream<Holder<Biome>> original) {
+        Set<Holder<Biome>> entrySet = original.collect(Collectors.toSet());
 
         BiomeCoordinator.OVERWORLD.writeBiomeEntries(entryPair -> entrySet.add(entryPair.getSecond()));
 

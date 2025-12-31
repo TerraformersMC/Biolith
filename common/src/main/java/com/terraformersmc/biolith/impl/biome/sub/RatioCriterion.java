@@ -9,14 +9,14 @@ import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.api.biome.sub.RatioTargets;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.dynamic.Range;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import org.jetbrains.annotations.Nullable;
 
-public record RatioCriterion(RatioTargets target, Range<Float> allowedValues) implements Criterion {
+public record RatioCriterion(RatioTargets target, InclusiveRange<Float> allowedValues) implements Criterion {
     public static final MapCodec<RatioCriterion> CODEC = RecordCodecBuilder.mapCodec(
             (instance) -> instance.group(
                             RatioTargets.CODEC.fieldOf("target")
@@ -29,7 +29,7 @@ public record RatioCriterion(RatioTargets target, Range<Float> allowedValues) im
                     .apply(instance, RatioCriterion::new));
 
     public RatioCriterion(RatioTargets target, float min, float max) {
-        this(target, new Range<>(min, max));
+        this(target, new InclusiveRange<>(min, max));
     }
 
     public float min() {
@@ -50,14 +50,14 @@ public record RatioCriterion(RatioTargets target, Range<Float> allowedValues) im
     }
 
     @Override
-    public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> replacementRange, float replacementNoise) {
+    public boolean matches(BiolithFittestNodes<Holder<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, Climate.TargetPoint noisePoint, @Nullable InclusiveRange<Float> replacementRange, float replacementNoise) {
         float comparable;
 
         if (target == RatioTargets.CENTER) {
             // Vanilla biomes pre-Biolith replacement; /10k is analogous to MultiNoiseUtil.toFloat(); param 6 is offset
-            comparable = MathHelper.sqrt((float) BiomeParameterTargets.getSquaredDistance(
-                    BiomeParameterTargets.parametersCenterPoint(fittestNodes.ultimate().parameters),
-                    noisePoint, fittestNodes.ultimate().parameters[6].min())) / 10000f;
+            comparable = Mth.sqrt((float) BiomeParameterTargets.getSquaredDistance(
+                    BiomeParameterTargets.parametersCenterPoint(fittestNodes.ultimate().parameterSpace),
+                    noisePoint, fittestNodes.ultimate().parameterSpace[6].min())) / 10000f;
             // Post-replacement we need to add in the replacement noise restriction
             if (replacementRange != null) {
                 // Replacement noise at the ends of the spectrum have centers at their extremities; thus the crap.
@@ -100,6 +100,6 @@ public record RatioCriterion(RatioTargets target, Range<Float> allowedValues) im
             throw new IllegalStateException("Unexpected value: " + target);
         }
 
-        return allowedValues.contains(comparable);
+        return allowedValues.isValueInRange(comparable);
     }
 }

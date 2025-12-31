@@ -1,10 +1,9 @@
 package com.terraformersmc.biolith.api.biome.sub;
 
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.util.Identifier;
-
 import java.util.HashMap;
 import java.util.Map;
+import net.minecraft.resources.Identifier;
 
 public class CriterionTypes {
     private static final Map<Identifier, CriterionType<?>> CRITERION_TYPES = new HashMap<>();

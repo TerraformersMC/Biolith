@@ -3,36 +3,35 @@ package com.terraformersmc.biolith.impl.config;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.PersistentState;
-import net.minecraft.world.PersistentStateType;
-import net.minecraft.world.biome.Biome;
-
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.SavedDataType;
 
 @SuppressWarnings("unused")
-public class BiolithState extends PersistentState {
-    private final LinkedHashMap<RegistryKey<Biome>, LinkedHashSet<RegistryKey<Biome>>> biomeReplacements = new LinkedHashMap<>(64);
-    private final ServerWorld world;
+public class BiolithState extends SavedData {
+    private final LinkedHashMap<ResourceKey<Biome>, LinkedHashSet<ResourceKey<Biome>>> biomeReplacements = new LinkedHashMap<>(64);
+    private final ServerLevel world;
 
     private static <E> Codec<LinkedHashSet<E>> getLinkedHashSetCodec(Codec<E> entryCodec) {
         return entryCodec.listOf().xmap(LinkedHashSet::new, lhs -> lhs.stream().toList());
     }
 
-    public static Codec<BiolithState> getCodec(ServerWorld world) {
+    public static Codec<BiolithState> getCodec(ServerLevel world) {
         return RecordCodecBuilder.create(
                 (instance) -> instance.group(
-                                Codec.unboundedMap(RegistryKey.createCodec(RegistryKeys.BIOME), getLinkedHashSetCodec(RegistryKey.createCodec(RegistryKeys.BIOME))).optionalFieldOf("biome_replacements", Map.of())
+                                Codec.unboundedMap(ResourceKey.codec(Registries.BIOME), getLinkedHashSetCodec(ResourceKey.codec(Registries.BIOME))).optionalFieldOf("biome_replacements", Map.of())
                                         .forGetter(biolithState -> biolithState.biomeReplacements),
-                                getLinkedHashSetCodec(RegistryKey.createCodec(RegistryKeys.BIOME)).listOf().optionalFieldOf("BiomeReplacementsList", List.of())
+                                getLinkedHashSetCodec(ResourceKey.codec(Registries.BIOME)).listOf().optionalFieldOf("BiomeReplacementsList", List.of())
                                         .forGetter(biolithState -> List.of())
                         )
                         .apply(instance, (replacements, biomeReplacementsList) -> {
@@ -46,37 +45,37 @@ public class BiolithState extends PersistentState {
                         }));
     }
 
-    public static PersistentStateType<BiolithState> getPersistentStateType(ServerWorld world) {
-        return new PersistentStateType<>(
-                Biolith.MOD_ID + "_state__" + world.getRegistryKey().getValue().toUnderscoreSeparatedString(),
+    public static SavedDataType<BiolithState> getPersistentStateType(ServerLevel world) {
+        return new SavedDataType<>(
+                Biolith.MOD_ID + "_state__" + world.dimension().identifier().toDebugFileName(),
                 () -> new BiolithState(world),
                 BiolithState.getCodec(world),
                 null
         );
     }
 
-    public BiolithState(ServerWorld world) {
+    public BiolithState(ServerLevel world) {
         this.world = world;
     }
 
     // Legacy unmarshaller for upgrading from v0 to v1
     // Each map was stored as a flat ordered list with the key in position 0.
-    private static BiolithState unmarshall_v0(ServerWorld world, List<LinkedHashSet<RegistryKey<Biome>>> biomeReplacementsList) {
+    private static BiolithState unmarshall_v0(ServerLevel world, List<LinkedHashSet<ResourceKey<Biome>>> biomeReplacementsList) {
         BiolithState state = new BiolithState(world);
 
         state.biomeReplacements.clear();
         biomeReplacementsList.forEach(list -> {
-            RegistryKey<Biome> key = list.removeFirst();
+            ResourceKey<Biome> key = list.removeFirst();
             state.biomeReplacements.put(key, new LinkedHashSet<>(list));
         });
 
         // Re-write the state in v1 format
-        state.markDirty();
+        state.setDirty();
 
         return state;
     }
 
-    private static BiolithState unmarshall_v1(ServerWorld world, Map<RegistryKey<Biome>, LinkedHashSet<RegistryKey<Biome>>> replacements) {
+    private static BiolithState unmarshall_v1(ServerLevel world, Map<ResourceKey<Biome>, LinkedHashSet<ResourceKey<Biome>>> replacements) {
         BiolithState state = new BiolithState(world);
 
         state.biomeReplacements.clear();
@@ -86,11 +85,11 @@ public class BiolithState extends PersistentState {
     }
 
     public void write() {
-        this.markDirty();
-        world.getPersistentStateManager().save();
+        this.setDirty();
+        world.getDataStorage().saveAndJoin();
     }
 
-    public Stream<RegistryKey<Biome>> getBiomeReplacements(RegistryKey<Biome> target) {
+    public Stream<ResourceKey<Biome>> getBiomeReplacements(ResourceKey<Biome> target) {
         if (biomeReplacements.containsKey(target)) {
             return biomeReplacements.get(target).stream();
         } else {
@@ -98,25 +97,25 @@ public class BiolithState extends PersistentState {
         }
     }
 
-    public void addBiomeReplacements(RegistryKey<Biome> target, Stream<RegistryKey<Biome>> replacements) {
+    public void addBiomeReplacements(ResourceKey<Biome> target, Stream<ResourceKey<Biome>> replacements) {
         if (biomeReplacements.containsKey(target)) {
             replacements.forEachOrdered(biomeReplacements.get(target)::add);
         } else {
             biomeReplacements.put(target, replacements.collect(Collectors.toCollection(LinkedHashSet::new)));
         }
 
-        this.markDirty();
+        this.setDirty();
     }
 
     public Identifier getDimensionId() {
-        if (world.getDimensionEntry().getKey().isEmpty()) {
-            return Identifier.of("biolith", "unregistered_dimension");
+        if (world.dimensionTypeRegistration().unwrapKey().isEmpty()) {
+            return Identifier.fromNamespaceAndPath("biolith", "unregistered_dimension");
         }
 
-        return world.getDimensionEntry().getKey().get().getValue();
+        return world.dimensionTypeRegistration().unwrapKey().get().identifier();
     }
 
     public Identifier getWorldId() {
-        return world.getRegistryKey().getValue();
+        return world.dimension().identifier();
     }
 }

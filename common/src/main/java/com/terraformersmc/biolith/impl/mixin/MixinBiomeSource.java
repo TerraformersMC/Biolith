@@ -2,34 +2,34 @@ package com.terraformersmc.biolith.impl.mixin;
 
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.InterfaceBiomeSource;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.core.Holder;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 @Mixin(BiomeSource.class)
 public class MixinBiomeSource implements InterfaceBiomeSource {
     @Unique
-    private RegistryKey<DimensionType> biolith$dimensionType = InterfaceBiomeSource.DIMENSION_TYPE_UNDEFINED;
+    private ResourceKey<DimensionType> biolith$dimensionType = InterfaceBiomeSource.DIMENSION_TYPE_UNDEFINED;
 
     @Override
-    public RegistryKey<DimensionType> biolith$getDimensionType() {
+    public ResourceKey<DimensionType> biolith$getDimensionType() {
         return biolith$dimensionType;
     }
 
     @Override
-    public void biolith$setDimensionType(RegistryEntry<DimensionType> dimensionTypeEntry) {
-        dimensionTypeEntry.getKey().ifPresent(this::biolith$setDimensionType);
+    public void biolith$setDimensionType(Holder<DimensionType> dimensionTypeEntry) {
+        dimensionTypeEntry.unwrapKey().ifPresent(this::biolith$setDimensionType);
     }
 
     @Override
-    public void biolith$setDimensionType(RegistryKey<DimensionType> dimensionTypeKey) {
-        if (!biolith$dimensionType.getValue().equals(InterfaceBiomeSource.DIMENSION_TYPE_UNDEFINED.getValue()) &&
-                !biolith$dimensionType.getValue().equals(dimensionTypeKey.getValue())) {
+    public void biolith$setDimensionType(ResourceKey<DimensionType> dimensionTypeKey) {
+        if (!biolith$dimensionType.identifier().equals(InterfaceBiomeSource.DIMENSION_TYPE_UNDEFINED.identifier()) &&
+                !biolith$dimensionType.identifier().equals(dimensionTypeKey.identifier())) {
             Biolith.LOGGER.warn("Dimension Type modified: from '{}' to '{}'",
-                    biolith$dimensionType.getValue(), dimensionTypeKey.getValue());
+                    biolith$dimensionType.identifier(), dimensionTypeKey.identifier());
         }
 
         biolith$dimensionType = dimensionTypeKey;

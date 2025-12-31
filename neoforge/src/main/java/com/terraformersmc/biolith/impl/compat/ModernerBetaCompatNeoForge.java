@@ -7,43 +7,43 @@ import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
 import mod.bluestaggo.modernerbeta.level.biome.ModernBetaBiomeSource;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.text.Text;
-import net.minecraft.util.Formatting;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeSource;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.Holder;
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
+import net.minecraft.world.level.biome.Climate;
 
 import static com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand.textFromBiome;
 
 public class ModernerBetaCompatNeoForge {
-    public static int describe(CommandContext<ServerCommandSource> context, int biomeX, int biomeY, int biomeZ, ServerWorld world, BiomeSource biomeSource, MultiNoiseUtil.Entries<RegistryEntry<Biome>> biomeEntries, MultiNoiseUtil.MultiNoiseSampler noise) {
+    public static int describe(CommandContext<CommandSourceStack> context, int biomeX, int biomeY, int biomeZ, ServerLevel world, BiomeSource biomeSource, Climate.ParameterList<Holder<Biome>> biomeEntries, Climate.Sampler noise) {
         if (!(biomeSource instanceof ModernBetaBiomeSource)) {
             return 0;
         }
 
-        RegistryEntry<Biome> original = ((ModernBetaBiomeSource) biomeSource).getBiomeProvider().getBiome(biomeX, biomeY, biomeZ);
-        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes = new BiolithFittestNodes<>(new MultiNoiseUtil.SearchTree.TreeLeafNode<>(DimensionBiomePlacement.OUT_OF_RANGE, original), 0, null, Integer.MAX_VALUE);
+        Holder<Biome> original = ((ModernBetaBiomeSource) biomeSource).getBiomeProvider().getBiome(biomeX, biomeY, biomeZ);
+        BiolithFittestNodes<Holder<Biome>> fittestNodes = new BiolithFittestNodes<>(new Climate.RTree.Leaf<>(DimensionBiomePlacement.OUT_OF_RANGE, original), 0, null, Integer.MAX_VALUE);
 
         double replacementNoise = BiomeCoordinator.OVERWORLD.getLocalNoise(biomeX, biomeY, biomeZ);
         int replacementScale = Biolith.getConfigManager().getGeneralConfig().getOverworldReplacementScale();
 
-        BiolithDescribeCommand.DescribeBiomeData describeBiomeData = BiomeCoordinator.OVERWORLD.getBiomeData(biomeX, biomeY, biomeZ, new MultiNoiseUtil.NoiseValuePoint(0,0,0,0,0,0), fittestNodes);
+        BiolithDescribeCommand.DescribeBiomeData describeBiomeData = BiomeCoordinator.OVERWORLD.getBiomeData(biomeX, biomeY, biomeZ, new Climate.TargetPoint(0,0,0,0,0,0), fittestNodes);
 
-        String worldTranslationKey = world.getRegistryKey().getValue().toTranslationKey();
+        String worldTranslationKey = world.dimension().identifier().toLanguageKey();
 
-        context.getSource().sendMessage(Text.literal("§nBiolith ")
-                .append(Text.translatable(worldTranslationKey).formatted(Formatting.UNDERLINE))
-                .append(Text.literal("§n ("))
-                .append(Text.translatable("biolith.command.describe.biome.scale").formatted(Formatting.UNDERLINE))
-                .append(Text.literal("§n: " + replacementScale + ") "))
-                .append(Text.translatable("biolith.command.describe.header").formatted(Formatting.UNDERLINE)));
+        context.getSource().sendSystemMessage(Component.literal("§nBiolith ")
+                .append(Component.translatable(worldTranslationKey).withStyle(ChatFormatting.UNDERLINE))
+                .append(Component.literal("§n ("))
+                .append(Component.translatable("biolith.command.describe.biome.scale").withStyle(ChatFormatting.UNDERLINE))
+                .append(Component.literal("§n: " + replacementScale + ") "))
+                .append(Component.translatable("biolith.command.describe.header").withStyle(ChatFormatting.UNDERLINE)));
 
-        context.getSource().sendMessage(Text.literal(String.format("§6BR§r:%+05.3f", replacementNoise)));
+        context.getSource().sendSystemMessage(Component.literal(String.format("§6BR§r:%+05.3f", replacementNoise)));
 
-        context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.moderner_beta")
+        context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.biome.moderner_beta")
                 .append(textFromBiome(original)));
 
         if (describeBiomeData.replacementBiome() != null && describeBiomeData.replacementRange() == null) {
@@ -52,19 +52,19 @@ public class ModernerBetaCompatNeoForge {
         }
 
         if (describeBiomeData.replacementBiome() != null) {
-            context.getSource().sendMessage(Text.translatable("biolith.command.describe.biome.replacement")
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.describe.biome.replacement")
                     .append(textFromBiome(describeBiomeData.replacementBiome()))
-                    .append(Text.literal("\n    "))
+                    .append(Component.literal("\n    "))
                     .append(describeBiomeData.lowerBiome() == null ?
-                            Text.translatable("biolith.command.describe.biome.none") :
+                            Component.translatable("biolith.command.describe.biome.none") :
                             textFromBiome(describeBiomeData.lowerBiome()))
-                    .append(Text.literal(" < "))
+                    .append(Component.literal(" < "))
                     .append(textFromBiome(describeBiomeData.replacementBiome()))
-                    .append(Text.literal(" < "))
+                    .append(Component.literal(" < "))
                     .append(describeBiomeData.higherBiome() == null ?
-                            Text.translatable("biolith.command.describe.biome.none") :
+                            Component.translatable("biolith.command.describe.biome.none") :
                             textFromBiome(describeBiomeData.higherBiome()))
-                    .append(Text.literal(String.format("\n    %+05.3f < %+05.3f < %+05.3f ",
+                    .append(Component.literal(String.format("\n    %+05.3f < %+05.3f < %+05.3f ",
                             describeBiomeData.replacementRange().minInclusive(),
                             replacementNoise,
                             describeBiomeData.replacementRange().maxInclusive()))));

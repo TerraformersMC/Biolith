@@ -5,10 +5,10 @@ import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTargets;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.dynamic.Range;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import org.jetbrains.annotations.Nullable;
 
 public class DeviationCriterion extends AbstractParameterCriterion {
@@ -29,14 +29,14 @@ public class DeviationCriterion extends AbstractParameterCriterion {
     }
 
     @Override
-    public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> replacementRange, float replacementNoise) {
+    public boolean matches(BiolithFittestNodes<Holder<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, Climate.TargetPoint noisePoint, @Nullable InclusiveRange<Float> replacementRange, float replacementNoise) {
         long value = parameter.getNoiseValue(noisePoint);
-        long parameterCenter = BiomeParameterTargets.parameterCenter(getParameterRange(fittestNodes.ultimate().parameters));
+        long parameterCenter = BiomeParameterTargets.parameterCenter(getParameterRange(fittestNodes.ultimate().parameterSpace));
 
-        return allowedValues.contains(MultiNoiseUtil.toFloat(value - parameterCenter));
+        return allowedValues.isValueInRange(Climate.unquantizeCoord(value - parameterCenter));
     }
 
-    private MultiNoiseUtil.ParameterRange getParameterRange(MultiNoiseUtil.ParameterRange[] parameters) {
+    private Climate.Parameter getParameterRange(Climate.Parameter[] parameters) {
         if (parameter == BiomeParameterTargets.PEAKS_VALLEYS) {
             // PV is a calculated noise based on folding weirdness twice
             long weirdnessMin = parameters[BiomeParameterTargets.WEIRDNESS.ordinal()].min();
@@ -58,7 +58,7 @@ public class DeviationCriterion extends AbstractParameterCriterion {
                 pvMax = Math.max(point1, point2);
             }
 
-            return new MultiNoiseUtil.ParameterRange(pvMin, pvMax);
+            return new Climate.Parameter(pvMin, pvMax);
         } else if (parameter.ordinal() < parameters.length) {
             return parameters[parameter.ordinal()];
         }

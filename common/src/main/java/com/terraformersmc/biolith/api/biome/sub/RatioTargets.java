@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.api.biome.sub;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.util.StringIdentifiable;
+import net.minecraft.util.StringRepresentable;
 
 /**
  * Available computed ratios in the {@link RatioTargets} enum:
@@ -10,11 +10,11 @@ import net.minecraft.util.StringIdentifiable;
  * <li>EDGE</li>
  * </ul>
  */
-public enum RatioTargets implements StringIdentifiable {
+public enum RatioTargets implements StringRepresentable {
     CENTER("center"),
     EDGE("edge");
 
-    public static final Codec<RatioTargets> CODEC = StringIdentifiable.createCodec(RatioTargets::values);
+    public static final Codec<RatioTargets> CODEC = StringRepresentable.fromEnum(RatioTargets::values);
     private final String name;
 
     RatioTargets(String name) {
@@ -22,7 +22,7 @@ public enum RatioTargets implements StringIdentifiable {
     }
 
     @Override
-    public String asString() {
+    public String getSerializedName() {
         return name;
     }
 }

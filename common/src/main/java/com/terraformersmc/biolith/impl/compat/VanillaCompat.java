@@ -2,39 +2,39 @@ package com.terraformersmc.biolith.impl.compat;
 
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkSectionPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.BiomeKeys;
-import net.minecraft.world.biome.source.BiomeAccess;
-import net.minecraft.world.biome.source.BiomeCoords;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.QuartPos;
+import net.minecraft.core.SectionPos;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.biome.Biomes;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.levelgen.DensityFunction;
 import org.apache.commons.lang3.function.TriFunction;
 
 public class VanillaCompat {
     @SuppressWarnings("unchecked")
     // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
-    public static BiolithFittestNodes<RegistryEntry<Biome>> getBiome(MultiNoiseUtil.NoiseValuePoint noisePoint, MultiNoiseUtil.Entries<RegistryEntry<Biome>> entries) {
-        return entries.tree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+    public static BiolithFittestNodes<Holder<Biome>> getBiome(Climate.TargetPoint noisePoint, Climate.ParameterList<Holder<Biome>> entries) {
+        return entries.index.biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
     }
 
-    public static BiolithFittestNodes<RegistryEntry<Biome>> getEndBiome(MultiNoiseUtil.NoiseValuePoint noisePoint, MultiNoiseUtil.Entries<RegistryEntry<Biome>> entries, RegistryEntry<Biome> original) {
-        BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes;
+    public static BiolithFittestNodes<Holder<Biome>> getEndBiome(Climate.TargetPoint noisePoint, Climate.ParameterList<Holder<Biome>> entries, Holder<Biome> original) {
+        BiolithFittestNodes<Holder<Biome>> fittestNodes;
 
-        if (original.matchesKey(BiomeKeys.THE_END)) {
+        if (original.is(Biomes.THE_END)) {
             // We do not use noise to replace the central End biome; replacements must be explicit.
             // As such, there is no second-best-fit biome.
-            MultiNoiseUtil.SearchTree.TreeLeafNode<RegistryEntry<Biome>> ultimate = new MultiNoiseUtil.SearchTree.TreeLeafNode<>(
-                    new MultiNoiseUtil.NoiseHypercube(
-                            MultiNoiseUtil.ParameterRange.of(MultiNoiseUtil.toFloat(noisePoint.temperatureNoise())),
-                            MultiNoiseUtil.ParameterRange.of(MultiNoiseUtil.toFloat(noisePoint.humidityNoise())),
-                            MultiNoiseUtil.ParameterRange.of(MultiNoiseUtil.toFloat(noisePoint.continentalnessNoise())),
-                            MultiNoiseUtil.ParameterRange.of(MultiNoiseUtil.toFloat(noisePoint.erosionNoise())),
-                            MultiNoiseUtil.ParameterRange.of(MultiNoiseUtil.toFloat(noisePoint.depth())),
-                            MultiNoiseUtil.ParameterRange.of(MultiNoiseUtil.toFloat(noisePoint.weirdnessNoise())),
+            Climate.RTree.Leaf<Holder<Biome>> ultimate = new Climate.RTree.Leaf<>(
+                    new Climate.ParameterPoint(
+                            Climate.Parameter.point(Climate.unquantizeCoord(noisePoint.temperature())),
+                            Climate.Parameter.point(Climate.unquantizeCoord(noisePoint.humidity())),
+                            Climate.Parameter.point(Climate.unquantizeCoord(noisePoint.continentalness())),
+                            Climate.Parameter.point(Climate.unquantizeCoord(noisePoint.erosion())),
+                            Climate.Parameter.point(Climate.unquantizeCoord(noisePoint.depth())),
+                            Climate.Parameter.point(Climate.unquantizeCoord(noisePoint.weirdness())),
                             0L),
                     original);
             fittestNodes = new BiolithFittestNodes<>(ultimate, 0);
@@ -42,19 +42,19 @@ public class VanillaCompat {
             // Evaluate the best fit biome by noise at the noise point.
             // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
             //noinspection unchecked
-            fittestNodes = entries.tree.biolith$searchTreeGet(noisePoint, MultiNoiseUtil.SearchTree.TreeNode::getSquaredDistance);
+            fittestNodes = entries.index.biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
         }
 
         // If the best noise fit was a vanilla biome, let whatever vanilla picked leak through.
         // This way if other mods have directly modified vanilla biome selection, it may still work.
         if (!original.equals(fittestNodes.ultimate().value) && (
-                fittestNodes.ultimate().value.matchesKey(BiomeKeys.SMALL_END_ISLANDS) ||
-                        fittestNodes.ultimate().value.matchesKey(BiomeKeys.END_BARRENS) ||
-                        fittestNodes.ultimate().value.matchesKey(BiomeKeys.END_MIDLANDS) ||
-                        fittestNodes.ultimate().value.matchesKey(BiomeKeys.END_HIGHLANDS))) {
+                fittestNodes.ultimate().value.is(Biomes.SMALL_END_ISLANDS) ||
+                        fittestNodes.ultimate().value.is(Biomes.END_BARRENS) ||
+                        fittestNodes.ultimate().value.is(Biomes.END_MIDLANDS) ||
+                        fittestNodes.ultimate().value.is(Biomes.END_HIGHLANDS))) {
 
             fittestNodes = new BiolithFittestNodes<>(
-                    new MultiNoiseUtil.SearchTree.TreeLeafNode<>(createNoiseHypercube(fittestNodes.ultimate().parameters), original),
+                    new Climate.RTree.Leaf<>(createNoiseHypercube(fittestNodes.ultimate().parameterSpace), original),
                     0L,
                     fittestNodes.ultimate(),
                     fittestNodes.ultimateDistance()
@@ -65,18 +65,18 @@ public class VanillaCompat {
     }
 
     // This is a smoothed version of vanilla's End biome placement.
-    public static RegistryEntry<Biome> getOriginalEndBiome(int biomeX, int biomeY, int biomeZ, MultiNoiseUtil.MultiNoiseSampler noise) {
-        RegistryEntry<Biome> biomeEntry;
+    public static Holder<Biome> getOriginalEndBiome(int biomeX, int biomeY, int biomeZ, Climate.Sampler noise) {
+        Holder<Biome> biomeEntry;
 
-        int x = BiomeCoords.toBlock(biomeX);
-        int y = BiomeCoords.toBlock(biomeY);
-        int z = BiomeCoords.toBlock(biomeZ);
+        int x = QuartPos.toBlock(biomeX);
+        int y = QuartPos.toBlock(biomeY);
+        int z = QuartPos.toBlock(biomeZ);
 
-        if (MathHelper.square((long) ChunkSectionPos.getSectionCoord(x)) +
-                MathHelper.square((long) ChunkSectionPos.getSectionCoord(z)) <= 4096L) {
+        if (Mth.square((long) SectionPos.blockToSectionCoord(x)) +
+                Mth.square((long) SectionPos.blockToSectionCoord(z)) <= 4096L) {
             biomeEntry = BiomeCoordinator.END.nodeTheEnd.value;
         } else {
-            double erosion = noise.erosion().sample(new DensityFunction.UnblendedNoisePos(x, y, z));
+            double erosion = noise.erosion().compute(new DensityFunction.SinglePointContext(x, y, z));
             if (erosion > 0.25) {
                 biomeEntry = BiomeCoordinator.END.nodeEndHighlands.value;
             } else if (erosion >= -0.0625) {
@@ -91,12 +91,12 @@ public class VanillaCompat {
         return biomeEntry;
     }
 
-    private static MultiNoiseUtil.NoiseHypercube createNoiseHypercube(MultiNoiseUtil.ParameterRange... parameters) {
-        return MultiNoiseUtil.createNoiseHypercube(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5], parameters[6].min());
+    private static Climate.ParameterPoint createNoiseHypercube(Climate.Parameter... parameters) {
+        return Climate.parameters(parameters[0], parameters[1], parameters[2], parameters[3], parameters[4], parameters[5], parameters[6].min());
     }
 
     /**
-     * This method duplicates the processing of {@link BiomeAccess#getBiome} which smooths out the 4x4x4
+     * This method duplicates the processing of {@link BiomeManager#getBiome} which smooths out the 4x4x4
      * biome pixels using the world seed as a source of "randomness".  It then calls the provided getBiome
      * function and returns whatever the function does.  Thus, use of other getBiome implementations is
      * possible without reimplementing chunk storage.
@@ -106,7 +106,7 @@ public class VanillaCompat {
      * @param seed The seed of the relevant world
      * @return RegistryEntry of Biome returned for the smoothed biome coordinates
      */
-    public static RegistryEntry<Biome> callFunctionWithSmoothedBiomeCoords(TriFunction<Integer, Integer, Integer, RegistryEntry<Biome>> function, BlockPos pos, long seed) {
+    public static Holder<Biome> callFunctionWithSmoothedBiomeCoords(TriFunction<Integer, Integer, Integer, Holder<Biome>> function, BlockPos pos, long seed) {
         int centerX = pos.getX() - 2;
         int centerY = pos.getY() - 2;
         int centerZ = pos.getZ() - 2;
@@ -123,7 +123,7 @@ public class VanillaCompat {
             boolean offsetX = (option & 4) == 0;
             boolean offsetY = (option & 2) == 0;
             boolean offsetZ = (option & 1) == 0;
-            double preference = BiomeAccess.method_38106(
+            double preference = BiomeManager.getFiddledDistance(
                     seed,
                     offsetX ? biomeX : biomeX + 1,
                     offsetY ? biomeY : biomeY + 1,

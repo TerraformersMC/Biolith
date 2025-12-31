@@ -7,15 +7,17 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.noise.OpenSimplexNoise2;
-import net.minecraft.registry.*;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.dynamic.Range;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.Vec3i;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.Vec3i;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.util.Mth;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,26 +27,26 @@ import java.util.stream.Collectors;
 
 public abstract class DimensionBiomePlacement {
     protected boolean biomesInjected = false;
-    protected ServerWorld world;
+    protected ServerLevel world;
     protected BiolithState state;
     protected OpenSimplexNoise2 replacementNoise;
     protected int[] seedlets = new int[8];
     protected Random seedRandom;
     protected final Collection<PlacementRequest> placementRequests = new HashSet<>(256);
     protected final Collection<RemovalRequest> removalRequests = new HashSet<>(256);
-    protected final HashMap<RegistryKey<Biome>, ReplacementRequestSet> replacementRequests = new HashMap<>(256);
-    protected final HashMap<RegistryKey<Biome>, SubBiomeRequestSet> subBiomeRequests = new HashMap<>(256);
+    protected final HashMap<ResourceKey<Biome>, ReplacementRequestSet> replacementRequests = new HashMap<>(256);
+    protected final HashMap<ResourceKey<Biome>, SubBiomeRequestSet> subBiomeRequests = new HashMap<>(256);
 
-    public static final MultiNoiseUtil.ParameterRange DEFAULT_PARAMETER = MultiNoiseUtil.ParameterRange.of(-1.0f, 1.0f);
-    public static final MultiNoiseUtil.NoiseHypercube OUT_OF_RANGE = MultiNoiseUtil.createNoiseHypercube(3.01f, 3.01f, 3.01f, 3.01f, 3.01f, 3.01f, 3.01f);
+    public static final Climate.Parameter DEFAULT_PARAMETER = Climate.Parameter.span(-1.0f, 1.0f);
+    public static final Climate.ParameterPoint OUT_OF_RANGE = Climate.parameters(3.01f, 3.01f, 3.01f, 3.01f, 3.01f, 3.01f, 3.01f);
 
-    public static final RegistryKey<Biome> VANILLA_PLACEHOLDER = RegistryKey.of(RegistryKeys.BIOME, Identifier.of(Biolith.MOD_ID, "vanilla"));
+    public static final ResourceKey<Biome> VANILLA_PLACEHOLDER = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Biolith.MOD_ID, "vanilla"));
 
     // TODO in Biolith 4: Move these together with existing args into a data record for sub-biome selection.
     protected static final ThreadLocal<Vec3i> EVALUATING_BIOME_POS = new ThreadLocal<>();
-    protected static final ThreadLocal<ServerWorld> EVALUATING_WORLD = new ThreadLocal<>();
+    protected static final ThreadLocal<ServerLevel> EVALUATING_WORLD = new ThreadLocal<>();
 
-    protected void serverReplaced(@NotNull BiolithState state, ServerWorld world) {
+    protected void serverReplaced(@NotNull BiolithState state, ServerLevel world) {
         long seed = world.getSeed();
 
         this.world = world;
@@ -72,33 +74,33 @@ public abstract class DimensionBiomePlacement {
     }
 
 
-    public void addPlacement(RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint, boolean fromData) {
+    public void addPlacement(ResourceKey<Biome> biome, Climate.ParameterPoint noisePoint, boolean fromData) {
         if (biomesInjected) {
-            Biolith.LOGGER.error("Biolith's BiomePlacement.addPlacement() called too late for biome: {}", biome.getValue());
+            Biolith.LOGGER.error("Biolith's BiomePlacement.addPlacement() called too late for biome: {}", biome.identifier());
         } else {
             placementRequests.add(new PlacementRequest(noisePoint, biome, fromData));
         }
     }
 
-    public void addRemoval(RegistryKey<Biome> biome, boolean fromData) {
+    public void addRemoval(ResourceKey<Biome> biome, boolean fromData) {
         if (biomesInjected) {
-            Biolith.LOGGER.error("Biolith's BiomePlacement.addRemoval() called too late for biome: {}", biome.getValue());
+            Biolith.LOGGER.error("Biolith's BiomePlacement.addRemoval() called too late for biome: {}", biome.identifier());
         } else {
             removalRequests.add(new RemovalRequest(biome, fromData));
         }
     }
 
-    public void addReplacement(RegistryKey<Biome> target, RegistryKey<Biome> biome, double rate, boolean fromData) {
+    public void addReplacement(ResourceKey<Biome> target, ResourceKey<Biome> biome, double rate, boolean fromData) {
         if (biomesInjected || (replacementRequests.containsKey(target) && replacementRequests.get(target).finalized)) {
-            Biolith.LOGGER.error("Biolith's BiomePlacement.addReplacement() called too late for biome: {}", biome.getValue());
+            Biolith.LOGGER.error("Biolith's BiomePlacement.addReplacement() called too late for biome: {}", biome.identifier());
         } else {
             replacementRequests.computeIfAbsent(target, ReplacementRequestSet::new).addRequest(biome, rate, fromData);
         }
     }
 
-    public void addSubBiome(RegistryKey<Biome> target, RegistryKey<Biome> biome, Criterion criterion, boolean fromData) {
+    public void addSubBiome(ResourceKey<Biome> target, ResourceKey<Biome> biome, Criterion criterion, boolean fromData) {
         if (biomesInjected || (subBiomeRequests.containsKey(target) && subBiomeRequests.get(target).finalized)) {
-            Biolith.LOGGER.error("Biolith's BiomePlacement.addSubBiome() called too late for biome: {}", biome.getValue());
+            Biolith.LOGGER.error("Biolith's BiomePlacement.addSubBiome() called too late for biome: {}", biome.identifier());
         } else {
             subBiomeRequests.computeIfAbsent(target, SubBiomeRequestSet::new).addRequest(biome, criterion, fromData);
         }
@@ -111,12 +113,12 @@ public abstract class DimensionBiomePlacement {
         subBiomeRequests.forEach((key, set) -> set.requests.removeIf(SubBiomeRequest::fromData));
     }
 
-    public RegistryEntry<Biome> getReplacement(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
-        RegistryEntry<Biome> biomeEntry = fittestNodes.ultimate().value;
-        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
+    public Holder<Biome> getReplacement(int x, int y, int z, Climate.TargetPoint noisePoint, BiolithFittestNodes<Holder<Biome>> fittestNodes) {
+        Holder<Biome> biomeEntry = fittestNodes.ultimate().value;
+        ResourceKey<Biome> biomeKey = biomeEntry.unwrapKey().orElseThrow();
 
         double localNoise = -1D;
-        Range<Float> localRange = null;
+        InclusiveRange<Float> localRange = null;
 
         // select phase one -- direct replacements
         if (replacementRequests.containsKey(biomeKey)) {
@@ -162,9 +164,9 @@ public abstract class DimensionBiomePlacement {
      * @param fittestNodes Biolith fittest nodes data structure at the targeted point
      * @return Biolith's describe biome command's biome data structure for the targeted replacement
      */
-    public BiolithDescribeCommand.DescribeBiomeData getBiomeData(int x, int y, int z, MultiNoiseUtil.NoiseValuePoint noisePoint, BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes) {
-        RegistryEntry<Biome> biomeEntry = fittestNodes.ultimate().value;
-        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
+    public BiolithDescribeCommand.DescribeBiomeData getBiomeData(int x, int y, int z, Climate.TargetPoint noisePoint, BiolithFittestNodes<Holder<Biome>> fittestNodes) {
+        Holder<Biome> biomeEntry = fittestNodes.ultimate().value;
+        ResourceKey<Biome> biomeKey = biomeEntry.unwrapKey().orElseThrow();
         double localNoise = getLocalNoise(x, y, z);
 
         ReplacementRequest lowerRequest = null;
@@ -205,11 +207,11 @@ public abstract class DimensionBiomePlacement {
         return new BiolithDescribeCommand.DescribeBiomeData(
                 replacementRequest == null ? null : replacementRequest.range(),
                 replacementRequest == null ? null : replacementRequest.biome().equals(VANILLA_PLACEHOLDER) ?
-                        fittestNodes.ultimate().value.getKey().orElseThrow() : replacementRequest.biome(),
+                        fittestNodes.ultimate().value.unwrapKey().orElseThrow() : replacementRequest.biome(),
                 lowerRequest       == null ? null : lowerRequest.biome().equals(VANILLA_PLACEHOLDER) ?
-                        fittestNodes.ultimate().value.getKey().orElseThrow() : lowerRequest.biome(),
+                        fittestNodes.ultimate().value.unwrapKey().orElseThrow() : lowerRequest.biome(),
                 higherRequest      == null ? null : higherRequest.biome().equals(VANILLA_PLACEHOLDER) ?
-                        fittestNodes.ultimate().value.getKey().orElseThrow() : higherRequest.biome(),
+                        fittestNodes.ultimate().value.unwrapKey().orElseThrow() : higherRequest.biome(),
                 subBiomeRequest    == null || subBiomeRequest.biome().equals(VANILLA_PLACEHOLDER) ? null :
                         subBiomeRequest.biome());
     }
@@ -224,8 +226,8 @@ public abstract class DimensionBiomePlacement {
      * @param biomeEntry Registry entry of the targeted biome
      * @return Entry of the selected biome if any; otherwise entry of the target biome
      */
-    public @NotNull RegistryEntry<Biome> getReplacementEntry(int x, int y, int z, @NotNull RegistryEntry<Biome> biomeEntry) {
-        RegistryKey<Biome> biomeKey = biomeEntry.getKey().orElseThrow();
+    public @NotNull Holder<Biome> getReplacementEntry(int x, int y, int z, @NotNull Holder<Biome> biomeEntry) {
+        ResourceKey<Biome> biomeKey = biomeEntry.unwrapKey().orElseThrow();
 
         // select phase one -- direct replacements
         if (replacementRequests.containsKey(biomeKey)) {
@@ -247,7 +249,7 @@ public abstract class DimensionBiomePlacement {
      * @param replacementNoise Replacement noise value at the targeted point
      * @return Pair of the biome key and registry entry if selected; otherwise null
      */
-    public @Nullable Pair<RegistryKey<Biome>, RegistryEntry<Biome>> getReplacementPair(@Nullable RegistryKey<Biome> biomeKey, float replacementNoise) {
+    public @Nullable Pair<ResourceKey<Biome>, Holder<Biome>> getReplacementPair(@Nullable ResourceKey<Biome> biomeKey, float replacementNoise) {
         // select phase one -- direct replacements
         if (biomeKey != null && replacementRequests.containsKey(biomeKey)) {
             ReplacementRequest request = replacementRequests.get(biomeKey).selectReplacement(replacementNoise);
@@ -276,7 +278,7 @@ public abstract class DimensionBiomePlacement {
      *
      * @return ServerWorld being evaluated
      */
-    public static ServerWorld getEvaluatingWorld() {
+    public static ServerLevel getEvaluatingWorld() {
         return EVALUATING_WORLD.get();
     }
 
@@ -285,9 +287,9 @@ public abstract class DimensionBiomePlacement {
      *
      * @param parameters Consumer of noise-value pairs (parameters)
      */
-    public void writeBiomeEntries(Consumer<Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>>> parameters) {
+    public void writeBiomeEntries(Consumer<Pair<Climate.ParameterPoint, Holder<Biome>>> parameters) {
         biomesInjected = true;
-        RegistryEntryLookup<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
+        HolderGetter<Biome> biomeEntryGetter = BiomeCoordinator.getBiomeLookupOrThrow();
 
         // MultiNoise-based biomes are added directly to the parameters list.
 
@@ -317,9 +319,9 @@ public abstract class DimensionBiomePlacement {
      * @param entryPair Noise hypercube and biome registry entry of removal request to evaluate
      * @return Whether the biome should be <b>retained</b> (false indicates removal)
      */
-    public boolean removalFilter(Pair<MultiNoiseUtil.NoiseHypercube, RegistryEntry<Biome>> entryPair) {
+    public boolean removalFilter(Pair<Climate.ParameterPoint, Holder<Biome>> entryPair) {
         for (RemovalRequest removalRequest : removalRequests) {
-            if (entryPair.getSecond().matchesKey(removalRequest.biome)) {
+            if (entryPair.getSecond().is(removalRequest.biome)) {
                 return false;
             }
         }
@@ -332,30 +334,30 @@ public abstract class DimensionBiomePlacement {
     // Approximation of normalizing K.jpg OpenSimplex2(F) values in [-1,1] to unbiased values in [0,1).
     // It's pretty close but values dip a bit near the edges and 1% at the +1 edge is a bit high.
     protected double normalize(double value) {
-        return MathHelper.clamp(value * 0.5375D + 0.5D, 0D, 1D - Double.MIN_NORMAL);
+        return Mth.clamp(value * 0.5375D + 0.5D, 0D, 1D - Double.MIN_NORMAL);
     }
 
-    protected record PlacementRequest(MultiNoiseUtil.NoiseHypercube hypercube, RegistryKey<Biome> biome, boolean fromData) {
-        public Pair<MultiNoiseUtil.NoiseHypercube, RegistryKey<Biome>> pair() {
+    protected record PlacementRequest(Climate.ParameterPoint hypercube, ResourceKey<Biome> biome, boolean fromData) {
+        public Pair<Climate.ParameterPoint, ResourceKey<Biome>> pair() {
             return Pair.of(hypercube, biome);
         }
     }
 
-    protected record RemovalRequest(RegistryKey<Biome> biome, boolean fromData) {
+    protected record RemovalRequest(ResourceKey<Biome> biome, boolean fromData) {
     }
 
-    protected record ReplacementRequest(RegistryKey<Biome> biome, double rate, RegistryEntry<Biome> biomeEntry, double start, double end, boolean fromData) {
+    protected record ReplacementRequest(ResourceKey<Biome> biome, double rate, Holder<Biome> biomeEntry, double start, double end, boolean fromData) {
         public ReplacementRequest {
-            rate = MathHelper.clamp(rate, 0D, 1D);
+            rate = Mth.clamp(rate, 0D, 1D);
         }
 
-        static ReplacementRequest of(RegistryKey<Biome> biome, double rate, boolean fromData) {
+        static ReplacementRequest of(ResourceKey<Biome> biome, double rate, boolean fromData) {
             return new ReplacementRequest(biome, rate, null, 0D, 0D, fromData);
         }
 
         // Reduced precision range packaged for sub-biome matchers.
-        public Range<Float> range() {
-            return new Range<>((float) start, end > 0.9999D ? 1f : (float) end);
+        public InclusiveRange<Float> range() {
+            return new InclusiveRange<>((float) start, end > 0.9999D ? 1f : (float) end);
         }
 
         @Override
@@ -372,7 +374,7 @@ public abstract class DimensionBiomePlacement {
             return biome.hashCode();
         }
 
-        ReplacementRequest complete(RegistryEntryLookup<Biome> biomeEntryGetter, double start, double end) {
+        ReplacementRequest complete(HolderGetter<Biome> biomeEntryGetter, double start, double end) {
             // Requests must be re-completed after every server restart in case the biome registry has changed.
             // But don't try to resolve the place-holder; it has no registry entry and will crash.
             if (this.biome.equals(VANILLA_PLACEHOLDER)) {
@@ -385,14 +387,14 @@ public abstract class DimensionBiomePlacement {
 
     protected class ReplacementRequestSet {
         private boolean finalized = false;
-        RegistryKey<Biome> target;
+        ResourceKey<Biome> target;
         List<ReplacementRequest> requests = new ArrayList<>(8);
 
-        ReplacementRequestSet(RegistryKey<Biome> target) {
+        ReplacementRequestSet(ResourceKey<Biome> target) {
             this.target = target;
         }
 
-        void addRequest(RegistryKey<Biome> biome, double rate, boolean fromData) {
+        void addRequest(ResourceKey<Biome> biome, double rate, boolean fromData) {
             addRequest(ReplacementRequest.of(biome, rate, fromData));
         }
 
@@ -414,7 +416,7 @@ public abstract class DimensionBiomePlacement {
             return null;
         }
 
-        void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
+        void complete(HolderGetter<Biome> biomeEntryGetter) {
             double maxRate = 0D;
             double locus;
             double vanilla;
@@ -435,7 +437,7 @@ public abstract class DimensionBiomePlacement {
                     maxRate = request.rate;
                 }
             }
-            vanilla = MathHelper.clamp(1D - maxRate, 0D, 1D);
+            vanilla = Mth.clamp(1D - maxRate, 0D, 1D);
             scale = locus + vanilla;
 
             // Add a special request with a place-holder for the vanilla biome, if/when it still generates.
@@ -446,7 +448,7 @@ public abstract class DimensionBiomePlacement {
             // Update saved state with any additions and sort the requests in the new state order.
             Collections.shuffle(requests, seedRandom);
             state.addBiomeReplacements(target, requests.stream().map(ReplacementRequest::biome));
-            List<RegistryKey<Biome>> sortOrder = state.getBiomeReplacements(target).toList();
+            List<ResourceKey<Biome>> sortOrder = state.getBiomeReplacements(target).toList();
             requests.sort(Comparator.comparingInt(request -> sortOrder.indexOf(request.biome)));
 
             // Finalize the request list.
@@ -471,8 +473,8 @@ public abstract class DimensionBiomePlacement {
         }
     }
 
-    protected record SubBiomeRequest(RegistryKey<Biome> biome, Criterion criterion, RegistryEntry<Biome> biomeEntry, boolean fromData) {
-        static SubBiomeRequest of(RegistryKey<Biome> biome, Criterion criterion, boolean fromData) {
+    protected record SubBiomeRequest(ResourceKey<Biome> biome, Criterion criterion, Holder<Biome> biomeEntry, boolean fromData) {
+        static SubBiomeRequest of(ResourceKey<Biome> biome, Criterion criterion, boolean fromData) {
             return new SubBiomeRequest(biome, criterion, null, fromData);
         }
 
@@ -491,7 +493,7 @@ public abstract class DimensionBiomePlacement {
             return biome.hashCode();
         }
 
-        SubBiomeRequest complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
+        SubBiomeRequest complete(HolderGetter<Biome> biomeEntryGetter) {
             // Requests must be re-completed after every server restart in case the biome registry has changed.
             criterion.complete(biomeEntryGetter);
 
@@ -508,14 +510,14 @@ public abstract class DimensionBiomePlacement {
 
     protected class SubBiomeRequestSet {
         private boolean finalized = false;
-        RegistryKey<Biome> target;
+        ResourceKey<Biome> target;
         List<SubBiomeRequest> requests = new ArrayList<>(8);
 
-        SubBiomeRequestSet(RegistryKey<Biome> target) {
+        SubBiomeRequestSet(ResourceKey<Biome> target) {
             this.target = target;
         }
 
-        void addRequest(RegistryKey<Biome> biome, Criterion criterion, boolean fromData) {
+        void addRequest(ResourceKey<Biome> biome, Criterion criterion, boolean fromData) {
             addRequest(SubBiomeRequest.of(biome, criterion, fromData));
         }
 
@@ -527,7 +529,7 @@ public abstract class DimensionBiomePlacement {
             }
         }
 
-        public @Nullable SubBiomeRequest selectSubBiome(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> localRange, double localNoise) {
+        public @Nullable SubBiomeRequest selectSubBiome(BiolithFittestNodes<Holder<Biome>> fittestNodes, Climate.TargetPoint noisePoint, @Nullable InclusiveRange<Float> localRange, double localNoise) {
             for (SubBiomeRequest request : requests) {
                 if (request.criterion().matches(fittestNodes, DimensionBiomePlacement.this , noisePoint, localRange, (float) localNoise)) {
                     return request;
@@ -537,7 +539,7 @@ public abstract class DimensionBiomePlacement {
             return null;
         }
 
-        void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
+        void complete(HolderGetter<Biome> biomeEntryGetter) {
             if (finalized) {
                 throw new IllegalStateException("Attempted to finalize sub-biome requests without first reopening!");
             }
@@ -545,7 +547,7 @@ public abstract class DimensionBiomePlacement {
             // Finalize the request list and store it in a somewhat stable order.
             requests = requests.stream()
                     .map(request -> request.complete(biomeEntryGetter))
-                    .sorted(Comparator.comparing(request -> request.biome.getValue()))
+                    .sorted(Comparator.comparing(request -> request.biome.identifier()))
                     .toList();
             finalized = true;
         }

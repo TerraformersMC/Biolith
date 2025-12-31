@@ -1,6 +1,6 @@
 package com.terraformersmc.biolith.impl.mixin;
 
-import net.minecraft.world.gen.chunk.ChunkGenerator;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -13,7 +13,7 @@ public class MixinChunkGenerator {
      * breaks Biolith in the End by finalizing a partial list of features.  This
      * mixin bypasses the method which finalizes the list too early.
      */
-    @Inject(method = "initializeIndexedFeaturesList", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "validate", at = @At("HEAD"), cancellable = true)
     private void biolith$disableInitializeIndexedFeaturesList(CallbackInfo ci) {
         ci.cancel();
     }

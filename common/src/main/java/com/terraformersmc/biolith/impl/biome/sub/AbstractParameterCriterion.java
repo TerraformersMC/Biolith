@@ -6,15 +6,15 @@ import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTargets;
 import com.terraformersmc.biolith.api.biome.sub.Criterion;
-import net.minecraft.util.dynamic.Range;
+import net.minecraft.util.InclusiveRange;
 
 public abstract class AbstractParameterCriterion implements Criterion {
     protected final BiomeParameterTargets parameter;
-    protected final Range<Float> allowedValues;
+    protected final InclusiveRange<Float> allowedValues;
 
     public AbstractParameterCriterion(BiomeParameterTargets parameter, float min, float max) {
         this.parameter = parameter;
-        this.allowedValues = new Range<>(min, max);
+        this.allowedValues = new InclusiveRange<>(min, max);
     }
 
     protected static <T extends AbstractParameterCriterion> MapCodec<T> buildCodec(Function3<BiomeParameterTargets, Float, Float, T> function) {

@@ -5,14 +5,13 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.dimension.DimensionTypes;
-
 import java.util.List;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public record BiomePlacementMarshaller(List<AddBiomeMarshaller> additions, List<RemoveBiomeMarshaller> removals, List<ReplaceBiomeMarshaller> replacements, List<AddSubBiomeMarshaller> subBiomes) {
     public static final Codec<BiomePlacementMarshaller> CODEC = RecordCodecBuilder.create(
@@ -43,62 +42,62 @@ public record BiomePlacementMarshaller(List<AddBiomeMarshaller> additions, List<
         }
     }
 
-    public record AddBiomeMarshaller(RegistryKey<DimensionType> dimension, RegistryKey<Biome> biome, MultiNoiseUtil.NoiseHypercube noisePoint) {
+    public record AddBiomeMarshaller(ResourceKey<DimensionType> dimension, ResourceKey<Biome> biome, Climate.ParameterPoint noisePoint) {
         public static Codec<AddBiomeMarshaller> CODEC = RecordCodecBuilder.create(
                 (instance) -> instance.group(
-                                RegistryKey.createCodec(RegistryKeys.DIMENSION_TYPE).fieldOf("dimension")
+                                ResourceKey.codec(Registries.DIMENSION_TYPE).fieldOf("dimension")
                                         .forGetter(AddBiomeMarshaller::dimension),
-                                RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("biome")
+                                ResourceKey.codec(Registries.BIOME).fieldOf("biome")
                                         .forGetter(AddBiomeMarshaller::biome),
-                                MultiNoiseUtil.NoiseHypercube.CODEC.fieldOf("noise")
+                                Climate.ParameterPoint.CODEC.fieldOf("noise")
                                         .forGetter(AddBiomeMarshaller::noisePoint)
                         )
                         .apply(instance, AddBiomeMarshaller::new));
 
         public void unmarshall() {
-            if (dimension.equals(DimensionTypes.OVERWORLD)) {
+            if (dimension.equals(BuiltinDimensionTypes.OVERWORLD)) {
                 BiomeCoordinator.OVERWORLD.addPlacement(biome, noisePoint, true);
-            } else if (dimension.equals(DimensionTypes.THE_NETHER)) {
+            } else if (dimension.equals(BuiltinDimensionTypes.NETHER)) {
                 BiomeCoordinator.NETHER.addPlacement(biome, noisePoint, true);
-            } else if (dimension.equals(DimensionTypes.THE_END)) {
+            } else if (dimension.equals(BuiltinDimensionTypes.END)) {
                 BiomeCoordinator.END.addPlacement(biome, noisePoint, true);
             } else {
-                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.getValue());
+                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.identifier());
             }
         }
     }
 
-    public record RemoveBiomeMarshaller(RegistryKey<DimensionType> dimension, RegistryKey<Biome> biome) {
+    public record RemoveBiomeMarshaller(ResourceKey<DimensionType> dimension, ResourceKey<Biome> biome) {
         public static Codec<RemoveBiomeMarshaller> CODEC = RecordCodecBuilder.create(
                 (instance) -> instance.group(
-                                RegistryKey.createCodec(RegistryKeys.DIMENSION_TYPE).fieldOf("dimension")
+                                ResourceKey.codec(Registries.DIMENSION_TYPE).fieldOf("dimension")
                                         .forGetter(RemoveBiomeMarshaller::dimension),
-                                RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("biome")
+                                ResourceKey.codec(Registries.BIOME).fieldOf("biome")
                                         .forGetter(RemoveBiomeMarshaller::biome)
                         )
                         .apply(instance, RemoveBiomeMarshaller::new));
 
         public void unmarshall() {
-            if (dimension.equals(DimensionTypes.OVERWORLD)) {
+            if (dimension.equals(BuiltinDimensionTypes.OVERWORLD)) {
                 BiomeCoordinator.OVERWORLD.addRemoval(biome, true);
-            } else if (dimension.equals(DimensionTypes.THE_NETHER)) {
+            } else if (dimension.equals(BuiltinDimensionTypes.NETHER)) {
                 BiomeCoordinator.NETHER.addRemoval(biome, true);
-            } else if (dimension.equals(DimensionTypes.THE_END)) {
+            } else if (dimension.equals(BuiltinDimensionTypes.END)) {
                 BiomeCoordinator.END.addRemoval(biome, true);
             } else {
-                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.getValue());
+                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.identifier());
             }
         }
     }
 
-    public record ReplaceBiomeMarshaller(RegistryKey<DimensionType> dimension, RegistryKey<Biome> target, RegistryKey<Biome> biome, double proportion) {
+    public record ReplaceBiomeMarshaller(ResourceKey<DimensionType> dimension, ResourceKey<Biome> target, ResourceKey<Biome> biome, double proportion) {
         public static Codec<ReplaceBiomeMarshaller> CODEC = RecordCodecBuilder.create(
                 (instance) -> instance.group(
-                                RegistryKey.createCodec(RegistryKeys.DIMENSION_TYPE).fieldOf("dimension")
+                                ResourceKey.codec(Registries.DIMENSION_TYPE).fieldOf("dimension")
                                         .forGetter(ReplaceBiomeMarshaller::dimension),
-                                RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("target")
+                                ResourceKey.codec(Registries.BIOME).fieldOf("target")
                                         .forGetter(ReplaceBiomeMarshaller::target),
-                                RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("biome")
+                                ResourceKey.codec(Registries.BIOME).fieldOf("biome")
                                         .forGetter(ReplaceBiomeMarshaller::biome),
                                 Codec.DOUBLE.optionalFieldOf("proportion", 1.0d)
                                         .forGetter(ReplaceBiomeMarshaller::proportion)
@@ -106,26 +105,26 @@ public record BiomePlacementMarshaller(List<AddBiomeMarshaller> additions, List<
                         .apply(instance, ReplaceBiomeMarshaller::new));
 
         public void unmarshall() {
-            if (dimension.equals(DimensionTypes.OVERWORLD)) {
+            if (dimension.equals(BuiltinDimensionTypes.OVERWORLD)) {
                 BiomeCoordinator.OVERWORLD.addReplacement(target, biome, proportion, true);
-            } else if (dimension.equals(DimensionTypes.THE_NETHER)) {
+            } else if (dimension.equals(BuiltinDimensionTypes.NETHER)) {
                 BiomeCoordinator.NETHER.addReplacement(target, biome, proportion, true);
-            } else if (dimension.equals(DimensionTypes.THE_END)) {
+            } else if (dimension.equals(BuiltinDimensionTypes.END)) {
                 BiomeCoordinator.END.addReplacement(target, biome, proportion, true);
             } else {
-                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.getValue());
+                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.identifier());
             }
         }
     }
 
-    public record AddSubBiomeMarshaller(RegistryKey<DimensionType> dimension, RegistryKey<Biome> target, RegistryKey<Biome> biome, Criterion criterion) {
+    public record AddSubBiomeMarshaller(ResourceKey<DimensionType> dimension, ResourceKey<Biome> target, ResourceKey<Biome> biome, Criterion criterion) {
         public static Codec<AddSubBiomeMarshaller> CODEC = RecordCodecBuilder.create(
                 (instance) -> instance.group(
-                                RegistryKey.createCodec(RegistryKeys.DIMENSION_TYPE).fieldOf("dimension")
+                                ResourceKey.codec(Registries.DIMENSION_TYPE).fieldOf("dimension")
                                         .forGetter(AddSubBiomeMarshaller::dimension),
-                                RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("target")
+                                ResourceKey.codec(Registries.BIOME).fieldOf("target")
                                         .forGetter(AddSubBiomeMarshaller::target),
-                                RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("biome")
+                                ResourceKey.codec(Registries.BIOME).fieldOf("biome")
                                         .forGetter(AddSubBiomeMarshaller::biome),
                                 Criterion.MATCHER_CODEC.fieldOf("criterion")
                                         .forGetter(AddSubBiomeMarshaller::criterion)
@@ -133,14 +132,14 @@ public record BiomePlacementMarshaller(List<AddBiomeMarshaller> additions, List<
                         .apply(instance, AddSubBiomeMarshaller::new));
 
         public void unmarshall() {
-            if (dimension.equals(DimensionTypes.OVERWORLD)) {
+            if (dimension.equals(BuiltinDimensionTypes.OVERWORLD)) {
                 BiomeCoordinator.OVERWORLD.addSubBiome(target, biome, criterion, true);
-            } else if (dimension.equals(DimensionTypes.THE_NETHER)) {
+            } else if (dimension.equals(BuiltinDimensionTypes.NETHER)) {
                 BiomeCoordinator.NETHER.addSubBiome(target, biome, criterion, true);
-            } else if (dimension.equals(DimensionTypes.THE_END)) {
+            } else if (dimension.equals(BuiltinDimensionTypes.END)) {
                 BiomeCoordinator.END.addSubBiome(target, biome, criterion, true);
             } else {
-                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.getValue());
+                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing biome placement.", dimension.identifier());
             }
         }
     }

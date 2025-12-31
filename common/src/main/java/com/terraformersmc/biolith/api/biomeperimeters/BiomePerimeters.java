@@ -1,9 +1,9 @@
 package com.terraformersmc.biolith.api.biomeperimeters;
 
 import com.terraformersmc.biolith.impl.biomeperimeters.BiomePerimetersImpl;
-import net.minecraft.util.math.*;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.BiomeAccess;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeManager;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -28,7 +28,7 @@ public interface BiomePerimeters {
 	 * @param pos         The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
 	 * @return            The perimeter distance value resolved for the target voxel.
 	 */
-	int getPerimeterDistance(BiomeAccess biomeAccess, BlockPos pos);
+	int getPerimeterDistance(BiomeManager biomeAccess, BlockPos pos);
 
 	/**
 	 * Each Biome must have a separate instance of BiomePerimeters.  An instance of BiomePerimeters

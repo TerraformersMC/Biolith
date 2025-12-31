@@ -6,11 +6,11 @@ import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.dynamic.Range;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import org.jetbrains.annotations.Nullable;
 
 public record NotCriterion(Criterion criterion) implements Criterion {
@@ -32,12 +32,12 @@ public record NotCriterion(Criterion criterion) implements Criterion {
     }
 
     @Override
-    public boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> replacementRange, float replacementNoise) {
+    public boolean matches(BiolithFittestNodes<Holder<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, Climate.TargetPoint noisePoint, @Nullable InclusiveRange<Float> replacementRange, float replacementNoise) {
         return !criterion.matches(fittestNodes, biomePlacement, noisePoint, replacementRange, replacementNoise);
     }
 
     @Override
-    public void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
+    public void complete(HolderGetter<Biome> biomeEntryGetter) {
         criterion.complete(biomeEntryGetter);
     }
 

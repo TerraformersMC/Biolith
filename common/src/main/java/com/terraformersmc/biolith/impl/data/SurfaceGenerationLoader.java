@@ -8,13 +8,6 @@ import com.mojang.serialization.JsonOps;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceFinder;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SinglePreparationResourceReloader;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -22,23 +15,29 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 
-public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<List<SurfaceGenerationMarshaller>> {
-    public static final ResourceFinder SURFACE_GENERATION_FINDER = ResourceFinder.json("biolith/surface_generation");
+public class SurfaceGenerationLoader extends SimplePreparableReloadListener<List<SurfaceGenerationMarshaller>> {
+    public static final FileToIdConverter SURFACE_GENERATION_FINDER = FileToIdConverter.json("biolith/surface_generation");
 
     @Override
-    protected List<SurfaceGenerationMarshaller> prepare(ResourceManager manager, Profiler profiler) {
+    protected List<SurfaceGenerationMarshaller> prepare(ResourceManager manager, ProfilerFiller profiler) {
         profiler.startTick();
         List<SurfaceGenerationMarshaller> marshallers = new ArrayList<>();
 
         profiler.push("biolith/surface_generation");
         try {
-            for (Map.Entry<Identifier, Resource> entry : SURFACE_GENERATION_FINDER.findResources(manager).entrySet()) {
+            for (Map.Entry<Identifier, Resource> entry : SURFACE_GENERATION_FINDER.listMatchingResources(manager).entrySet()) {
                 Resource resource = entry.getValue();
 
-                profiler.push(resource.getPackId());
+                profiler.push(resource.sourcePackId());
                 try {
-                    InputStream inputStream = resource.getInputStream();
+                    InputStream inputStream = resource.open();
                     try {
                         InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                         try {
@@ -72,7 +71,7 @@ public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<L
                     }
                     inputStream.close();
                 } catch (RuntimeException runtimeBreak) {
-                    Biolith.LOGGER.warn("Parsing error loading surface generation '{}': '{}'", resource.getPackId(), runtimeBreak);
+                    Biolith.LOGGER.warn("Parsing error loading surface generation '{}': '{}'", resource.sourcePackId(), runtimeBreak);
                 }
                 profiler.pop();
             }
@@ -86,7 +85,7 @@ public class SurfaceGenerationLoader extends SinglePreparationResourceReloader<L
     }
 
     @Override
-    protected void apply(List<SurfaceGenerationMarshaller> marshallers, ResourceManager manager, Profiler profiler) {
+    protected void apply(List<SurfaceGenerationMarshaller> marshallers, ResourceManager manager, ProfilerFiller profiler) {
         if (BiomeCoordinator.isServerStarted()) {
             Biolith.LOGGER.warn("Ignoring request to reload surface generation data while server is running.");
             return;

@@ -2,23 +2,23 @@ package com.terraformersmc.biolith.impl.commands;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.server.command.ServerCommandSource;
-import net.minecraft.text.Text;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
 
 public class BiolithHelpCommand {
-    protected static int noargs(CommandContext<ServerCommandSource> context) {
-        context.getSource().sendMessage(Text.translatable("biolith.command.hint"));
+    protected static int noargs(CommandContext<CommandSourceStack> context) {
+        context.getSource().sendSystemMessage(Component.translatable("biolith.command.hint"));
 
         return 1;
     }
 
-    protected static int help(CommandContext<ServerCommandSource> context) {
-        context.getSource().sendMessage(Text.translatable("biolith.command.help"));
+    protected static int help(CommandContext<CommandSourceStack> context) {
+        context.getSource().sendSystemMessage(Component.translatable("biolith.command.help"));
 
         return 1;
     }
 
-    protected static int helpSpecific(CommandContext<ServerCommandSource> context) {
+    protected static int helpSpecific(CommandContext<CommandSourceStack> context) {
         String subcommand = StringArgumentType.getString(context, "command");
 
         if (subcommand.compareTo("help") == 0) {
@@ -27,10 +27,10 @@ public class BiolithHelpCommand {
         }
 
         if (BiolithCommands.COMMANDS.contains(subcommand)) {
-            context.getSource().sendMessage(Text.translatable("biolith.command.help." + subcommand));
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.help." + subcommand));
             return 1;
         } else {
-            context.getSource().sendMessage(Text.translatable("biolith.command.help.missing"));
+            context.getSource().sendSystemMessage(Component.translatable("biolith.command.help.missing"));
             return -1;
         }
     }

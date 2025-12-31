@@ -4,23 +4,23 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.feature.ResilientPlacedFeatureIndexer;
-import net.minecraft.registry.entry.RegistryEntryList;
-import net.minecraft.world.gen.feature.PlacedFeature;
-import net.minecraft.world.gen.feature.util.PlacedFeatureIndexer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.List;
 import java.util.function.Function;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.level.biome.FeatureSorter;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
-@Mixin(PlacedFeatureIndexer.class)
+@Mixin(FeatureSorter.class)
 public class MixinPlacedFeatureIndexer {
     @Unique
     private static final ThreadLocal<Boolean> BIOLITH_RECURSION = ThreadLocal.withInitial(() -> false);
 
-    @WrapMethod(method = "collectIndexedFeatures")
-    private static <T> List<PlacedFeatureIndexer.IndexedFeatures> biolith$wrapFeatureIndexer(List<T> biomes, Function<T, List<RegistryEntryList<PlacedFeature>>> biomesToPlacedFeaturesList, boolean listInvolvedBiomesOnFailure, Operation<List<PlacedFeatureIndexer.IndexedFeatures>> original) {
-        List<PlacedFeatureIndexer.IndexedFeatures> features;
+    @WrapMethod(method = "buildFeaturesPerStep")
+    private static <T> List<FeatureSorter.StepFeatureData> biolith$wrapFeatureIndexer(List<T> biomes, Function<T, List<HolderSet<PlacedFeature>>> biomesToPlacedFeaturesList, boolean listInvolvedBiomesOnFailure, Operation<List<FeatureSorter.StepFeatureData>> original) {
+        List<FeatureSorter.StepFeatureData> features;
 
         if (Biolith.getConfigManager().getGeneralConfig().forceResilientFeatureIndexer()) {
             Biolith.LOGGER.info("Using Biolith's resilient feature indexer (force_resilient_feature_indexer = true).");

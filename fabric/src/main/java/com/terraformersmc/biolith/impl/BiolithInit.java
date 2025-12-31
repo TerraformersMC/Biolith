@@ -7,7 +7,7 @@ import com.terraformersmc.biolith.impl.data.SurfaceGenerationLoader;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
 import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
-import net.minecraft.resource.ResourceType;
+import net.minecraft.server.packs.PackType;
 
 public class BiolithInit implements ModInitializer {
     @Override
@@ -23,7 +23,7 @@ public class BiolithInit implements ModInitializer {
             ServerLifecycleEvents.SERVER_STOPPED.register(BiomeCoordinator::handleServerStopped);
 
             // Implement our resource reloaders The Fabric Way (tm).
-            ResourceLoader serverDataLoader = ResourceLoader.get(ResourceType.SERVER_DATA);
+            ResourceLoader serverDataLoader = ResourceLoader.get(PackType.SERVER_DATA);
             serverDataLoader.registerReloader(Biolith.id("biome_placement_loader"), new BiomePlacementLoader());
             serverDataLoader.registerReloader(Biolith.id("surface_generation_loader"), new SurfaceGenerationLoader());
 

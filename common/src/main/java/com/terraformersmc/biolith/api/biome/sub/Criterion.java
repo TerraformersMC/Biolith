@@ -5,11 +5,11 @@ import com.mojang.serialization.MapCodec;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import com.terraformersmc.biolith.impl.biome.sub.AllOfCriterion;
-import net.minecraft.registry.RegistryEntryLookup;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.dynamic.Range;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.util.InclusiveRange;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -36,12 +36,12 @@ public interface Criterion {
      *
      * @param fittestNodes {@link BiolithFittestNodes} as returned by noise biome evaluation
      * @param biomePlacement {@link DimensionBiomePlacement} of the dimension being generated
-     * @param noisePoint {@link MultiNoiseUtil.NoiseValuePoint} at the locus under evaluation
+     * @param noisePoint {@link Climate.TargetPoint} at the locus under evaluation
      * @param replacementRange Biolith replacement noise range of the selected replacement biome
      * @param replacementNoise Biolith replacement noise value at the locus under evaluation
      * @return True if the criterion matches the provided data, and false if it does not
      */
-    boolean matches(BiolithFittestNodes<RegistryEntry<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, MultiNoiseUtil.NoiseValuePoint noisePoint, @Nullable Range<Float> replacementRange, float replacementNoise);
+    boolean matches(BiolithFittestNodes<Holder<Biome>> fittestNodes, DimensionBiomePlacement biomePlacement, Climate.TargetPoint noisePoint, @Nullable InclusiveRange<Float> replacementRange, float replacementNoise);
 
     /**
      * <p>
@@ -54,7 +54,7 @@ public interface Criterion {
      *
      * @param biomeEntryGetter Biome registry entry lookup for the game that is starting
      */
-    default void complete(RegistryEntryLookup<Biome> biomeEntryGetter) {
+    default void complete(HolderGetter<Biome> biomeEntryGetter) {
     }
 
     /**

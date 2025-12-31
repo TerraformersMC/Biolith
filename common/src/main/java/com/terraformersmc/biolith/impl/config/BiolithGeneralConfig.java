@@ -1,7 +1,7 @@
 package com.terraformersmc.biolith.impl.config;
 
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 
 @SuppressWarnings({"FieldMayBeFinal", "FieldCanBeLocal"})
 public class BiolithGeneralConfig {
@@ -22,7 +22,7 @@ public class BiolithGeneralConfig {
 	public int getOverworldReplacementScale() {
 		if (overworldReplacementScale < 1 || overworldReplacementScale > 16) {
 			Biolith.LOGGER.warn("Biolith Overworld replacement noise scale is out of range; clamping to [1,16]...");
-			overworldReplacementScale = MathHelper.clamp(overworldReplacementScale, 1, 16);
+			overworldReplacementScale = Mth.clamp(overworldReplacementScale, 1, 16);
 		}
 
 		return overworldReplacementScale;
@@ -31,7 +31,7 @@ public class BiolithGeneralConfig {
 	public int getNetherReplacementScale() {
 		if (netherReplacementScale < 1 || netherReplacementScale > 16) {
 			Biolith.LOGGER.warn("Biolith Nether replacement noise scale is out of range; clamping to [1,16]...");
-			netherReplacementScale = MathHelper.clamp(netherReplacementScale, 1, 16);
+			netherReplacementScale = Mth.clamp(netherReplacementScale, 1, 16);
 		}
 
 		return netherReplacementScale;
@@ -40,7 +40,7 @@ public class BiolithGeneralConfig {
 	public int getEndReplacementScale() {
 		if (endReplacementScale < 1 || endReplacementScale > 16) {
 			Biolith.LOGGER.warn("Biolith End replacement noise scale is out of range; clamping to [1,16]...");
-			endReplacementScale = MathHelper.clamp(endReplacementScale, 1, 16);
+			endReplacementScale = Mth.clamp(endReplacementScale, 1, 16);
 		}
 
 		return endReplacementScale;

@@ -4,12 +4,18 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.platform.Services;
-import net.minecraft.registry.*;
+import net.minecraft.core.HolderGetter;
+import net.minecraft.core.LayeredRegistryAccess;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.world.ServerWorld;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.dimension.DimensionTypes;
+import net.minecraft.server.RegistryLayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
@@ -25,18 +31,18 @@ public class BiomeCoordinator {
     private static BiolithState OVERWORLD_STATE;
 
     private static boolean serverStarted = false;
-    protected static DynamicRegistryManager.Immutable registryManager;
+    protected static RegistryAccess.Frozen registryManager;
 
     public static boolean isServerStarted() {
         return serverStarted;
     }
 
-    public static void setRegistryManager(CombinedDynamicRegistries<ServerDynamicRegistryType> combinedDynamicRegistries) {
+    public static void setRegistryManager(LayeredRegistryAccess<RegistryLayer> combinedDynamicRegistries) {
         // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer and MixinServerLoader so we can set this really early.
-        registryManager = combinedDynamicRegistries.getCombinedRegistryManager();
+        registryManager = combinedDynamicRegistries.compositeAccess();
     }
 
-    public static @Nullable DynamicRegistryManager.Immutable getRegistryManager() {
+    public static @Nullable RegistryAccess.Frozen getRegistryManager() {
         return registryManager;
     }
 
@@ -45,16 +51,16 @@ public class BiomeCoordinator {
             return Optional.empty();
         }
 
-        return registryManager.getOptional(RegistryKeys.BIOME);
+        return registryManager.lookup(Registries.BIOME);
     }
 
-    public static RegistryEntryLookup<Biome> getBiomeLookupOrThrow() {
+    public static HolderGetter<Biome> getBiomeLookupOrThrow() {
         return getBiomeLookup().orElseThrow();
     }
 
     public static void handleServerStarting(MinecraftServer server) {
         if (registryManager == null) {
-            registryManager = server.getCombinedDynamicRegistries().getCombinedRegistryManager();
+            registryManager = server.registries().compositeAccess();
         }
 
         // When TerraBlender is present, it ignores our surface rules.
@@ -72,40 +78,40 @@ public class BiomeCoordinator {
         }
     }
 
-    public static void handleWorldStarting(ServerWorld world) {
-        Optional<RegistryKey<DimensionType>> dimensionKey = world.getDimensionEntry().getKey();
+    public static void handleWorldStarting(ServerLevel world) {
+        Optional<ResourceKey<DimensionType>> dimensionKey = world.dimensionTypeRegistration().unwrapKey();
 
         if (!serverStarted) {
-            Biolith.LOGGER.error("New world '{}' created when server is not running!", world.getRegistryKey().getValue());
+            Biolith.LOGGER.error("New world '{}' created when server is not running!", world.dimension().identifier());
         }
 
         if (dimensionKey.isPresent()) {
-            if (DimensionTypes.THE_END.equals(dimensionKey.get())) {
+            if (BuiltinDimensionTypes.END.equals(dimensionKey.get())) {
                 if (END_STATE == null) {
-                    END_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType(world));
+                    END_STATE = world.getDataStorage().computeIfAbsent(BiolithState.getPersistentStateType(world));
                     END.serverReplaced(END_STATE, world);
                 } else {
-                    Biolith.LOGGER.warn("More than one End dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), END_STATE.getWorldId());
+                    Biolith.LOGGER.warn("More than one End dimension world created; cowardly ignoring '{}' in favor of '{}'", world.dimension().identifier(), END_STATE.getWorldId());
                 }
-            } else if (DimensionTypes.THE_NETHER.equals(dimensionKey.get())) {
+            } else if (BuiltinDimensionTypes.NETHER.equals(dimensionKey.get())) {
                 if (NETHER_STATE == null) {
-                    NETHER_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType(world));
+                    NETHER_STATE = world.getDataStorage().computeIfAbsent(BiolithState.getPersistentStateType(world));
                     NETHER.serverReplaced(NETHER_STATE, world);
                 } else {
-                    Biolith.LOGGER.warn("More than one Nether dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), NETHER_STATE.getWorldId());
+                    Biolith.LOGGER.warn("More than one Nether dimension world created; cowardly ignoring '{}' in favor of '{}'", world.dimension().identifier(), NETHER_STATE.getWorldId());
                 }
-            } else if (DimensionTypes.OVERWORLD.equals(dimensionKey.get())) {
+            } else if (BuiltinDimensionTypes.OVERWORLD.equals(dimensionKey.get())) {
                 if (OVERWORLD_STATE == null) {
-                    OVERWORLD_STATE = world.getPersistentStateManager().getOrCreate(BiolithState.getPersistentStateType(world));
+                    OVERWORLD_STATE = world.getDataStorage().computeIfAbsent(BiolithState.getPersistentStateType(world));
                     OVERWORLD.serverReplaced(OVERWORLD_STATE, world);
                 } else {
-                    Biolith.LOGGER.warn("More than one Overworld dimension world created; cowardly ignoring '{}' in favor of '{}'", world.getRegistryKey().getValue(), OVERWORLD_STATE.getWorldId());
+                    Biolith.LOGGER.warn("More than one Overworld dimension world created; cowardly ignoring '{}' in favor of '{}'", world.dimension().identifier(), OVERWORLD_STATE.getWorldId());
                 }
             } else {
-                Biolith.LOGGER.info("Ignoring world '{}'; unknown dimension type: {}", world.getRegistryKey().getValue(), dimensionKey.get().getValue());
+                Biolith.LOGGER.info("Ignoring world '{}'; unknown dimension type: {}", world.dimension().identifier(), dimensionKey.get().identifier());
             }
         } else {
-            Biolith.LOGGER.info("Ignoring world '{}'; world has no associated dimension", world.getRegistryKey().getValue());
+            Biolith.LOGGER.info("Ignoring world '{}'; world has no associated dimension", world.dimension().identifier());
         }
     }
 

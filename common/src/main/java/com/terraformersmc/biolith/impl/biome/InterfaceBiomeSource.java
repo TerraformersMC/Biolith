@@ -1,27 +1,27 @@
 package com.terraformersmc.biolith.impl.biome;
 
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.jetbrains.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public interface InterfaceBiomeSource {
-    RegistryKey<DimensionType> DIMENSION_TYPE_UNDEFINED =
-            RegistryKey.of(RegistryKeys.DIMENSION_TYPE, Identifier.of(Biolith.MOD_ID, "undefined"));
+    ResourceKey<DimensionType> DIMENSION_TYPE_UNDEFINED =
+            ResourceKey.create(Registries.DIMENSION_TYPE, Identifier.fromNamespaceAndPath(Biolith.MOD_ID, "undefined"));
 
-    RegistryKey<DimensionType> biolith$getDimensionType();
+    ResourceKey<DimensionType> biolith$getDimensionType();
 
-    void biolith$setDimensionType(RegistryEntry<DimensionType> dimensionTypeEntry);
+    void biolith$setDimensionType(Holder<DimensionType> dimensionTypeEntry);
 
-    void biolith$setDimensionType(RegistryKey<DimensionType> dimensionTypeEntry);
+    void biolith$setDimensionType(ResourceKey<DimensionType> dimensionTypeEntry);
 
-    default @Nullable MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
+    default @Nullable Climate.ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
         return null;
     }
 

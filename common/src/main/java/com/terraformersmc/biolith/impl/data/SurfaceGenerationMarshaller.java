@@ -4,14 +4,13 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.dimension.DimensionTypes;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
-
 import java.util.List;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public record SurfaceGenerationMarshaller(List<SurfaceRuleMarshaller> surfaceRules) {
     public static final Codec<SurfaceGenerationMarshaller> CODEC = RecordCodecBuilder.create(
@@ -27,27 +26,27 @@ public record SurfaceGenerationMarshaller(List<SurfaceRuleMarshaller> surfaceRul
         }
     }
 
-    public record SurfaceRuleMarshaller(RegistryKey<DimensionType> dimension, Identifier rulesOwner, List<MaterialRules.MaterialRule> materialRules) {
+    public record SurfaceRuleMarshaller(ResourceKey<DimensionType> dimension, Identifier rulesOwner, List<SurfaceRules.RuleSource> materialRules) {
         public static Codec<SurfaceRuleMarshaller> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
-                            RegistryKey.createCodec(RegistryKeys.DIMENSION_TYPE).fieldOf("dimension")
+                            ResourceKey.codec(Registries.DIMENSION_TYPE).fieldOf("dimension")
                                     .forGetter(SurfaceRuleMarshaller::dimension),
                             Identifier.CODEC.fieldOf("rules_owner")
                                     .forGetter(SurfaceRuleMarshaller::rulesOwner),
-                            MaterialRules.MaterialRule.CODEC.listOf().optionalFieldOf("material_rules", List.of())
+                            SurfaceRules.RuleSource.CODEC.listOf().optionalFieldOf("material_rules", List.of())
                                     .forGetter(SurfaceRuleMarshaller::materialRules)
                     )
                     .apply(instance, SurfaceRuleMarshaller::new));
 
         public void unmarshall() {
-            if (dimension.equals(DimensionTypes.OVERWORLD)) {
-                SurfaceRuleCollector.OVERWORLD.addFromData(rulesOwner, materialRules.toArray(new MaterialRules.MaterialRule[0]));
-            } else if (dimension.equals(DimensionTypes.THE_NETHER)) {
-                SurfaceRuleCollector.NETHER.addFromData(rulesOwner, materialRules.toArray(new MaterialRules.MaterialRule[0]));
-            } else if (dimension.equals(DimensionTypes.THE_END)) {
-                SurfaceRuleCollector.END.addFromData(rulesOwner, materialRules.toArray(new MaterialRules.MaterialRule[0]));
+            if (dimension.equals(BuiltinDimensionTypes.OVERWORLD)) {
+                SurfaceRuleCollector.OVERWORLD.addFromData(rulesOwner, materialRules.toArray(new SurfaceRules.RuleSource[0]));
+            } else if (dimension.equals(BuiltinDimensionTypes.NETHER)) {
+                SurfaceRuleCollector.NETHER.addFromData(rulesOwner, materialRules.toArray(new SurfaceRules.RuleSource[0]));
+            } else if (dimension.equals(BuiltinDimensionTypes.END)) {
+                SurfaceRuleCollector.END.addFromData(rulesOwner, materialRules.toArray(new SurfaceRules.RuleSource[0]));
             } else {
-                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing surface generation.", dimension.getValue());
+                Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing surface generation.", dimension.identifier());
             }
         }
     }

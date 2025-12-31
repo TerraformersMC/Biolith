@@ -1,13 +1,12 @@
 package com.terraformersmc.biolith.api.biome.sub;
 
 import com.terraformersmc.biolith.impl.biome.sub.*;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.tag.BiomeTags;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.biome.source.util.MultiNoiseUtil;
-
 import java.util.List;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.BiomeTags;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.Climate;
 
 /**
  * CriterionBuilder creates a {@link Criterion} (condition) which must match in order for a sub-biome
@@ -85,7 +84,7 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} used to evaluate whether the raw noise value of the
-     * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is within the provided range.
+     * {@link Climate.TargetPoint} being evaluated is within the provided range.
      * </p><p>
      * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
@@ -102,7 +101,7 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} used to evaluate whether the raw noise value of the
-     * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is at least the provided minimum.
+     * {@link Climate.TargetPoint} being evaluated is at least the provided minimum.
      * </p><p>
      * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
@@ -118,7 +117,7 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} used to evaluate whether the raw noise value of the
-     * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is no more than the provided maximum.
+     * {@link Climate.TargetPoint} being evaluated is no more than the provided maximum.
      * </p><p>
      * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
@@ -134,8 +133,8 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} used to evaluate whether the distance from the center of the
-     * selected biome's {@link MultiNoiseUtil.ParameterRange} to a selected noise value of the
-     * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is within the provided range.
+     * selected biome's {@link Climate.Parameter} to a selected noise value of the
+     * {@link Climate.TargetPoint} being evaluated is within the provided range.
      * </p><p>
      * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
@@ -152,8 +151,8 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} used to evaluate whether the distance from the center of the
-     * selected biome's {@link MultiNoiseUtil.ParameterRange} to a selected noise value of the
-     * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is at least the provided minimum.
+     * selected biome's {@link Climate.Parameter} to a selected noise value of the
+     * {@link Climate.TargetPoint} being evaluated is at least the provided minimum.
      * </p><p>
      * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
@@ -169,8 +168,8 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} used to evaluate whether the distance from the center of the
-     * selected biome's {@link MultiNoiseUtil.ParameterRange} to a selected noise value of the
-     * {@link MultiNoiseUtil.NoiseValuePoint} being evaluated is no more than the provided maximum.
+     * selected biome's {@link Climate.Parameter} to a selected noise value of the
+     * {@link Climate.TargetPoint} being evaluated is no more than the provided maximum.
      * </p><p>
      * The available noise values are detailed in {@link BiomeParameterTargets}.
      * </p>
@@ -242,7 +241,7 @@ public class CriterionBuilder {
      * @param biome The registry key of the biome being evaluated
      * @return The created {@link OriginalCriterion}
      */
-    public static Criterion original(RegistryKey<Biome> biome) {
+    public static Criterion original(ResourceKey<Biome> biome) {
         return new OriginalCriterion(AbstractBiomeCriterion.BiomeTarget.of(biome));
     }
 
@@ -272,7 +271,7 @@ public class CriterionBuilder {
      * @param biome The registry key of the biome being evaluated
      * @return The created {@link NeighborCriterion}
      */
-    public static Criterion neighbor(RegistryKey<Biome> biome) {
+    public static Criterion neighbor(ResourceKey<Biome> biome) {
         return new NeighborCriterion(AbstractBiomeCriterion.BiomeTarget.of(biome));
     }
 
@@ -310,7 +309,7 @@ public class CriterionBuilder {
      * @param alternate The registry key of the alternate, "as-if" biome
      * @return The created {@link AlternateCriterion}
      */
-    public static Criterion alternate(RegistryKey<Biome> biome, RegistryKey<Biome> alternate) {
+    public static Criterion alternate(ResourceKey<Biome> biome, ResourceKey<Biome> alternate) {
         return new AlternateCriterion(AbstractBiomeCriterion.BiomeTarget.of(biome), alternate);
     }
 
@@ -329,7 +328,7 @@ public class CriterionBuilder {
      * @param alternate The registry key of the alternate, "as-if" biome
      * @return The created {@link AlternateCriterion}
      */
-    public static Criterion alternate(TagKey<Biome> tag, RegistryKey<Biome> alternate) {
+    public static Criterion alternate(TagKey<Biome> tag, ResourceKey<Biome> alternate) {
         return new AlternateCriterion(AbstractBiomeCriterion.BiomeTarget.of(tag), alternate);
     }
 }

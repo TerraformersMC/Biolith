@@ -3,12 +3,12 @@ package com.terraformersmc.biolith.api.biome.sub;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Nullables;
+import net.minecraft.Optionull;
+import net.minecraft.resources.Identifier;
 
 public interface CriterionType<T extends Criterion> {
     Codec<CriterionType<?>> TYPE_CODEC = Identifier.CODEC.comapFlatMap(id ->
-        Nullables.mapOrElseGet(CriterionTypes.get(id), DataResult::success, () -> DataResult.error(() -> "Unknown criterion type" + id)),
+        Optionull.mapOrElse(CriterionTypes.get(id), DataResult::success, () -> DataResult.error(() -> "Unknown criterion type" + id)),
         CriterionType::getId
     );
 

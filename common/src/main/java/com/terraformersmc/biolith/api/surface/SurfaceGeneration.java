@@ -2,8 +2,8 @@ package com.terraformersmc.biolith.api.surface;
 
 import com.terraformersmc.biolith.impl.surface.SurfaceBuilderCollector;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
+import net.minecraft.resources.Identifier;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 
 @SuppressWarnings("unused")
 public final class SurfaceGeneration {
@@ -20,7 +20,7 @@ public final class SurfaceGeneration {
      * @param rulesOwner    Rules will be grouped by rulesOwner during sequencing
      * @param materialRules The surface rules to be injected
      */
-    public static void addEndSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
+    public static void addEndSurfaceRules(Identifier rulesOwner, SurfaceRules.RuleSource... materialRules) {
         SurfaceRuleCollector.END.addFromMods(rulesOwner, materialRules);
     }
 
@@ -34,7 +34,7 @@ public final class SurfaceGeneration {
      * @param rulesOwner    Rules will be grouped by rulesOwner during sequencing
      * @param materialRules The surface rules to be injected
      */
-    public static void addNetherSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
+    public static void addNetherSurfaceRules(Identifier rulesOwner, SurfaceRules.RuleSource... materialRules) {
         SurfaceRuleCollector.NETHER.addFromMods(rulesOwner, materialRules);
     }
 
@@ -48,7 +48,7 @@ public final class SurfaceGeneration {
      * @param rulesOwner    Rules will be grouped by rulesOwner during sequencing
      * @param materialRules The rules to be injected
      */
-    public static void addOverworldSurfaceRules(Identifier rulesOwner, MaterialRules.MaterialRule... materialRules) {
+    public static void addOverworldSurfaceRules(Identifier rulesOwner, SurfaceRules.RuleSource... materialRules) {
         SurfaceRuleCollector.OVERWORLD.addFromMods(rulesOwner, materialRules);
     }
 

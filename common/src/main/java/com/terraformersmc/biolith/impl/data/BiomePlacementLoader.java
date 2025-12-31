@@ -7,13 +7,6 @@ import com.mojang.serialization.Decoder;
 import com.mojang.serialization.JsonOps;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
-import net.minecraft.resource.Resource;
-import net.minecraft.resource.ResourceFinder;
-import net.minecraft.resource.ResourceManager;
-import net.minecraft.resource.SinglePreparationResourceReloader;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.profiler.Profiler;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -21,23 +14,29 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 
-public class BiomePlacementLoader extends SinglePreparationResourceReloader<List<BiomePlacementMarshaller>> {
-    public static final ResourceFinder BIOME_PLACEMENT_FINDER = ResourceFinder.json("biolith/biome_placement");
+public class BiomePlacementLoader extends SimplePreparableReloadListener<List<BiomePlacementMarshaller>> {
+    public static final FileToIdConverter BIOME_PLACEMENT_FINDER = FileToIdConverter.json("biolith/biome_placement");
 
     @Override
-    protected List<BiomePlacementMarshaller> prepare(ResourceManager manager, Profiler profiler) {
+    protected List<BiomePlacementMarshaller> prepare(ResourceManager manager, ProfilerFiller profiler) {
         profiler.startTick();
         List<BiomePlacementMarshaller> marshallers = new ArrayList<>();
 
         profiler.push("biolith/biome_placement");
         try {
-            for (Map.Entry<Identifier, Resource> entry : BIOME_PLACEMENT_FINDER.findResources(manager).entrySet()) {
+            for (Map.Entry<Identifier, Resource> entry : BIOME_PLACEMENT_FINDER.listMatchingResources(manager).entrySet()) {
                 Resource resource = entry.getValue();
 
-                profiler.push(resource.getPackId());
+                profiler.push(resource.sourcePackId());
                 try {
-                    InputStream inputStream = resource.getInputStream();
+                    InputStream inputStream = resource.open();
                     try {
                         InputStreamReader reader = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
                         try {
@@ -71,7 +70,7 @@ public class BiomePlacementLoader extends SinglePreparationResourceReloader<List
                     }
                     inputStream.close();
                 } catch (RuntimeException runtimeBreak) {
-                    Biolith.LOGGER.warn("Parsing error loading biome placement '{}': '{}'", resource.getPackId(), runtimeBreak);
+                    Biolith.LOGGER.warn("Parsing error loading biome placement '{}': '{}'", resource.sourcePackId(), runtimeBreak);
                 }
                 profiler.pop();
             }
@@ -85,7 +84,7 @@ public class BiomePlacementLoader extends SinglePreparationResourceReloader<List
     }
 
     @Override
-    protected void apply(List<BiomePlacementMarshaller> marshallers, ResourceManager manager, Profiler profiler) {
+    protected void apply(List<BiomePlacementMarshaller> marshallers, ResourceManager manager, ProfilerFiller profiler) {
         if (BiomeCoordinator.isServerStarted()) {
             Biolith.LOGGER.warn("Ignoring request to reload biome placement data while server is running.");
             return;

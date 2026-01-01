@@ -2,8 +2,12 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
-            name = 'Architectury'
-            url = 'https://maven.architectury.dev/'
+            name = 'Unimined releases'
+            url = 'https://maven.wagyourtail.xyz/releases'
+        }
+        maven {
+            name = 'Unimined snapshots'
+            url = 'https://maven.wagyourtail.xyz/snapshots'
         }
         maven {
             name = 'Fabric'

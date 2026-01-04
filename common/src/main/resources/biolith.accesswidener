@@ -23,3 +23,6 @@ accessible  class   net/minecraft/world/gen/surfacebuilder/MaterialRules$BlockSt
 accessible  field   net/minecraft/world/ChunkRegion world Lnet/minecraft/server/world/ServerWorld;
 accessible  class   net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext
 accessible  method  net/minecraft/world/gen/surfacebuilder/MaterialRules$MaterialRuleContext estimateSurfaceHeight ()I
+accessible class net/minecraft/world/biome/Biome$Weather
+accessible class net/minecraft/world/gen/surfacebuilder/MaterialRules$BooleanSupplier
+accessible method net/minecraft/world/biome/Biome getTemperature (Lnet/minecraft/util/math/BlockPos;I)F

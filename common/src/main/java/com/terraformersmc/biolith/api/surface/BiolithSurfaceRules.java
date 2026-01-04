@@ -140,42 +140,12 @@ public class BiolithSurfaceRules {
 		};
 	}
 
-
     /**
-     * whilst funny-looking, aboveDeepslate (which uses getKey) allows to easily check if a rule is above deepslate
-     * This can potentially preserve performance if doing many expensive checks such as depth noise, which is not cached per-column and thus more expensive per-block
+     * aboveDeepslate allows to easily check if a block is above deepslate (wow!), with perfect matching to deepslate transition noise
+     * This can also be used to preserve performance in certain situations if doing many expensive checks such as depth noise, which is not cached per-column and thus more expensive per-block
      */
     public static MaterialRules.MaterialCondition aboveDeepslate() {
-        return aboveDeepslate("deepslate");
-    }
-    public static MaterialRules.MaterialCondition aboveDeepslate(String key) {
-        return aboveDeepslate(0, key);
-    }
-    public static MaterialRules.MaterialCondition aboveDeepslate(int startY) {
-        return aboveDeepslate(startY, getKey(startY, 8));
-    }
-    public static MaterialRules.MaterialCondition aboveDeepslate(int startY, String key) {
-        return aboveDeepslate(startY, 8, key);
-    }
-    public static MaterialRules.MaterialCondition aboveDeepslate(int startY, int transitonBlocks) {
-        return aboveDeepslate(startY, transitonBlocks, getKey(startY, transitonBlocks));
-    }
-    public static MaterialRules.MaterialCondition aboveDeepslate(int startY, int transitonBlocks, String key) {
-        return aboveDeepslate(YOffset.fixed(startY), YOffset.fixed(startY + transitonBlocks), key);
-    }
-    public static MaterialRules.MaterialCondition aboveDeepslate(YOffset startAnchor, YOffset transitionAnchor, boolean matchDeepslate) {
-        String key;
-        if (matchDeepslate) key = "deepslate";
-        else key = "depth";
-        return aboveDeepslate(startAnchor, transitionAnchor, key);
-    }
-    public static MaterialRules.MaterialCondition aboveDeepslate(YOffset startAnchor, YOffset transitionAnchor, String key) {
-        return MaterialRules.not(MaterialRules.verticalGradient(key, startAnchor, transitionAnchor));
-    }
-
-    public static String getKey(int startY, int transitionBlocks) {
-        if (startY == 0 && transitionBlocks == 8) return "deepslate";
-        else return "depth";
+        return MaterialRules.not(MaterialRules.verticalGradient("deepslate", YOffset.fixed(0), YOffset.fixed(8)));
     }
 
     /**

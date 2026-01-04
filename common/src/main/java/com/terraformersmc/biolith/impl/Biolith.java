@@ -4,6 +4,9 @@ import com.terraformersmc.biolith.impl.biome.sub.BiolithCriteria;
 import com.terraformersmc.biolith.impl.commands.BiolithCommands;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.config.BiolithConfigManager;
+import com.terraformersmc.biolith.impl.surface.BiolithSurfaceConditions;
+import net.minecraft.registry.Registry;
+import net.minecraft.registry.RegistryKey;
 import net.minecraft.util.Identifier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +24,7 @@ public class Biolith {
         BiolithCompat.init();
         BiolithCommands.init();
         BiolithCriteria.init();
+        BiolithSurfaceConditions.init();
     }
 
     public static BiolithConfigManager getConfigManager() {
@@ -29,5 +33,8 @@ public class Biolith {
 
     public static Identifier id(String name) {
         return Identifier.of(MOD_ID, name);
+    }
+    public static <T> RegistryKey<T> key(RegistryKey<? extends Registry<T>> resourceKey, String path) {
+        return RegistryKey.of(resourceKey, id(path));
     }
 }

@@ -17,6 +17,7 @@ public class MixinServerWorld {
     ))
     @SuppressWarnings("unused")
     private ChunkGeneratorStructureState biolith$serverWorldStarting(ServerChunkCache instance, Operation<ChunkGeneratorStructureState> original) {
+        //noinspection ConstantConditions
         BiomeCoordinator.handleWorldStarting((ServerLevel)(Object) this);
 
         return original.call(instance);

@@ -1,27 +1,29 @@
+import groovy.xml.XmlSlurper
+
 unimined.minecraft {
     // Combine with common, for identifying both together as one mod for dev runs
-    combineWith(project(":common").sourceSets.withoutFMJ)
+    combineWith(project(":common").sourceSets.main)
 
     fabric {
         loader project.fabric_loader_version
-        accessWidener file("../common/src/main/resources/biolith.accesswidener")
+        accessWidener file("../common/src/main/resources/biolith.classtweaker")
     }
 }
 
 dependencies {
-    modImplementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    modApi "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
+    implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
+    api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     implementation(project(path: ":common")) { transitive = false }
 
     // Terraform Surfaces API for OpenSimplexNoise
-    //include(modImplementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
+    //include(implementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
 
     // TerraBlender so we can use its API
-    modCompileOnly "com.github.glitchfiend:TerraBlender-fabric:${rootProject.terrablender_version}"
+    compileOnly "com.github.glitchfiend:TerraBlender-fabric:${rootProject.terrablender_version}"
 
     // Moderner Beta so we can target it with mixins
-    modCompileOnly "maven.modrinth:moderner-beta:${rootProject.moderner_beta_version}-fabric"
+    compileOnly "maven.modrinth:moderner-beta:${rootProject.moderner_beta_version}-fabric"
 }
 
 processResources {
@@ -44,7 +46,7 @@ publish {
         rootProject.enabled_platforms.split(",").contains(project.projectDir)
     }
     onlyIf {
-        checkVersion(archivesBaseName, version)
+        checkVersion(project.base.archivesName, version)
     }
 
     curseforge_game_versions = "${rootProject.curseforge_game_versions}, Fabric, Quilt"
@@ -56,13 +58,13 @@ publishing {
         mavenJava(MavenPublication) {
             from components.java
             groupId "${rootProject.maven_group}"
-            artifactId "${project.archivesBaseName}"
+            artifactId "${project.base.archivesName}"
             version "${project.version}"
 
             // Exclude TerraBlender from maven deps so Loom does not load it during builds
             // and tests of other projects using our API (unless they configure it to).
             pom.withXml {
-                asNode().dependencies.dependency.each { dep ->
+                asNode(null).dependencies.dependency.each { dep ->
                     if (dep.artifactId.last().value().last() in ["TerraBlender-fabric", "TerraBlender-forge", "TerraBlender-neoforge"]) {
                         assert dep.parent().remove(dep)
                     }
@@ -90,7 +92,7 @@ static void setupRepositories(RepositoryHandler repositories) {
 
 ext.checkVersion = { archivesBaseName, version ->
     try {
-        def xml = new URL("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").text
+        def xml = new URI("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").toURL().text
         def metadata = new XmlSlurper().parseText(xml)
         def versions = metadata.versioning.versions.version*.text()
         if (versions.contains(version)) {

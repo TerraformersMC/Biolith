@@ -19,7 +19,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Climate;
 
 @Mixin(Climate.RTree.class)
-public class MixinSearchTree<T> implements InterfaceSearchTree<T> {
+public class MixinClimateRTree<T> implements InterfaceSearchTree<T> {
     @Shadow
     @Final
     private Climate.RTree.Node<T> root;

@@ -1,4 +1,4 @@
-accessWidener   v1  named
+classTweaker v1 official
 
 accessible  field   net/minecraft/server/level/WorldGenRegion level Lnet/minecraft/server/level/ServerLevel;
 accessible  method  net/minecraft/world/level/biome/BiomeManager getFiddledDistance (JIIIDDD)D
@@ -22,3 +22,6 @@ accessible  class   net/minecraft/world/level/biome/FeatureSorter$StepFeatureDat
 accessible  method  net/minecraft/world/level/biome/FeatureSorter$StepFeatureData <init> (Ljava/util/List;)V
 accessible  class   net/minecraft/world/level/levelgen/SurfaceRules$Context
 accessible  method  net/minecraft/world/level/levelgen/SurfaceRules$Context getMinSurfaceLevel ()I
+
+inject-interface  net/minecraft/world/level/biome/BiomeSource com/terraformersmc/biolith/impl/biome/InterfaceBiomeSource
+inject-interface  net/minecraft/world/level/biome/Climate$RTree com/terraformersmc/biolith/impl/biome/InterfaceClimateRTree

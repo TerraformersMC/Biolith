@@ -11,7 +11,7 @@
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
     "MixinPlacedFeatureIndexer",
-    "MixinSearchTree",
+    "MixinClimateRTree",
     "MixinServerWorld",
     "MixinSurfaceBuilder",
     "MixinTheEndBiomeSource"

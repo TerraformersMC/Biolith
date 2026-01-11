@@ -1,49 +1,28 @@
 plugins {
     id 'java'
-    id 'xyz.wagyourtail.unimined' version '1.4.1' apply false
+    id 'java-library'
+    id 'xyz.wagyourtail.unimined' version '1.4.+' apply false
 }
 
 subprojects {
     apply plugin: 'xyz.wagyourtail.unimined'
 
-    project.archivesBaseName = "${rootProject.archives_base_name}-${project.name}"
-
-    configurations {
-        modCompileOnly
-        compileOnly.extendsFrom modCompileOnly
-        modApi
-        api.extendsFrom modApi
-    }
+    project.base.archivesName = "${rootProject.archives_base_name}-${project.name}"
 
     unimined.minecraft(sourceSets.main, true) {
         version rootProject.minecraft_version
 
-        mappings {
-            mojmap()
-            devNamespace "mojmap"
-        }
-
         mods {
-            remap(configurations.modCompileOnly) {
-                catchAWNamespaceAssertion()
-            }
-
-            remap(configurations.modApi)
-
-            // This is basically just a shortcut for `remap(configurations.modImplementation)`.
-            modImplementation {
-                // You can do this if mods have the wrong access widener mapping, but it may break runs.
-                catchAWNamespaceAssertion()
-            }
         }
     }
 }
 
 // Ferry for publishing; this has to be after unimined plugin apply and before subproject version is set.
-apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.0/ferry-mpp.gradle'
+apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.1/ferry-mpp.gradle'
 
 allprojects {
     apply plugin: 'java'
+    apply plugin: 'java-library'
     apply plugin: 'maven-publish'
 
     group = rootProject.maven_group

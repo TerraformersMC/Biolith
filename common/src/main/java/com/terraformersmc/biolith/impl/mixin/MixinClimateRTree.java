@@ -1,25 +1,24 @@
 package com.terraformersmc.biolith.impl.mixin;
 
-import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
-import com.terraformersmc.biolith.impl.biome.InterfaceSearchTree;
+import com.terraformersmc.biolith.impl.Biolith;
+import com.terraformersmc.biolith.impl.biome.InterfaceClimateRTree;
 import com.terraformersmc.biolith.impl.biome.SimpleArrayIterator;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.biome.Climate;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.Iterator;
-import net.minecraft.core.Holder;
-import net.minecraft.core.registries.Registries;
-import net.minecraft.resources.Identifier;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.biome.Climate;
 
 @Mixin(Climate.RTree.class)
-public class MixinClimateRTree<T> implements InterfaceSearchTree<T> {
+public class MixinClimateRTree<T> implements InterfaceClimateRTree<T> {
     @Shadow
     @Final
     private Climate.RTree.Node<T> root;
@@ -44,10 +43,13 @@ public class MixinClimateRTree<T> implements InterfaceSearchTree<T> {
         Iterator<Climate.RTree.Node<T>>[] stack = new SimpleArrayIterator[64];
         int stackDepth = 0;
 
-        Climate.RTree.Leaf<T> ultimate = previousUltimateNode.get();
-        Climate.RTree.Leaf<T> penultimate = previousPenultimateNode.get();
+        Climate.RTree.@Nullable Leaf<T> ultimate = previousUltimateNode.get();
+        Climate.RTree.@Nullable Leaf<T> penultimate = previousPenultimateNode.get();
 
+        // Something causes an incorrect @NotNull inference on ThreadLocal.get(), which can return null by design...
+        //noinspection ConstantConditions
         long ultimateDistance = ultimate != null ? distanceFunction.distance(ultimate, otherParameters) : Long.MAX_VALUE;
+        //noinspection ConstantConditions
         long penultimateDistance = penultimate != null ? distanceFunction.distance(penultimate, otherParameters) : Long.MAX_VALUE;
 
         // It's possible for the best and next-best fit to have switched places
@@ -117,6 +119,8 @@ public class MixinClimateRTree<T> implements InterfaceSearchTree<T> {
         previousPenultimateNode.set(penultimate);
 
         // Return the first- and second-best fit nodes, as well as their fitness (squared n-dimensional distance)
+        // Yes, it's still possible for penultimate to be null.
+        //noinspection ConstantConditions
         if (penultimate == null) {
             return new BiolithFittestNodes<>(ultimate, ultimateDistance);
         } else {
@@ -125,7 +129,7 @@ public class MixinClimateRTree<T> implements InterfaceSearchTree<T> {
     }
 
     @Unique
-    private @NotNull ResourceKey<?> biolith$keyOf(@Nullable Climate.RTree.Leaf<T> leafNode) {
+    private ResourceKey<?> biolith$keyOf(Climate.RTree.@Nullable Leaf<T> leafNode) {
         if (leafNode == null) {
             return ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Biolith.MOD_ID, "null"));
         } else {

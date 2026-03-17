@@ -19,7 +19,7 @@ import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 public enum BiolithCompats {
     /**
      * <p>
-     * Compatibility layer for Modern Beta, allowing replacement of biomes in Modern Beta worlds.
+     * Compatibility layer for Modern Beta, allowing replacement of biomes in Modern Beta levels.
      * </p><p>
      * This layer is a temporary alias for {@code MODERNER_BETA}, and will be removed in Biolith 4.
      * </p>
@@ -27,7 +27,7 @@ public enum BiolithCompats {
     @Deprecated(forRemoval = true)
     MODERN_BETA,
     /**
-     * Compatibility layer for Moderner Beta, allowing replacement of biomes in Moderner Beta worlds.
+     * Compatibility layer for Moderner Beta, allowing replacement of biomes in Moderner Beta levels.
      */
     MODERNER_BETA,
     /**
@@ -37,7 +37,7 @@ public enum BiolithCompats {
     /**
      * Compatibility layer for vanilla Minecraft.  At the moment, this compatibility is always enabled, but
      * in future versions it may be disabled under certain circumstances (f.e. Biolith having full control of
-     * worldgen in primary dimensions).
+     * levelgen in primary dimensions).
      */
     VANILLA;
 

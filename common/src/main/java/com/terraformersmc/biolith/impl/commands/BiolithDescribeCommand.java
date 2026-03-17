@@ -5,7 +5,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTargets;
 import com.terraformersmc.biolith.impl.Biolith;
-import com.terraformersmc.biolith.impl.biome.*;
+import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
+import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import com.terraformersmc.biolith.impl.platform.Services;
@@ -25,7 +26,7 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class BiolithDescribeCommand {
     protected static int atCaller(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
@@ -52,9 +53,6 @@ public class BiolithDescribeCommand {
         int biomeZ = QuartPos.fromBlock(pos.getZ());
 
         ServerLevel world = context.getSource().getLevel();
-        if (world == null) {
-            world = context.getSource().getServer().overworld();
-        }
         BiomeSource biomeSource = world.getChunkSource().getGenerator().getBiomeSource();
         Climate.ParameterList<Holder<Biome>> biomeEntries = biomeSource.biolith$getBiomeEntries();
         if (biomeEntries == null) {

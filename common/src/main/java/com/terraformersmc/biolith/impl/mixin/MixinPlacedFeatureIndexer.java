@@ -4,14 +4,14 @@ import com.llamalad7.mixinextras.injector.wrapmethod.WrapMethod;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.feature.ResilientPlacedFeatureIndexer;
+import net.minecraft.core.HolderSet;
+import net.minecraft.world.level.biome.FeatureSorter;
+import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 
 import java.util.List;
 import java.util.function.Function;
-import net.minecraft.core.HolderSet;
-import net.minecraft.world.level.biome.FeatureSorter;
-import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
 @Mixin(FeatureSorter.class)
 public class MixinPlacedFeatureIndexer {

@@ -4,9 +4,6 @@ import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.noise.OpenSimplexNoise2;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.function.Consumer;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.QuartPos;
@@ -17,19 +14,23 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.DensityFunction;
+import org.jspecify.annotations.Nullable;
+
+import java.util.Objects;
+import java.util.function.Consumer;
 
 public class EndBiomePlacement extends DimensionBiomePlacement {
     private final double[] scale = new double[4];
 
-    public Climate.RTree.Leaf<Holder<Biome>> nodeTheEnd;
-    public Climate.RTree.Leaf<Holder<Biome>> nodeSmallEndIslands;
-    public Climate.RTree.Leaf<Holder<Biome>> nodeEndBarrens;
-    public Climate.RTree.Leaf<Holder<Biome>> nodeEndMidlands;
-    public Climate.RTree.Leaf<Holder<Biome>> nodeEndHighlands;
+    public Climate.RTree.@Nullable Leaf<Holder<Biome>> nodeTheEnd;
+    public Climate.RTree.@Nullable Leaf<Holder<Biome>> nodeSmallEndIslands;
+    public Climate.RTree.@Nullable Leaf<Holder<Biome>> nodeEndBarrens;
+    public Climate.RTree.@Nullable Leaf<Holder<Biome>> nodeEndMidlands;
+    public Climate.RTree.@Nullable Leaf<Holder<Biome>> nodeEndHighlands;
 
-    private OpenSimplexNoise2 humidityNoise;
-    private OpenSimplexNoise2 temperatureNoise;
-    private OpenSimplexNoise2 weirdnessNoise;
+    private @Nullable OpenSimplexNoise2 humidityNoise;
+    private @Nullable OpenSimplexNoise2 temperatureNoise;
+    private @Nullable OpenSimplexNoise2 weirdnessNoise;
 
     public EndBiomePlacement() {
         super();
@@ -42,7 +43,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
     }
 
     @Override
-    protected void serverReplaced(@NotNull BiolithState state, ServerLevel world) {
+    protected void serverReplaced(BiolithState state, ServerLevel world) {
         super.serverReplaced(state, world);
 
         // Update vanilla biome entries for the End
@@ -72,6 +73,8 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
 
     @Override
     public double getLocalNoise(int x, int y, int z) {
+        Objects.requireNonNull(replacementNoise);
+
         double localNoise;
 
         // Four octaves to give some edge fuzz
@@ -115,6 +118,10 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
 
     // TODO: This should be replaced with a more robust noise implementation, perhaps also more similar to vanilla.
     public Climate.TargetPoint sampleEndNoise(int x, int y, int z, Climate.Sampler originalNoise, Holder<Biome> originalBiome) {
+        Objects.requireNonNull(humidityNoise);
+        Objects.requireNonNull(temperatureNoise);
+        Objects.requireNonNull(weirdnessNoise);
+
         double erosion = originalNoise.erosion().compute(new DensityFunction.SinglePointContext(
                 QuartPos.toBlock(x),
                 QuartPos.toBlock(y),

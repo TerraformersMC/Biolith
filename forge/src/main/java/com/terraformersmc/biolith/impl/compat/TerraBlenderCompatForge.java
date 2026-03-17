@@ -3,7 +3,6 @@ package com.terraformersmc.biolith.impl.compat;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
-import org.jetbrains.annotations.Nullable;
 import terrablender.api.Region;
 import terrablender.api.SurfaceRuleManager;
 import terrablender.worldgen.IExtendedParameterList;
@@ -14,6 +13,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.SurfaceRules;
+import org.jspecify.annotations.Nullable;
 
 public class TerraBlenderCompatForge implements TerraBlenderCompat {
     @Override
@@ -42,12 +42,12 @@ public class TerraBlenderCompatForge implements TerraBlenderCompat {
         }
 
         // Apply our RTree search implementation to TerraBlender's search tree.
-        fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
+        fittestNodes = InterfaceClimateRTree.cast(searchTree).biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
 
         // TerraBlender requires a second search if the first returned their placeholder biome.
         if (fittestNodes.ultimate().value.is(Region.DEFERRED_PLACEHOLDER)) {
             searchTree = entries.getTree(0);
-            fittestNodes = searchTree.biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
+            fittestNodes = InterfaceClimateRTree.cast(searchTree).biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
         }
 
         return fittestNodes;

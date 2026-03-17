@@ -1,11 +1,12 @@
 package com.terraformersmc.biolith.impl.biome;
 
 import com.mojang.datafixers.util.Pair;
-import java.util.function.Consumer;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
+
+import java.util.function.Consumer;
 
 import static com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement.DEFAULT_PARAMETER;
 import static com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement.OUT_OF_RANGE;

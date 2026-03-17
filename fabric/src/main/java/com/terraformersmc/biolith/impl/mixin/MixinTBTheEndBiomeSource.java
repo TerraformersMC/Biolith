@@ -14,6 +14,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import java.util.Objects;
+
 /*
  * This entire mixin is basically a work-around for TerraBlender's HEAD mixin and @Unique variables.
  * If TerraBlender gets a proper API for End generation, maybe we can toss this in favor of something better.
@@ -56,7 +58,7 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
         Climate.TargetPoint noisePoint = BiomeCoordinator.END.sampleEndNoise(x, y, z, noise, original);
 
         // Select noise biome
-        BiolithFittestNodes<Holder<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, this.biolith$getBiomeEntries(), original);
+        BiolithFittestNodes<Holder<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, Objects.requireNonNull(this.biolith$getBiomeEntries()), original);
 
         // Process any replacements or sub-biomes.
         cir.setReturnValue(BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes));

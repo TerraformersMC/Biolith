@@ -6,6 +6,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.platform.Services;
+import org.jspecify.annotations.Nullable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -14,7 +15,7 @@ import java.nio.file.Path;
 public class BiolithConfigManager {
 	private final Path generalConfigPath;
 	private final Path generalConfigBackupPath;
-	private BiolithGeneralConfig generalConfig;
+	private @Nullable BiolithGeneralConfig generalConfig;
 
 	private static final Gson GSON = new GsonBuilder().setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES).setPrettyPrinting().create();
 

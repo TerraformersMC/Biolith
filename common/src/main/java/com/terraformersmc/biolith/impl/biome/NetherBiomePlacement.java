@@ -2,6 +2,8 @@ package com.terraformersmc.biolith.impl.biome;
 
 import com.terraformersmc.biolith.impl.Biolith;
 
+import java.util.Objects;
+
 public class NetherBiomePlacement extends DimensionBiomePlacement {
     private final double[] scale = new double[5];
 
@@ -18,6 +20,8 @@ public class NetherBiomePlacement extends DimensionBiomePlacement {
 
     @Override
     public double getLocalNoise(int x, int y, int z) {
+        Objects.requireNonNull(replacementNoise);
+
         double localNoise;
 
         // Three octaves to give some edge fuzz

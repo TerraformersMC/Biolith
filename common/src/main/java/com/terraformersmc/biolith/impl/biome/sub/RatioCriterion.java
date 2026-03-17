@@ -3,10 +3,10 @@ package com.terraformersmc.biolith.impl.biome.sub;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.api.biome.sub.BiomeParameterTargets;
 import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
-import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.api.biome.sub.RatioTargets;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.core.Holder;
@@ -14,7 +14,7 @@ import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record RatioCriterion(RatioTargets target, InclusiveRange<Float> allowedValues) implements Criterion {
     public static final MapCodec<RatioCriterion> CODEC = RecordCodecBuilder.mapCodec(

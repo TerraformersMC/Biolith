@@ -5,6 +5,16 @@ import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 
+/**
+ * Code API methods for surface generation strategies:
+ *
+ * <ul>
+ * <li>{@linkplain #addEndSurfaceRules} - Prepend surface rules for End biomes</li>
+ * <li>{@linkplain #addNetherSurfaceRules} - Prepend surface rules for Nether biomes</li>
+ * <li>{@linkplain #addOverworldSurfaceRules} - Prepend surface rules for Overworld biomes</li>
+ * <li>{@linkplain #addSurfaceBuilder} - Add a traditional surface builder (selected by biome)</li>
+ * </ul>
+ */
 @SuppressWarnings("unused")
 public final class SurfaceGeneration {
     private SurfaceGeneration() {

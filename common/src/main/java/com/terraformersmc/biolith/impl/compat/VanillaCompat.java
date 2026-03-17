@@ -66,6 +66,14 @@ public class VanillaCompat {
 
     // This is a smoothed version of vanilla's End biome placement.
     public static Holder<Biome> getOriginalEndBiome(int biomeX, int biomeY, int biomeZ, Climate.Sampler noise) {
+        if (BiomeCoordinator.END.nodeEndHighlands == null) {
+            throw new UnsupportedOperationException("VanillaCompat.getOriginalEndBiome called before End level created.");
+        }
+        assert  BiomeCoordinator.END.nodeTheEnd != null &&
+                BiomeCoordinator.END.nodeEndMidlands != null &&
+                BiomeCoordinator.END.nodeSmallEndIslands != null &&
+                BiomeCoordinator.END.nodeEndBarrens != null;
+
         Holder<Biome> biomeEntry;
 
         int x = QuartPos.toBlock(biomeX);
@@ -101,10 +109,10 @@ public class VanillaCompat {
      * function and returns whatever the function does.  Thus, use of other getBiome implementations is
      * possible without reimplementing chunk storage.
      *
-     * @param function A getBiome tri-function mapping biome coordinates (x, y, z) to RegistryEntry of Biome
+     * @param function A getBiome tri-function mapping biome coordinates (x, y, z) to Holder of Biome
      * @param pos The BlockPos to target with function
      * @param seed The seed of the relevant world
-     * @return RegistryEntry of Biome returned for the smoothed biome coordinates
+     * @return Holder of Biome returned for the smoothed biome coordinates
      */
     public static Holder<Biome> callFunctionWithSmoothedBiomeCoords(TriFunction<Integer, Integer, Integer, Holder<Biome>> function, BlockPos pos, long seed) {
         int centerX = pos.getX() - 2;

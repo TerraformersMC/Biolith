@@ -88,18 +88,20 @@ public enum BiomeParameterTargets implements StringRepresentable {
     }
 
     /**
+     * <p>
      * Compromise method to provide a way to gauge how far below the ocean surface a position is.
-     *
+     * </p></p>
      * This method may be removed in a later API version (Biolith 4 or above) if new features make it redundant.
+     * </p>
      *
      * @param depth A long-type depth noise value
      * @return The long-type calculated depth with ocean surface
      */
     public static long getDepthWithOceanSurfaceLong(long depth) {
-        ServerLevel world = DimensionBiomePlacement.getEvaluatingWorld();
-        int seaLevel = world.getSeaLevel();
-        double bottom = world.getMinY();
-        double top = world.getMaxY();
+        ServerLevel level = DimensionBiomePlacement.getEvaluatingWorld();
+        int seaLevel = level.getSeaLevel();
+        double bottom = level.getMinY();
+        double top = level.getMaxY();
         double bottomNew = 15000;
         double topNew = -15000;
 

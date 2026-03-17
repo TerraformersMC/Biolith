@@ -6,9 +6,10 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.dimension.DimensionType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 @SuppressWarnings("unused")
 public interface InterfaceBiomeSource {
@@ -21,7 +22,7 @@ public interface InterfaceBiomeSource {
 
     void biolith$setDimensionType(ResourceKey<DimensionType> dimensionTypeEntry);
 
-    default @Nullable Climate.ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
+    default Climate.@Nullable ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
         return null;
     }
 
@@ -30,5 +31,10 @@ public interface InterfaceBiomeSource {
     }
 
     default void biolith$setBypass(boolean value) {
+    }
+
+    // Used to extend injected interface coverage to the forges
+    static InterfaceBiomeSource cast(BiomeSource biomeSource) {
+        return biomeSource;
     }
 }

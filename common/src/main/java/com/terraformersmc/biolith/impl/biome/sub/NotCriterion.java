@@ -2,16 +2,16 @@ package com.terraformersmc.biolith.impl.biome.sub;
 
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
+import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.api.biome.sub.CriterionType;
-import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public record NotCriterion(Criterion criterion) implements Criterion {
     public static final MapCodec<NotCriterion> CODEC = RecordCodecBuilder.mapCodec(
@@ -37,8 +37,8 @@ public record NotCriterion(Criterion criterion) implements Criterion {
     }
 
     @Override
-    public void complete(HolderGetter<Biome> biomeEntryGetter) {
-        criterion.complete(biomeEntryGetter);
+    public void complete(HolderGetter<Biome> biomeHolderGetter) {
+        criterion.complete(biomeHolderGetter);
     }
 
     @Override

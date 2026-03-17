@@ -4,10 +4,11 @@ unimined.minecraft {
     // Combine with common, for identifying both together as one mod for dev runs
     combineWith(project(":common").sourceSets.main)
 
-    neoForged {
-        loader neoforge_version
+    neoForge {
+        loader("net.neoforged:neoforge:${neoforge_version}")
         mixinConfig("biolith.mixins.json", "biolith.neoforge.mixins.json")
-        accessTransformer aw2at(file("../common/src/main/resources/biolith.accesswidener"))
+        // TODO: This should be converted from the CT file once that capability exists...
+        accessTransformer aw2at(file("biolith.accesswidener"))
     }
 }
 
@@ -29,6 +30,10 @@ dependencies {
 
     // Moderner Beta so we can target it with mixins
     compileOnly "maven.modrinth:moderner-beta:${rootProject.moderner_beta_version}-neoforge"
+}
+
+tasks.withType(Jar).configureEach {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
 
 processResources {

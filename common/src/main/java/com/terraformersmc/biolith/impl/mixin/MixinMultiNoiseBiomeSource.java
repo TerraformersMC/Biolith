@@ -9,6 +9,10 @@ import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import com.terraformersmc.biolith.impl.platform.Services;
+import net.minecraft.core.Holder;
+import net.minecraft.world.level.biome.*;
+import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
@@ -19,13 +23,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import net.minecraft.core.Holder;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSourceParameterList;
-import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 
 // Inject before TerraBlender so we can ensure our tree search and placement overrides get used.
 @Mixin(value = MultiNoiseBiomeSource.class, priority = 900)
@@ -34,7 +31,7 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
     protected abstract Climate.ParameterList<Holder<Biome>> parameters();
 
     @Unique
-    private Climate.ParameterList<Holder<Biome>> biolith$biomeEntries;
+    private Climate.@Nullable ParameterList<Holder<Biome>> biolith$biomeEntries;
 
     // Inject noise points the first time somebody requests them.
     @WrapOperation(
@@ -111,7 +108,7 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
     }
 
     @Override
-    public Climate.ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
+    public Climate.@Nullable ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
         return biolith$biomeEntries;
     }
 }

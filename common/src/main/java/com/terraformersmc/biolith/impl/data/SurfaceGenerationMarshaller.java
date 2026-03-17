@@ -4,13 +4,14 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
-import java.util.List;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.levelgen.SurfaceRules;
+
+import java.util.List;
 
 public record SurfaceGenerationMarshaller(List<SurfaceRuleMarshaller> surfaceRules) {
     public static final Codec<SurfaceGenerationMarshaller> CODEC = RecordCodecBuilder.create(

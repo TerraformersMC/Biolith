@@ -10,7 +10,7 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A criterion is a condition or set of conditions which must match in order for a sub-biome to replace a biome.
@@ -46,20 +46,20 @@ public interface Criterion {
     /**
      * <p>
      * Called when a game is starting and the biome registry is available.  This is when biome
-     * registry entries and any one-time computations should be cached to speed up evaluation of
+     * registry holders and any one-time computations should be cached to speed up evaluation of
      * the {@link #matches} method.
      * </p><p>
      * Container Criterion implementations must delegate this method to their contained criteria.
      * </p>
      *
-     * @param biomeEntryGetter Biome registry entry lookup for the game that is starting
+     * @param biomeHolderGetter Biome holder lookup for the game that is starting
      */
-    default void complete(HolderGetter<Biome> biomeEntryGetter) {
+    default void complete(HolderGetter<Biome> biomeHolderGetter) {
     }
 
     /**
      * <p>
-     * Called when a game is stopping and cached values such as biome registry entries should be
+     * Called when a game is stopping and cached values such as biome registry holders should be
      * invalidated because they will require re-computation before use.
      * </p><p>
      * Container Criterion implementations must delegate this method to their contained criteria.

@@ -16,7 +16,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -26,12 +26,12 @@ public class BiomeCoordinator {
     public static final OverworldBiomePlacement OVERWORLD = new OverworldBiomePlacement();
     private static boolean registeredWithTerrablender = false;
 
-    private static BiolithState END_STATE;
-    private static BiolithState NETHER_STATE;
-    private static BiolithState OVERWORLD_STATE;
+    private static @Nullable BiolithState END_STATE;
+    private static @Nullable BiolithState NETHER_STATE;
+    private static @Nullable BiolithState OVERWORLD_STATE;
 
     private static boolean serverStarted = false;
-    protected static RegistryAccess.Frozen registryManager;
+    protected static RegistryAccess.@Nullable Frozen registryManager;
 
     public static boolean isServerStarted() {
         return serverStarted;
@@ -42,7 +42,7 @@ public class BiomeCoordinator {
         registryManager = combinedDynamicRegistries.compositeAccess();
     }
 
-    public static @Nullable RegistryAccess.Frozen getRegistryManager() {
+    public static RegistryAccess.@Nullable Frozen getRegistryManager() {
         return registryManager;
     }
 

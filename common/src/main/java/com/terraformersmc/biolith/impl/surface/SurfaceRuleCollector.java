@@ -2,11 +2,11 @@ package com.terraformersmc.biolith.impl.surface;
 
 import com.google.common.collect.Sets;
 import com.terraformersmc.biolith.impl.Biolith;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.*;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.levelgen.SurfaceRules;
+import org.jspecify.annotations.Nullable;
+
+import java.util.*;
 
 public class SurfaceRuleCollector {
     public static final SurfaceRuleCollector END = new SurfaceRuleCollector();
@@ -21,7 +21,7 @@ public class SurfaceRuleCollector {
             MATERIAL_RULES_DATA.computeIfAbsent(ruleOwner, ignored -> new ArrayList<>(4))
                     .addAll(Arrays.stream(materialRules).toList());
         } else {
-            Biolith.LOGGER.warn("Request to add empty surface rule set with ID of '{}'", ruleOwner);
+            Biolith.LOGGER.warn("Request by data to add empty surface rule set with ID of '{}'", ruleOwner);
         }
     }
 
@@ -30,7 +30,7 @@ public class SurfaceRuleCollector {
             MATERIAL_RULES_MODS.computeIfAbsent(ruleOwner, ignored -> new ArrayList<>(4))
                     .addAll(Arrays.stream(materialRules).toList());
         } else {
-            Biolith.LOGGER.warn("Request to add empty surface rule set with ID of '{}'", ruleOwner);
+            Biolith.LOGGER.warn("Request by mod to add empty surface rule set with ID of '{}'", ruleOwner);
         }
     }
 
@@ -42,20 +42,20 @@ public class SurfaceRuleCollector {
         MATERIAL_RULES_MODS.clear();
     }
 
-    public @Nullable SurfaceRules.RuleSource get(Identifier ruleOwner) {
+    public SurfaceRules.@Nullable RuleSource get(Identifier ruleOwner) {
         if (MATERIAL_RULES_DATA.containsKey(ruleOwner)) {
             if (MATERIAL_RULES_DATA.get(ruleOwner).size() > 1) {
                 SurfaceRules.RuleSource[] rules = new SurfaceRules.RuleSource[0];
                 return SurfaceRules.sequence(MATERIAL_RULES_DATA.get(ruleOwner).toArray(rules));
             } else {
-                return MATERIAL_RULES_DATA.get(ruleOwner).get(0);
+                return MATERIAL_RULES_DATA.get(ruleOwner).getFirst();
             }
         } else if (MATERIAL_RULES_MODS.containsKey(ruleOwner)) {
             if (MATERIAL_RULES_MODS.get(ruleOwner).size() > 1) {
                 SurfaceRules.RuleSource[] rules = new SurfaceRules.RuleSource[0];
                 return SurfaceRules.sequence(MATERIAL_RULES_MODS.get(ruleOwner).toArray(rules));
             } else {
-                return MATERIAL_RULES_MODS.get(ruleOwner).get(0);
+                return MATERIAL_RULES_MODS.get(ruleOwner).getFirst();
             }
         }
 
@@ -68,7 +68,7 @@ public class SurfaceRuleCollector {
             return SurfaceRules.sequence(MATERIAL_RULES_DATA.get(ruleOwner).toArray(rules));
         }
 
-        return MATERIAL_RULES_DATA.get(ruleOwner).get(0);
+        return MATERIAL_RULES_DATA.get(ruleOwner).getFirst();
     }
 
     private SurfaceRules.RuleSource getFromMods(Identifier ruleOwner) {
@@ -77,7 +77,7 @@ public class SurfaceRuleCollector {
             return SurfaceRules.sequence(MATERIAL_RULES_MODS.get(ruleOwner).toArray(rules));
         }
 
-        return MATERIAL_RULES_MODS.get(ruleOwner).get(0);
+        return MATERIAL_RULES_MODS.get(ruleOwner).getFirst();
     }
 
     public SurfaceRules.RuleSource[] getAll() {

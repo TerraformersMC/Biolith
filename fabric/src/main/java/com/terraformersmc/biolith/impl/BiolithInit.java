@@ -24,8 +24,8 @@ public class BiolithInit implements ModInitializer {
 
             // Implement our resource reloaders The Fabric Way (tm).
             ResourceLoader serverDataLoader = ResourceLoader.get(PackType.SERVER_DATA);
-            serverDataLoader.registerReloader(Biolith.id("biome_placement_loader"), new BiomePlacementLoader());
-            serverDataLoader.registerReloader(Biolith.id("surface_generation_loader"), new SurfaceGenerationLoader());
+            serverDataLoader.registerReloadListener(Biolith.id("biome_placement_loader"), new BiomePlacementLoader());
+            serverDataLoader.registerReloadListener(Biolith.id("surface_generation_loader"), new SurfaceGenerationLoader());
 
             // Call loader-agnostic init.
             Biolith.init();

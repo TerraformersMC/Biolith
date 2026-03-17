@@ -3,7 +3,6 @@ package com.terraformersmc.biolith.impl.compat;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
-import org.jetbrains.annotations.Nullable;
 import terrablender.api.Region;
 import terrablender.api.SurfaceRuleManager;
 import terrablender.worldgen.IExtendedParameterList;
@@ -14,8 +13,18 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.levelgen.SurfaceRules;
+import org.jspecify.annotations.Nullable;
 
 public class TerraBlenderCompatFabric implements TerraBlenderCompat {
+    @Override
+    public @Nullable BiolithFittestNodes<Holder<Biome>> getBiome(int x, int y, int z, Climate.TargetPoint noisePoint, Climate.ParameterList<Holder<Biome>> biomeEntries) {
+        return null;
+    }
+
+    @Override
+    public void registerSurfaceRules() {
+    }
+/*
     @Override
     @SuppressWarnings("unchecked")
     // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
@@ -80,4 +89,5 @@ public class TerraBlenderCompatFabric implements TerraBlenderCompat {
             }
         });
     }
+*/
 }

@@ -7,6 +7,13 @@ import com.mojang.serialization.Decoder;
 import com.mojang.serialization.JsonOps;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.Identifier;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.util.profiling.ProfilerFiller;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -14,12 +21,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.resources.FileToIdConverter;
-import net.minecraft.resources.Identifier;
-import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
-import net.minecraft.util.profiling.ProfilerFiller;
 
 public class BiomePlacementLoader extends SimplePreparableReloadListener<List<BiomePlacementMarshaller>> {
     public static final FileToIdConverter BIOME_PLACEMENT_FINDER = FileToIdConverter.json("biolith/biome_placement");
@@ -43,11 +44,7 @@ public class BiomePlacementLoader extends SimplePreparableReloadListener<List<Bi
                             profiler.push("parse");
                             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
                             BiomePlacementMarshaller marshaller = get(BiomePlacementMarshaller.CODEC, jsonObject);
-                            if (marshaller != null) {
-                                marshallers.add(marshaller);
-                            } else {
-                                throw new RuntimeException();
-                            }
+                            marshallers.add(marshaller);
                             profiler.pop();
                         } catch (Throwable throwable) {
                             try {
@@ -59,12 +56,10 @@ public class BiomePlacementLoader extends SimplePreparableReloadListener<List<Bi
                         }
                         reader.close();
                     } catch (Throwable throwable) {
-                        if (inputStream != null) {
-                            try {
-                                inputStream.close();
-                            } catch (Throwable closeBreak) {
-                                throwable.addSuppressed(closeBreak);
-                            }
+                        try {
+                            inputStream.close();
+                        } catch (Throwable closeBreak) {
+                            throwable.addSuppressed(closeBreak);
                         }
                         throw throwable;
                     }
@@ -90,7 +85,7 @@ public class BiomePlacementLoader extends SimplePreparableReloadListener<List<Bi
             return;
         }
 
-        if (marshallers.size() > 0) {
+        if (!marshallers.isEmpty()) {
             Biolith.LOGGER.info("Applying biome placement data from {} source(s).", marshallers.size());
         }
 

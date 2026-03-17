@@ -3,19 +3,19 @@ package com.terraformersmc.biolith.impl.feature;
 import com.google.common.collect.ImmutableList;
 import com.google.common.graph.*;
 import com.terraformersmc.biolith.impl.Biolith;
-import org.jetbrains.annotations.NotNull;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderSet;
 import net.minecraft.world.level.biome.FeatureSorter;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Function;
+
 @SuppressWarnings("UnstableApiUsage")
 public class ResilientPlacedFeatureIndexer {
+    @SuppressWarnings("ConstantConditions")  // fake place-holder feature
     private static final IndexedFeature ROOT_FEATURE = new IndexedFeature(Holder.direct(new PlacedFeature(null, null)), -1);
 
     public static <T> List<FeatureSorter.StepFeatureData> collectIndexedFeatures(List<T> biomes, Function<T, List<HolderSet<PlacedFeature>>> biomesToPlacedFeaturesList) {
@@ -97,7 +97,7 @@ public class ResilientPlacedFeatureIndexer {
         }
 
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return featureEntry.getRegisteredName();
         }
     }

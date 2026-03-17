@@ -6,15 +6,14 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.api.biome.sub.Criterion;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Function;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
+import org.jspecify.annotations.Nullable;
+
+import java.util.function.Function;
 
 public abstract class AbstractBiomeCriterion implements Criterion {
     protected final BiomeTarget biomeTarget;
@@ -49,11 +48,11 @@ public abstract class AbstractBiomeCriterion implements Criterion {
             }
         }
 
-        public static BiomeTarget of(@NotNull ResourceKey<Biome> biome) {
+        public static BiomeTarget of(ResourceKey<Biome> biome) {
             return new BiomeTarget(biome, null);
         }
 
-        public static BiomeTarget of(@NotNull TagKey<Biome> tag) {
+        public static BiomeTarget of(TagKey<Biome> tag) {
             return new BiomeTarget(null, tag);
         }
 
@@ -62,6 +61,7 @@ public abstract class AbstractBiomeCriterion implements Criterion {
         }
 
         public DataResult<Either<ResourceKey<Biome>, TagKey<Biome>>> toEither() {
+            assert this.biome != null || this.tag != null;  // enforced by ctor
             return DataResult.success(this.biome != null ?
                     Either.left(this.biome) :
                     Either.right(this.tag)

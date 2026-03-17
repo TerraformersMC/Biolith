@@ -5,13 +5,14 @@ import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.api.biome.sub.Criterion;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
-import java.util.List;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
+
+import java.util.List;
 
 public record BiomePlacementMarshaller(List<AddBiomeMarshaller> additions, List<RemoveBiomeMarshaller> removals, List<ReplaceBiomeMarshaller> replacements, List<AddSubBiomeMarshaller> subBiomes) {
     public static final Codec<BiomePlacementMarshaller> CODEC = RecordCodecBuilder.create(

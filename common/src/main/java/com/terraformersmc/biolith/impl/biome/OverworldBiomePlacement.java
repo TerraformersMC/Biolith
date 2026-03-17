@@ -2,6 +2,8 @@ package com.terraformersmc.biolith.impl.biome;
 
 import com.terraformersmc.biolith.impl.Biolith;
 
+import java.util.Objects;
+
 public class OverworldBiomePlacement extends DimensionBiomePlacement {
     private final double[] scale = new double[4];
 
@@ -17,6 +19,8 @@ public class OverworldBiomePlacement extends DimensionBiomePlacement {
 
     @Override
     public double getLocalNoise(int x, int y, int z) {
+        Objects.requireNonNull(replacementNoise);
+
         double localNoise;
 
         // Four octaves to give some edge fuzz

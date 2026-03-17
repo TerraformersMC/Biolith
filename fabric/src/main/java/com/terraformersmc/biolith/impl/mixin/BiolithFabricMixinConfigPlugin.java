@@ -2,6 +2,7 @@ package com.terraformersmc.biolith.impl.mixin;
 
 import com.google.common.collect.ImmutableMap;
 import net.fabricmc.loader.api.FabricLoader;
+import org.jspecify.annotations.Nullable;
 import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
@@ -31,7 +32,7 @@ public class BiolithFabricMixinConfigPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public String getRefMapperConfig() {
+    public @Nullable String getRefMapperConfig() {
         return null;
     }
 
@@ -40,7 +41,7 @@ public class BiolithFabricMixinConfigPlugin implements IMixinConfigPlugin {
     }
 
     @Override
-    public List<String> getMixins() {
+    public @Nullable List<String> getMixins() {
         return null;
     }
 

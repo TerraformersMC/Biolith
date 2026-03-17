@@ -14,7 +14,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 
@@ -24,8 +24,9 @@ import java.util.stream.Stream;
 
 @Mixin(ModernBetaBiomeSource.class)
 public abstract class MixinMBBiomeSource extends BiomeSource {
+/*
     @Override
-    public @Nullable Climate.ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
+    public Climate.@Nullable ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
         return new Climate.ParameterList<>(this.possibleBiomes().stream().map(
                 biomeEntry -> Pair.of(DimensionBiomePlacement.OUT_OF_RANGE, biomeEntry)
                 ).toList());
@@ -87,4 +88,5 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
 
         return entrySet.stream();
     }
+*/
 }

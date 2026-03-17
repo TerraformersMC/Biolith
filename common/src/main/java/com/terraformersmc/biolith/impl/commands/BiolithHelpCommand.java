@@ -6,7 +6,7 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.Component;
 
 public class BiolithHelpCommand {
-    protected static int noargs(CommandContext<CommandSourceStack> context) {
+    protected static int noArgs(CommandContext<CommandSourceStack> context) {
         context.getSource().sendSystemMessage(Component.translatable("biolith.command.hint"));
 
         return 1;

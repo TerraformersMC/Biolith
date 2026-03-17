@@ -4,9 +4,6 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompat;
-import org.apache.commons.lang3.function.TriFunction;
-
-import java.nio.file.Path;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -15,7 +12,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
+import org.apache.commons.lang3.function.TriFunction;
 
+import java.nio.file.Path;
+
+@SuppressWarnings("unused")
 public interface PlatformHelper {
     /**
      * Gets the name of the current platform

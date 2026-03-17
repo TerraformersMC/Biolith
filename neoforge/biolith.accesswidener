@@ -1,0 +1,24 @@
+accessWidener v1 official
+
+accessible  field   net/minecraft/server/level/WorldGenRegion level Lnet/minecraft/server/level/ServerLevel;
+accessible  method  net/minecraft/world/level/biome/BiomeManager getFiddledDistance (JIIIDDD)D
+accessible  field   net/minecraft/world/level/biome/BiomeManager noiseBiomeSource Lnet/minecraft/world/level/biome/BiomeManager$NoiseBiomeSource;
+accessible  class   net/minecraft/world/level/biome/Climate$DistanceMetric
+accessible  method  net/minecraft/world/level/biome/Climate$DistanceMetric distance (Lnet/minecraft/world/level/biome/Climate$RTree$Node;[J)J
+accessible  class   net/minecraft/world/level/biome/Climate$ParameterList
+accessible  field   net/minecraft/world/level/biome/Climate$ParameterList index Lnet/minecraft/world/level/biome/Climate$RTree;
+accessible  class   net/minecraft/world/level/biome/Climate$RTree
+accessible  class   net/minecraft/world/level/biome/Climate$RTree$Leaf
+accessible  method  net/minecraft/world/level/biome/Climate$RTree$Leaf <init> (Lnet/minecraft/world/level/biome/Climate$ParameterPoint;Ljava/lang/Object;)V
+accessible  field   net/minecraft/world/level/biome/Climate$RTree$Leaf value Ljava/lang/Object;
+accessible  class   net/minecraft/world/level/biome/Climate$RTree$Node
+accessible  method  net/minecraft/world/level/biome/Climate$RTree$Node distance ([J)J
+accessible  field   net/minecraft/world/level/biome/Climate$RTree$Node parameterSpace [Lnet/minecraft/world/level/biome/Climate$Parameter;
+accessible  method  net/minecraft/world/level/biome/Climate$RTree$Node search ([JLnet/minecraft/world/level/biome/Climate$RTree$Leaf;Lnet/minecraft/world/level/biome/Climate$DistanceMetric;)Lnet/minecraft/world/level/biome/Climate$RTree$Leaf;
+accessible  class   net/minecraft/world/level/biome/Climate$RTree$SubTree
+accessible  field   net/minecraft/world/level/biome/Climate$RTree$SubTree children [Lnet/minecraft/world/level/biome/Climate$RTree$Node;
+accessible  method  net/minecraft/world/level/biome/Climate$TargetPoint toParameterArray ()[J
+accessible  class   net/minecraft/world/level/biome/FeatureSorter$StepFeatureData
+accessible  method  net/minecraft/world/level/biome/FeatureSorter$StepFeatureData <init> (Ljava/util/List;)V
+accessible  class   net/minecraft/world/level/levelgen/SurfaceRules$Context
+accessible  method  net/minecraft/world/level/levelgen/SurfaceRules$Context getMinSurfaceLevel ()I

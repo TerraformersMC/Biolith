@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'java-library'
-    id 'xyz.wagyourtail.unimined' version '1.4.+' apply false
+    id 'xyz.wagyourtail.unimined' version '1.4.2+redlance.2' apply false
 }
 
 subprojects {
@@ -15,6 +15,10 @@ subprojects {
         mods {
         }
     }
+
+    // Apply to each valid subproject.
+    apply from: rootProject.file('gradle/package-info.gradle')
+    apply from: rootProject.file('gradle/validate-annotations.gradle')
 }
 
 // Ferry for publishing; this has to be after unimined plugin apply and before subproject version is set.

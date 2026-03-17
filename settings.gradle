@@ -17,6 +17,10 @@ pluginManagement {
             name = 'Forge'
             url = 'https://maven.minecraftforge.net/'
         }
+        maven {
+            name = 'Unimined temporary'
+            url = 'https://repo.redlance.org/public'
+        }
     }
 }
 
@@ -24,4 +28,4 @@ rootProject.name = "biolith"
 include("common")
 include("fabric")
 //include("forge")
-//include("neoforge")
+include("neoforge")

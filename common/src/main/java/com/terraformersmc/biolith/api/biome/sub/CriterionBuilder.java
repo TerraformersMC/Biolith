@@ -1,18 +1,21 @@
 package com.terraformersmc.biolith.api.biome.sub;
 
 import com.terraformersmc.biolith.impl.biome.sub.*;
-import java.util.List;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.BiomeTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 
+import java.util.List;
+
 /**
+ * <p>
  * CriterionBuilder creates a {@link Criterion} (condition) which must match in order for a sub-biome
  * to replace a biome.  A criterion can also be a list of criteria, all or any of which must match.
  * Anywhere the provided criterion is met, the biome will be replaced by the sub-biome.
- * <p></p>
+ * </p>
+ * <p>
  * Writing noise matchers takes a lot of trial and error.  In a hurry, the built-in matchers may provide some relief:
  * <ul>
  * <li>NEAR_BORDER - Tries to target a fairly thin band around the edge of the target biome</li>
@@ -21,6 +24,20 @@ import net.minecraft.world.level.biome.Climate;
  * <li>OCEANSIDE - Targets the edge of a biome near an adjacent ocean</li>
  * <li>RIVERSIDE - Targets the edge of a biome near an adjacent river</li>
  * </ul>
+ * </p><p>
+ * Standard Biolith criteria via the code API:
+ * <ul>
+ * <li>{@linkplain #not} - Container criterion inverting the result of its contained criterion</li>
+ * <li>{@linkplain #allOf} - Container criterion requiring all contained criteria to match</li>
+ * <li>{@linkplain #anyOf} - Container criterion requiring at least one contained criterion to match</li>
+ * <li>{@linkplain #value} - Criterion used to evaluate raw noise values</li>
+ * <li>{@linkplain #deviation} - Criterion used to evaluate noise squared distance from center</li>
+ * <li>{@linkplain #ratio} - Criterion used to evaluate noise relative to center and edge</li>
+ * <li>{@linkplain #original} - Criterion used to check original noise biome before replacement</li>
+ * <li>{@linkplain #neighbor} - Criterion used to check next-best-fit noise biome</li>
+ * <li>{@linkplain #alternate} - Criterion used to check replacement biome had specified biome been selected by noise</li>
+ * </ul>
+ * </p>
  */
 @SuppressWarnings("unused")
 public class CriterionBuilder {
@@ -185,7 +202,7 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} to check computed ratios of the target's center and edge which can be
-     * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the of the
+     * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the
      * selected noise or replacement biome.
      * </p><p>
      * The available noise values are detailed in {@link RatioTargets}.
@@ -203,7 +220,7 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} to check computed ratios of the target's center and edge which can be
-     * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the of the
+     * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the
      * selected noise or replacement biome.
      * </p><p>
      * The available noise values are detailed in {@link RatioTargets}.
@@ -220,7 +237,7 @@ public class CriterionBuilder {
     /**
      * <p>
      * Creates a numerical {@link Criterion} to check computed ratios of the target's center and edge which can be
-     * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the of the
+     * used to evaluate roughly how close the point being evaluated is to the noise center or edge of the
      * selected noise or replacement biome.
      * </p><p>
      * The available noise values are detailed in {@link RatioTargets}.

@@ -3,12 +3,6 @@ package com.terraformersmc.biolith.impl.config;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.impl.Biolith;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
@@ -16,6 +10,13 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.SavedDataType;
+
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @SuppressWarnings("unused")
 public class BiolithState extends SavedData {
@@ -46,8 +47,10 @@ public class BiolithState extends SavedData {
     }
 
     public static SavedDataType<BiolithState> getPersistentStateType(ServerLevel world) {
+        // dataFixType = null is OK here
+        //noinspection ConstantConditions
         return new SavedDataType<>(
-                Biolith.MOD_ID + "_state__" + world.dimension().identifier().toDebugFileName(),
+                Identifier.fromNamespaceAndPath(Biolith.MOD_ID, "state__" + world.dimension().identifier().toDebugFileName()),
                 () -> new BiolithState(world),
                 BiolithState.getCodec(world),
                 null

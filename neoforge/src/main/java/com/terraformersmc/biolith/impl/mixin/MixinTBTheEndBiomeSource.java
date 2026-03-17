@@ -27,6 +27,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  */
 @Mixin(value = TheEndBiomeSource.class, priority = 900)
 public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
+/*
     @Unique
     private static final ThreadLocal<Boolean> bypass = ThreadLocal.withInitial(() -> false);
 
@@ -59,11 +60,13 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
         // Process any replacements or sub-biomes.
         cir.setReturnValue(BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes));
     }
+*/
 
     /*
      * Under normal conditions, TerraBlender will have already canceled, but if bclib is present, it may not.
      * This ensures our main getBiome() mixin will not be called when bypass is true.
      */
+/*
     @Inject(method = "getNoiseBiome", at = @At("RETURN"), cancellable = true)
     private void biolith$cancelGetBiome(int x, int y, int z, Climate.Sampler noise, CallbackInfoReturnable<Holder<Biome>> cir) {
         // Allows us to call unmodified (by us) getBiome() to get TerraBlender values.
@@ -71,4 +74,5 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
             cir.setReturnValue(cir.getReturnValue());
         }
     }
+*/
 }

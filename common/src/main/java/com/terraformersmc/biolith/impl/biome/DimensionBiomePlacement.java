@@ -18,8 +18,7 @@ import net.minecraft.util.InclusiveRange;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 import java.util.*;
 import java.util.function.Consumer;
@@ -27,11 +26,11 @@ import java.util.stream.Collectors;
 
 public abstract class DimensionBiomePlacement {
     protected boolean biomesInjected = false;
-    protected ServerLevel world;
-    protected BiolithState state;
-    protected OpenSimplexNoise2 replacementNoise;
+    protected @Nullable ServerLevel world;
+    protected @Nullable BiolithState state;
+    protected @Nullable OpenSimplexNoise2 replacementNoise;
     protected int[] seedlets = new int[8];
-    protected Random seedRandom;
+    protected @Nullable Random seedRandom;
     protected final Collection<PlacementRequest> placementRequests = new HashSet<>(256);
     protected final Collection<RemovalRequest> removalRequests = new HashSet<>(256);
     protected final HashMap<ResourceKey<Biome>, ReplacementRequestSet> replacementRequests = new HashMap<>(256);
@@ -46,7 +45,7 @@ public abstract class DimensionBiomePlacement {
     protected static final ThreadLocal<Vec3i> EVALUATING_BIOME_POS = new ThreadLocal<>();
     protected static final ThreadLocal<ServerLevel> EVALUATING_WORLD = new ThreadLocal<>();
 
-    protected void serverReplaced(@NotNull BiolithState state, ServerLevel world) {
+    protected void serverReplaced(BiolithState state, ServerLevel world) {
         long seed = world.getSeed();
 
         this.world = world;
@@ -67,6 +66,9 @@ public abstract class DimensionBiomePlacement {
         biomesInjected = false;
         state = null;
         world = null;
+
+        replacementNoise = null;
+        seedRandom = null;
 
         // Reopen completed request lists.
         replacementRequests.forEach((key, list) -> list.reopen());
@@ -125,12 +127,12 @@ public abstract class DimensionBiomePlacement {
             localNoise = getLocalNoise(x, y, z);
             ReplacementRequest request = replacementRequests.get(biomeKey).selectReplacement(localNoise);
 
-            if (request != null) {
+            if (request != null && request.biomeEntry != null) {
                 localRange = request.range();
 
                 if (!request.biome().equals(VANILLA_PLACEHOLDER)) {
-                    biomeEntry = request.biomeEntry();
-                    biomeKey = request.biome();
+                    biomeEntry = request.biomeEntry;
+                    biomeKey = request.biome;
                 }
             }
         }
@@ -141,12 +143,12 @@ public abstract class DimensionBiomePlacement {
                 localNoise = getLocalNoise(x, y, z);
             }
             EVALUATING_BIOME_POS.set(new Vec3i(x, y, z));
-            EVALUATING_WORLD.set(this.world);
+            EVALUATING_WORLD.set(Objects.requireNonNull(this.world));
             SubBiomeRequest request = subBiomeRequests.get(biomeKey).selectSubBiome(fittestNodes, noisePoint, localRange, localNoise);
 
-            if (request != null) {
-                biomeEntry = request.biomeEntry();
-                biomeKey = request.biome();
+            if (request != null && request.biomeEntry != null) {
+                biomeEntry = request.biomeEntry;
+                biomeKey = request.biome;
             }
         }
 
@@ -190,7 +192,7 @@ public abstract class DimensionBiomePlacement {
         }
 
         EVALUATING_BIOME_POS.set(new Vec3i(x, y, z));
-        EVALUATING_WORLD.set(this.world);
+        EVALUATING_WORLD.set(Objects.requireNonNull(this.world));
         if (replacementRequest == null) {
             if (subBiomeRequests.containsKey(biomeKey)) {
                 subBiomeRequest = subBiomeRequests.get(biomeKey).
@@ -226,7 +228,7 @@ public abstract class DimensionBiomePlacement {
      * @param biomeEntry Registry entry of the targeted biome
      * @return Entry of the selected biome if any; otherwise entry of the target biome
      */
-    public @NotNull Holder<Biome> getReplacementEntry(int x, int y, int z, @NotNull Holder<Biome> biomeEntry) {
+    public @Nullable Holder<Biome> getReplacementEntry(int x, int y, int z, Holder<Biome> biomeEntry) {
         ResourceKey<Biome> biomeKey = biomeEntry.unwrapKey().orElseThrow();
 
         // select phase one -- direct replacements
@@ -254,7 +256,7 @@ public abstract class DimensionBiomePlacement {
         if (biomeKey != null && replacementRequests.containsKey(biomeKey)) {
             ReplacementRequest request = replacementRequests.get(biomeKey).selectReplacement(replacementNoise);
 
-            if (request != null && request.biome != null) {
+            if (request != null && request.biomeEntry != null) {
                 return Pair.of(request.biome, request.biomeEntry);
             }
         }
@@ -273,7 +275,7 @@ public abstract class DimensionBiomePlacement {
     }
 
     /**
-     * This is a temporary extension for Biolith 3.0 and 3.1 to allow evaluation of the biome config
+     * This is a temporary extension for Biolith 3.x to allow evaluation of the biome config
      * during sub-biome evaluation without having to modify the Criterion portion of the API.
      *
      * @return ServerWorld being evaluated
@@ -346,7 +348,7 @@ public abstract class DimensionBiomePlacement {
     protected record RemovalRequest(ResourceKey<Biome> biome, boolean fromData) {
     }
 
-    protected record ReplacementRequest(ResourceKey<Biome> biome, double rate, Holder<Biome> biomeEntry, double start, double end, boolean fromData) {
+    protected record ReplacementRequest(ResourceKey<Biome> biome, double rate, @Nullable Holder<Biome> biomeEntry, double start, double end, boolean fromData) {
         public ReplacementRequest {
             rate = Mth.clamp(rate, 0D, 1D);
         }
@@ -445,6 +447,9 @@ public abstract class DimensionBiomePlacement {
                 requests.add(ReplacementRequest.of(VANILLA_PLACEHOLDER, vanilla, false));
             }
 
+            // Guarantees buried in vanilla logic and our mixins
+            assert seedRandom != null && state != null;
+
             // Update saved state with any additions and sort the requests in the new state order.
             Collections.shuffle(requests, seedRandom);
             state.addBiomeReplacements(target, requests.stream().map(ReplacementRequest::biome));
@@ -473,7 +478,7 @@ public abstract class DimensionBiomePlacement {
         }
     }
 
-    protected record SubBiomeRequest(ResourceKey<Biome> biome, Criterion criterion, Holder<Biome> biomeEntry, boolean fromData) {
+    protected record SubBiomeRequest(ResourceKey<Biome> biome, Criterion criterion, @Nullable Holder<Biome> biomeEntry, boolean fromData) {
         static SubBiomeRequest of(ResourceKey<Biome> biome, Criterion criterion, boolean fromData) {
             return new SubBiomeRequest(biome, criterion, null, fromData);
         }

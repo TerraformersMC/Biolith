@@ -11,7 +11,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.RegistryLayer;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.RandomSequences;
 import net.minecraft.world.level.CustomSpawner;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.chunk.ChunkGenerator;
@@ -23,7 +22,6 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.ServerLevelData;
-import org.jetbrains.annotations.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -55,8 +53,8 @@ public abstract class MixinMinecraftServer {
             target = "net/minecraft/server/level/ServerLevel"
     ))
     @SuppressWarnings("unused")
-    private ServerLevel biolith$prependSurfaceRules(MinecraftServer server, Executor workerExecutor, LevelStorageSource.LevelStorageAccess session, ServerLevelData properties, ResourceKey<Level> worldKey, LevelStem dimensionOptions, boolean debugWorld, long seed, List<CustomSpawner> spawners, boolean shouldTickTime, @Nullable RandomSequences randomSequencesState, Operation<ServerLevel> operation) {
-        Optional<ResourceKey<DimensionType>> dimensionKey = dimensionOptions.type().unwrapKey();
+    private ServerLevel biolith$prependSurfaceRules(MinecraftServer server, Executor executor, LevelStorageSource.LevelStorageAccess levelStorage, ServerLevelData levelData, ResourceKey<Level> dimension, LevelStem levelStem, boolean isDebug, long biomeZoomSeed, List<CustomSpawner> customSpawners, boolean tickTime, Operation<ServerLevel> operation) {
+        Optional<ResourceKey<DimensionType>> dimensionKey = levelStem.type().unwrapKey();
         SurfaceRules.RuleSource[] rulesType = new SurfaceRules.RuleSource[0];
         SurfaceRuleCollector surfaceRuleCollector = null;
 
@@ -72,7 +70,7 @@ public abstract class MixinMinecraftServer {
 
         // TODO: Consider whether we need to guard against modifying the same ChunkGeneratorSettings more than once...
         if (surfaceRuleCollector != null && surfaceRuleCollector.getRuleCount() > 0) {
-            ChunkGenerator chunkGenerator = dimensionOptions.generator();
+            ChunkGenerator chunkGenerator = levelStem.generator();
             if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseChunkGenerator) {
                 NoiseGeneratorSettings chunkGeneratorSettings = noiseChunkGenerator.generatorSettings().value();
 
@@ -84,6 +82,6 @@ public abstract class MixinMinecraftServer {
             }
         }
 
-        return operation.call(server, workerExecutor, session, properties, worldKey, dimensionOptions, debugWorld, seed, spawners, shouldTickTime, randomSequencesState);
+        return operation.call(server, executor, levelStorage, levelData, dimension, levelStem, isDebug, biomeZoomSeed, customSpawners, tickTime);
     }
 }

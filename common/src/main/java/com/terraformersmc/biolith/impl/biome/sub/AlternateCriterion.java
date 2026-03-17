@@ -3,8 +3,8 @@ package com.terraformersmc.biolith.impl.biome.sub;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.biome.sub.CriterionType;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import org.jetbrains.annotations.Nullable;
+import org.jspecify.annotations.Nullable;
 
 public class AlternateCriterion extends AbstractBiomeCriterion {
     public static final MapCodec<AlternateCriterion> CODEC = RecordCodecBuilder.mapCodec(
@@ -26,7 +26,7 @@ public class AlternateCriterion extends AbstractBiomeCriterion {
                     .apply(instance, AlternateCriterion::new));
 
     private final ResourceKey<Biome> alternate;
-    private Holder<Biome> alternateEntry;
+    private @Nullable Holder<Biome> alternateEntry;
 
     public AlternateCriterion(BiomeTarget biomeTarget, ResourceKey<Biome> alternate) {
         super(biomeTarget);
@@ -59,8 +59,8 @@ public class AlternateCriterion extends AbstractBiomeCriterion {
     }
 
     @Override
-    public void complete(HolderGetter<Biome> biomeEntryGetter) {
-        alternateEntry = biomeEntryGetter.getOrThrow(alternate);
+    public void complete(HolderGetter<Biome> biomeHolderGetter) {
+        alternateEntry = biomeHolderGetter.getOrThrow(alternate);
     }
 
     @Override

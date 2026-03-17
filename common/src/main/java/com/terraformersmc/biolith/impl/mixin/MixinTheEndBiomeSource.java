@@ -10,17 +10,6 @@ import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.VanillaEndBiomeParameters;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
-import org.jetbrains.annotations.NotNull;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Unique;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.stream.Stream;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.core.QuartPos;
@@ -30,13 +19,24 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import net.minecraft.world.level.levelgen.DensityFunction;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Unique;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.jspecify.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Mixin(value = TheEndBiomeSource.class, priority = 990)
 public abstract class MixinTheEndBiomeSource extends BiomeSource {
     @Unique
-    private static HolderGetter<Biome> biolith$biomeLookup;
+    private static @Nullable HolderGetter<Biome> biolith$biomeLookup;
     @Unique
-    private static Climate.ParameterList<Holder<Biome>> biolith$biomeEntries;
+    private static Climate.@Nullable ParameterList<Holder<Biome>> biolith$biomeEntries;
 
     @Inject(method = "create", at = @At("HEAD"))
     private static void biolith$getRegistry(HolderGetter<Biome> biomeLookup, CallbackInfoReturnable<TheEndBiomeSource> cir) {
@@ -119,7 +119,7 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
     }
 
     @Override
-    public @NotNull Climate.ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
+    public Climate.ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
         // I don't know why this hasn't always happened already, but sometimes it hasn't...
         if (biolith$biomeEntries == null) {
             this.collectPossibleBiomes();

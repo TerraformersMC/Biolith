@@ -119,5 +119,9 @@ runs/
 # Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
 !gradle-wrapper.jar
 
+# Generated sources
+# The trailing * is important, otherwise Git wouldn't evaluate the directories at all and we wouldn't be able to un-ignore some of them.
+**/src/generated/*
+
 # Forges via Unimined
 accesstransformer.cfg

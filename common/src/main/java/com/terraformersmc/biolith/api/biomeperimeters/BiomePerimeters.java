@@ -24,11 +24,11 @@ public interface BiomePerimeters {
 	 * distance to the perimeter if it is less than the instance's configured horizon, and a value greater than or
 	 * equal to the configured horizon if it is not.
 	 *
-	 * @param biomeAccess Biome access used to determine whether neighboring voxels are in-biome.
+	 * @param biomeManager Biome access used to determine whether neighboring voxels are in-biome.
 	 * @param pos         The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
 	 * @return            The perimeter distance value resolved for the target voxel.
 	 */
-	int getPerimeterDistance(BiomeManager biomeAccess, BlockPos pos);
+	int getPerimeterDistance(BiomeManager biomeManager, BlockPos pos);
 
 	/**
 	 * Each Biome must have a separate instance of BiomePerimeters.  An instance of BiomePerimeters

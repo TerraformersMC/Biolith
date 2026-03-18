@@ -42,7 +42,7 @@ publish {
         rootProject.enabled_platforms.split(",").contains(project.projectDir)
     }
     onlyIf {
-        checkVersion(project.base.archivesName, version)
+        checkVersion(project.base.archivesName.get(), version)
     }
 
     curseforge_game_versions = "${rootProject.curseforge_game_versions}, Forge"
@@ -52,21 +52,21 @@ publish {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            // Gradle's config cache forces stupid hacks
-            Provider<String> groupIdProvider = project.provider { rootProject.maven_group.toString() }
-            Provider<String> artifactIdProvider = project.provider { project.base.archivesName.toString() }
-            Provider<String> versionProvider = project.provider { project.version.toString() }
-
             from components.java
-            groupId = groupIdProvider.get()
-            artifactId = artifactIdProvider.get()
-            version = versionProvider.get()
+            groupId = "${rootProject.maven_group}"
+            artifactId = "${project.base.archivesName.get()}"
+            version = "${rootProject.version}"
 
-            // Exclude TerraBlender from maven deps so Loom does not load it during builds
-            // and tests of other projects using our API (unless they configure it to).
             pom.withXml {
                 asNode().dependencies.dependency.each { dep ->
+                    // Exclude TerraBlender from maven deps so Loom does not load it during builds
+                    // and tests of other projects using our API (unless they configure it to).
                     if (dep.artifactId.last().value().last() in ["TerraBlender-fabric", "TerraBlender-forge", "TerraBlender-neoforge"]) {
+                        assert dep.parent().remove(dep)
+                    }
+
+                    // Exclude merged common project from maven deps to prevent Loom doing anything stupid.
+                    if (dep.artifactId.last().value().last() in ["common"]) {
                         assert dep.parent().remove(dep)
                     }
                 }

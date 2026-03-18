@@ -52,10 +52,15 @@ publish {
 publishing {
     publications {
         mavenJava(MavenPublication) {
+            // Gradle's config cache forces stupid hacks
+            Provider<String> groupIdProvider = project.provider { rootProject.maven_group.toString() }
+            Provider<String> artifactIdProvider = project.provider { project.base.archivesName.toString() }
+            Provider<String> versionProvider = project.provider { project.version.toString() }
+
             from components.java
-            groupId "${rootProject.maven_group}"
-            artifactId "${project.base.archivesName}"
-            version "${project.version}"
+            groupId = groupIdProvider.get()
+            artifactId = artifactIdProvider.get()
+            version = versionProvider.get()
 
             // Exclude TerraBlender from maven deps so Loom does not load it during builds
             // and tests of other projects using our API (unless they configure it to).

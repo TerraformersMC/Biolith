@@ -16,7 +16,7 @@ import org.apache.commons.lang3.function.TriFunction;
 
 public class VanillaCompat {
     @SuppressWarnings("unchecked")
-    // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
+    // Unchecked because of parameterized types (which are always Holder<Biome>)
     public static BiolithFittestNodes<Holder<Biome>> getBiome(Climate.TargetPoint noisePoint, Climate.ParameterList<Holder<Biome>> entries) {
         return entries.index.biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
     }
@@ -40,7 +40,7 @@ public class VanillaCompat {
             fittestNodes = new BiolithFittestNodes<>(ultimate, 0);
         } else {
             // Evaluate the best fit biome by noise at the noise point.
-            // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
+            // Unchecked because of parameterized types (which are always Holder<Biome>)
             //noinspection unchecked
             fittestNodes = entries.index.biolith$searchTreeGet(noisePoint, Climate.RTree.Node::distance);
         }

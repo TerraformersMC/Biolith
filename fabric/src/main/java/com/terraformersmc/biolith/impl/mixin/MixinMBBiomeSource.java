@@ -47,7 +47,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
     @WrapOperation(method = {"getCaveBiome"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lmod/bluestaggo/modernerbeta/api/level/cavebiome/CaveBiomeProvider;getBiome(III)Lnet/minecraft/registry/entry/RegistryEntry;"
+                    target = "Lmod/bluestaggo/modernerbeta/api/level/cavebiome/CaveBiomeProvider;getBiome(III)Lnet/minecraft/core/Holder;"
             )
     )
     @SuppressWarnings("unused")
@@ -66,7 +66,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
     @WrapOperation(method = {"getBiomeForSpawn", "getBiomeForSurfaceGen"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lmod/bluestaggo/modernerbeta/api/level/biome/BiomeResolverBlock;getBiomeBlock(III)Lnet/minecraft/registry/entry/RegistryEntry;"
+                    target = "Lmod/bluestaggo/modernerbeta/api/level/biome/BiomeResolverBlock;getBiomeBlock(III)Lnet/minecraft/core/Holder;"
             )
     )
     @SuppressWarnings("unused")

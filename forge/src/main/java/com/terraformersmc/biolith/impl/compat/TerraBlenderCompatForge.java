@@ -18,7 +18,7 @@ import org.jspecify.annotations.Nullable;
 public class TerraBlenderCompatForge implements TerraBlenderCompat {
     @Override
     @SuppressWarnings("unchecked")
-    // Unchecked because of parameterized types (which are always RegistryEntry<Biome>)
+    // Unchecked because of parameterized types (which are always Holder<Biome>)
     public @Nullable BiolithFittestNodes<Holder<Biome>> getBiome(int x, int y, int z, Climate.TargetPoint noisePoint, Climate.ParameterList<Holder<Biome>> biomeEntries) {
         BiolithFittestNodes<Holder<Biome>> fittestNodes;
 

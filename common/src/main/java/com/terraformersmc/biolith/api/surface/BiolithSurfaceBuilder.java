@@ -62,7 +62,7 @@ public abstract class BiolithSurfaceBuilder {
 	 * evaluates biomes set in setBiomeKey() and setBiomeTag() is sufficient for most requirements:
 	 *
 	 * <pre>{@code
-	 * public boolean filterBiome(RegistryEntry<Biome> biome) {
+	 * public boolean filterBiome(Holder<Biome> biome) {
 	 *     if (biomeKey != null) {
 	 *         return biome.matchesKey(biomeKey);
 	 *     } else if (biomeTag != null) {

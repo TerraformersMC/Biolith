@@ -14,7 +14,7 @@ dependencies {
     implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
     api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
-    implementation(project(path: ":common")) { transitive = false }
+    compileOnly(project(path: ":common")) { transitive = false }
 
     // Terraform Surfaces API for OpenSimplexNoise
     //include(implementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
@@ -46,7 +46,7 @@ sourcesJar {
 
 publish {
     onlyIf {
-        rootProject.enabled_platforms.split(",").contains(project.projectDir)
+        enabled_platforms.split(',').contains(project.projectDir)
     }
     onlyIf {
         checkVersion(project.base.archivesName.get(), version)

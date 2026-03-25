@@ -6,6 +6,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.biome.DimensionBiomePlacement;
+import com.terraformersmc.biolith.impl.biome.InterfaceBiomeSource;
 import mod.bluestaggo.modernerbeta.api.level.biome.BiomeProvider;
 import mod.bluestaggo.modernerbeta.api.level.biome.BiomeResolverBlock;
 import mod.bluestaggo.modernerbeta.api.level.cavebiome.CaveBiomeProvider;
@@ -23,8 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Mixin(ModernBetaBiomeSource.class)
-public abstract class MixinMBBiomeSource extends BiomeSource {
-/*
+public abstract class MixinMBBiomeSource extends BiomeSource implements InterfaceBiomeSource {
     @Override
     public Climate.@Nullable ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
         return new Climate.ParameterList<>(this.possibleBiomes().stream().map(
@@ -48,7 +48,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
     @WrapOperation(method = {"getCaveBiome"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lmod/bluestaggo/modernerbeta/api/level/cavebiome/CaveBiomeProvider;getBiome(III)Lnet/minecraft/registry/entry/RegistryEntry;"
+                    target = "Lmod/bluestaggo/modernerbeta/api/level/cavebiome/CaveBiomeProvider;getBiome(III)Lnet/minecraft/core/Holder;"
             )
     )
     @SuppressWarnings("unused")
@@ -66,7 +66,7 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
     @WrapOperation(method = {"getBiomeForSpawn", "getBiomeForSurfaceGen"},
             at = @At(
                     value = "INVOKE",
-                    target = "Lmod/bluestaggo/modernerbeta/api/level/biome/BiomeResolverBlock;getBiomeBlock(III)Lnet/minecraft/registry/entry/RegistryEntry;"
+                    target = "Lmod/bluestaggo/modernerbeta/api/level/biome/BiomeResolverBlock;getBiomeBlock(III)Lnet/minecraft/core/Holder;"
             )
     )
     @SuppressWarnings("unused")
@@ -88,5 +88,4 @@ public abstract class MixinMBBiomeSource extends BiomeSource {
 
         return entrySet.stream();
     }
-*/
 }

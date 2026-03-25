@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation(project(path: ":common")) { transitive = false }
+    compileOnly(project(path: ":common")) { transitive = false }
 
     // Terraform Surfaces API for OpenSimplexNoise
     //include(implementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
@@ -46,7 +46,7 @@ processResources {
 
 publish {
     onlyIf {
-        rootProject.enabled_platforms.split(",").contains(project.projectDir)
+        enabled_platforms.split(',').contains(project.projectDir)
     }
     onlyIf {
         checkVersion(project.base.archivesName.get(), version)

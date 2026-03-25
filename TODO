@@ -2,9 +2,6 @@ Quick list of important to-do items from the hell that was upgrading to 26.1.
 
 * neoforge/build.gradle
 * neoforge/biolith.accesswidener
-* neoforge: ~~MixinMBBiomeSource~~, MixinTBTheEndBiomeSource
-* ~~ModernerBetaCompat*~~ and TerraBlenderCompat*
-* Implemented interface on ModernerBetaCompat for Neo
 * Unimined to official version
 * settings.gradle mavenLocal()
 

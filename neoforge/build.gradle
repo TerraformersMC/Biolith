@@ -71,11 +71,6 @@ publishing {
                     if (dep.artifactId.last().value().last() in ["TerraBlender-fabric", "TerraBlender-forge", "TerraBlender-neoforge"]) {
                         assert dep.parent().remove(dep)
                     }
-
-                    // Exclude merged common project from maven deps to prevent Loom doing anything stupid.
-                    if (dep.artifactId.last().value().last() in ["common"]) {
-                        assert dep.parent().remove(dep)
-                    }
                 }
             }
         }

@@ -17,15 +17,6 @@ import org.jspecify.annotations.Nullable;
 
 public class TerraBlenderCompatFabric implements TerraBlenderCompat {
     @Override
-    public @Nullable BiolithFittestNodes<Holder<Biome>> getBiome(int x, int y, int z, Climate.TargetPoint noisePoint, Climate.ParameterList<Holder<Biome>> biomeEntries) {
-        return null;
-    }
-
-    @Override
-    public void registerSurfaceRules() {
-    }
-/*
-    @Override
     @SuppressWarnings("unchecked")
     // Unchecked because of parameterized types (which are always Holder<Biome>)
     public @Nullable BiolithFittestNodes<Holder<Biome>> getBiome(int x, int y, int z, Climate.TargetPoint noisePoint, Climate.ParameterList<Holder<Biome>> biomeEntries) {
@@ -89,5 +80,4 @@ public class TerraBlenderCompatFabric implements TerraBlenderCompat {
             }
         });
     }
-*/
 }

@@ -20,10 +20,6 @@ import static com.terraformersmc.biolith.impl.commands.BiolithDescribeCommand.te
 
 public class ModernerBetaCompatFabric {
     public static int describe(CommandContext<CommandSourceStack> context, int biomeX, int biomeY, int biomeZ, ServerLevel world, BiomeSource biomeSource, Climate.ParameterList<Holder<Biome>> biomeEntries, Climate.Sampler noise) {
-        return 0;
-    }
-/*
-    public static int describe(CommandContext<CommandSourceStack> context, int biomeX, int biomeY, int biomeZ, ServerLevel world, BiomeSource biomeSource, Climate.ParameterList<Holder<Biome>> biomeEntries, Climate.Sampler noise) {
         if (!(biomeSource instanceof ModernBetaBiomeSource)) {
             return 0;
         }
@@ -76,5 +72,4 @@ public class ModernerBetaCompatFabric {
 
         return 1;
     }
-*/
 }

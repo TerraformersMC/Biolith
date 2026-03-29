@@ -1,8 +1,9 @@
 Quick list of important to-do items from the hell that was upgrading to 26.1.
 
+* forge/build.gradle
+* forge/biolith.accesswidener
 * neoforge/build.gradle
 * neoforge/biolith.accesswidener
-* Unimined to official version
 * settings.gradle mavenLocal()
 
 * Internal names to mojmap-esq

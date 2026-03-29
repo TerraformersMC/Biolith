@@ -5,9 +5,9 @@ unimined.minecraft {
     combineWith(project(":common").sourceSets.main)
 
     minecraftForge {
-        loader("net.minecraftforge:forge:${forge_version}")
+        loader forge_version
         mixinConfig("biolith.mixins.json", "biolith.forge.mixins.json")
-        accessTransformer aw2at(file("../common/src/main/resources/biolith.accesswidener"))
+        accessTransformer aw2at(file("biolith.accesswidener"))
     }
 }
 
@@ -52,20 +52,12 @@ publish {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            from components.java
+            artifact tasks.remapJar
+            artifact tasks.sourcesJar
+
             groupId = "${rootProject.maven_group}"
             artifactId = "${project.base.archivesName.get()}"
             version = "${rootProject.version}"
-
-            pom.withXml {
-                asNode().dependencies.dependency.each { dep ->
-                    // Exclude TerraBlender from maven deps so Loom does not load it during builds
-                    // and tests of other projects using our API (unless they configure it to).
-                    if (dep.artifactId.last().value().last() in ["TerraBlender-fabric", "TerraBlender-forge", "TerraBlender-neoforge"]) {
-                        assert dep.parent().remove(dep)
-                    }
-                }
-            }
         }
     }
 

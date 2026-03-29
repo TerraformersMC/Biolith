@@ -2,6 +2,7 @@ package com.terraformersmc.biolith.impl.mixin;
 
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
+import com.terraformersmc.biolith.impl.biome.InterfaceBiomeSource;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
@@ -13,6 +14,8 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+
+import java.util.Objects;
 
 /*
  * This entire mixin is basically a work-around for TerraBlender's HEAD mixin and @Unique variables.
@@ -26,7 +29,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
  * Priority 900 places this mixin in front of both TerraBlender and our main TheEndBiomeSource mixin.
  */
 @Mixin(value = TheEndBiomeSource.class, priority = 900)
-public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
+public abstract class MixinTBTheEndBiomeSource extends BiomeSource implements InterfaceBiomeSource {
     @Unique
     private static final ThreadLocal<Boolean> bypass = ThreadLocal.withInitial(() -> false);
 
@@ -54,7 +57,7 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
         Climate.TargetPoint noisePoint = BiomeCoordinator.END.sampleEndNoise(x, y, z, noise, original);
 
         // Select noise biome
-        BiolithFittestNodes<Holder<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, this.biolith$getBiomeEntries(), original);
+        BiolithFittestNodes<Holder<Biome>> fittestNodes = VanillaCompat.getEndBiome(noisePoint, Objects.requireNonNull(this.biolith$getBiomeEntries()), original);
 
         // Process any replacements or sub-biomes.
         cir.setReturnValue(BiomeCoordinator.END.getReplacement(x, y, z, noisePoint, fittestNodes));

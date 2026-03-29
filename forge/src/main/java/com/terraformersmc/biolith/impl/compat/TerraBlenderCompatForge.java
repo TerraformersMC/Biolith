@@ -2,6 +2,7 @@ package com.terraformersmc.biolith.impl.compat;
 
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.Biolith;
+import com.terraformersmc.biolith.impl.biome.InterfaceClimateRTree;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import terrablender.api.Region;
 import terrablender.api.SurfaceRuleManager;

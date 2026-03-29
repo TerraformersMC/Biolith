@@ -1,7 +1,7 @@
 plugins {
     id 'java'
     id 'java-library'
-    id 'xyz.wagyourtail.unimined' version '1.4.2+redlance.2' apply false
+    id 'xyz.wagyourtail.unimined' version '1.4.+'
 }
 
 subprojects {
@@ -22,6 +22,7 @@ subprojects {
 }
 
 // Ferry for publishing; this has to be after unimined plugin apply and before subproject version is set.
+ext.jarTask = "remapJar"
 apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.2/ferry-mpp.gradle'
 
 allprojects {
@@ -70,3 +71,6 @@ allprojects {
         targetCompatibility = JavaVersion.VERSION_25
     }
 }
+
+// Ensure all the sub-projects are configured before the root project's implicit configurations.
+enabled_platforms.split(', *').each {rootProject.evaluationDependsOn(it) }

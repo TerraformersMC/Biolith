@@ -25,6 +25,7 @@
         "biolith.mixins.json",
         "biolith.fabric.mixins.json"
     ],
+    "accessWidener": "biolith.classtweaker",
     "custom": {
         "modmenu": {
             "badges": [

@@ -1,15 +1,6 @@
-import groovy.xml.XmlSlurper
-
-unimined.minecraft {
-    // Combine with common, for identifying both together as one mod for dev runs
-    combineWith(project(":common").sourceSets.main)
-
-    neoForge {
-        loader("net.neoforged:neoforge:${neoforge_version}")
-        mixinConfig("biolith.mixins.json", "biolith.neoforge.mixins.json")
-        // TODO: This should be converted from the CT file once that capability exists...
-        accessTransformer aw2at(file("biolith.accesswidener"))
-    }
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
+    convertAw2At(tasks.named("jar", Jar), ["biolith.classtweaker"])
 }
 
 repositories {
@@ -20,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(path: ":common")) { transitive = false }
+    forgeUserdev "net.neoforged:neoforge:${rootProject.neoforge_version}:userdev"
 
     // Terraform Surfaces API for OpenSimplexNoise
     //include(implementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
@@ -32,8 +23,10 @@ dependencies {
     compileOnly "maven.modrinth:moderner-beta:${rootProject.moderner_beta_version}-neoforge"
 }
 
-tasks.withType(Jar).configureEach {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+configurations {
+    loomDevelopmentDependencies {
+        exclude group: "net.fabricmc", module: "fabric-log4j-util"
+    }
 }
 
 processResources {
@@ -45,60 +38,6 @@ processResources {
 }
 
 publish {
-    onlyIf {
-        enabled_platforms.split(',').contains(project.projectDir)
-    }
-    onlyIf {
-        checkVersion(project.base.archivesName.get(), version)
-    }
-
     curseforge_game_versions = "${rootProject.curseforge_game_versions}, NeoForge"
     modrinth_mod_loaders = "neoforge"
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact tasks.remapJar
-            artifact tasks.sourcesJar
-
-            groupId = "${rootProject.maven_group}"
-            artifactId = "${project.base.archivesName.get()}"
-            version = "${rootProject.version}"
-        }
-    }
-
-    setupRepositories(repositories)
-}
-
-static void setupRepositories(RepositoryHandler repositories) {
-    //repositories.mavenLocal() // uncomment for testing
-    def ENV = System.getenv()
-    if (ENV.MAVEN_URL) {
-        repositories.maven {
-            url ENV.MAVEN_URL
-            credentials {
-                username ENV.MAVEN_USERNAME
-                password ENV.MAVEN_PASSWORD
-            }
-        }
-    }
-}
-
-ext.checkVersion = { archivesBaseName, version ->
-    try {
-        def xml = new URI("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").toURL().text
-        def metadata = new XmlSlurper().parseText(xml)
-        def versions = metadata.versioning.versions.version*.text()
-        if (versions.contains(version)) {
-            println "$archivesBaseName version $version will not be published; already exists"
-            return false
-        } else {
-            println "$archivesBaseName version $version will be published"
-            return true
-        }
-    } catch (FileNotFoundException ignored) {
-        println "$archivesBaseName is not on maven yet"
-        return true
-    }
 }

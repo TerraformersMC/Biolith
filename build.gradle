@@ -1,37 +1,38 @@
+import groovy.xml.XmlSlurper
+
 plugins {
-    id 'java'
-    id 'java-library'
-    id 'xyz.wagyourtail.unimined' version '1.4.+'
+    id 'org.relativitymc.neo-loom' version '1.16.0-alpha.2' apply false
 }
 
 subprojects {
-    apply plugin: 'xyz.wagyourtail.unimined'
-
-    project.base.archivesName = "${rootProject.archives_base_name}-${project.name}"
-
-    unimined.minecraft(sourceSets.main, true) {
-        version rootProject.minecraft_version
-
-        mods {
-        }
-    }
+    apply plugin: 'idea'
+    apply plugin: 'java'
+    apply plugin: 'java-library'
+    apply plugin: 'maven-publish'
+    apply plugin: 'org.relativitymc.neo-loom'
 
     // Apply to each valid subproject.
     apply from: rootProject.file('gradle/package-info.gradle')
     apply from: rootProject.file('gradle/validate-annotations.gradle')
+
+    project.base.archivesName = "${rootProject.archives_base_name}-${project.name}"
 }
 
-// Ferry for publishing; this has to be after unimined plugin apply and before subproject version is set.
-ext.jarTask = "remapJar"
+// Ferry for publishing; this has to be after loom plugin apply and before subproject version is set.
 apply from: 'https://raw.githubusercontent.com/TerraformersMC/GradleScripts/3.2/ferry-mpp.gradle'
 
-allprojects {
-    apply plugin: 'java'
-    apply plugin: 'java-library'
-    apply plugin: 'maven-publish'
+tasks.register('build') {
+    group = "build"
+}
+tasks.register('publish') {
+    group = "publishing"
+}
 
+subprojects {
     group = rootProject.maven_group
     version = rootProject.version
+
+    java.toolchain.languageVersion = JavaLanguageVersion.of(project.java_version)
 
     repositories {
         mavenCentral()
@@ -42,6 +43,7 @@ allprojects {
 
         // for TerraBlender
         maven {
+            name = 'MinecraftForge'
             url = 'https://maven.minecraftforge.net/'
         }
 
@@ -59,18 +61,110 @@ allprojects {
         }
     }
 
-    tasks.withType(JavaCompile).configureEach {
-        it.options.encoding = 'UTF-8'
-        it.options.getRelease().set(25)
+    dependencies {
+        minecraft "com.mojang:minecraft:${project.minecraft_version}"
     }
 
-    java {
-        withSourcesJar()
+    // Hack to allow calling build via root project
+    rootProject.tasks.build.dependsOn(it.tasks.build)
 
-        sourceCompatibility = JavaVersion.VERSION_25
-        targetCompatibility = JavaVersion.VERSION_25
+    jar {
+        from(rootProject.file('LICENSE'))
+    }
+
+    publish {
+        onlyIf {
+            enabled_platforms.split(',').contains(project.projectDir)
+        }
+        onlyIf {
+            checkVersion(project.base.archivesName.get(), version)
+        }
+    }
+
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+                groupId = rootProject.maven_group
+                artifactId = project.base.archivesName
+                version = rootProject.version
+            }
+        }
+
+        setupRepositories(repositories)
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        it.options.encoding = 'UTF-8'
+    }
+
+    idea {
+        module {
+            downloadSources = true
+            downloadJavadoc = true
+        }
+    }
+
+    // Configuration that applies to all subprojects except :common
+    if (it.name != "common") {
+        configurations {
+            commonJava {
+                canBeResolved = true
+            }
+            commonResources {
+                canBeResolved = true
+            }
+        }
+
+        dependencies {
+            compileOnly project(':common')
+            commonJava project(path: ':common', configuration: 'commonJava')
+            commonResources project(path: ':common', configuration: 'commonResources')
+        }
+
+        // Hack to allow calling build via root project
+        rootProject.tasks.publish.dependsOn(it.tasks.publish)
+
+        tasks.named('compileJava', JavaCompile) {
+            dependsOn(configurations.commonJava)
+            source(configurations.commonJava)
+        }
+
+        processResources {
+            dependsOn(configurations.commonResources)
+            from(configurations.commonResources)
+        }
     }
 }
 
-// Ensure all the sub-projects are configured before the root project's implicit configurations.
-enabled_platforms.split(', *').each {rootProject.evaluationDependsOn(it) }
+static void setupRepositories(RepositoryHandler repositories) {
+    //repositories.mavenLocal() // uncomment for testing
+    def ENV = System.getenv()
+    if (ENV.MAVEN_URL) {
+        repositories.maven {
+            url ENV.MAVEN_URL
+            credentials {
+                username ENV.MAVEN_USERNAME
+                password ENV.MAVEN_PASSWORD
+            }
+        }
+    }
+}
+
+ext.checkVersion = { archivesBaseName, version ->
+    try {
+        def xml = new URI("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").toURL().text
+        def metadata = new XmlSlurper().parseText(xml)
+        def versions = metadata.versioning.versions.version*.text()
+        if (versions.contains(version)) {
+            println "$archivesBaseName version $version will not be published; already exists"
+            return false
+        } else {
+            println "$archivesBaseName version $version will be published"
+            return true
+        }
+    } catch (FileNotFoundException ignored) {
+        println "$archivesBaseName is not on maven yet"
+        return true
+    }
+}

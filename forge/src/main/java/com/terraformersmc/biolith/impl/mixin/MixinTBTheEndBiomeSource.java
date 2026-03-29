@@ -29,7 +29,7 @@ import java.util.Objects;
  * Priority 900 places this mixin in front of both TerraBlender and our main TheEndBiomeSource mixin.
  */
 @Mixin(value = TheEndBiomeSource.class, priority = 900)
-public abstract class MixinTBTheEndBiomeSource extends BiomeSource implements InterfaceBiomeSource {
+public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
     @Unique
     private static final ThreadLocal<Boolean> bypass = ThreadLocal.withInitial(() -> false);
 

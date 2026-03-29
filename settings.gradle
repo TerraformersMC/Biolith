@@ -2,12 +2,8 @@ pluginManagement {
     repositories {
         gradlePluginPortal()
         maven {
-            name = 'Unimined releases'
-            url = 'https://maven.wagyourtail.xyz/releases'
-        }
-        maven {
-            name = 'Unimined snapshots'
-            url = 'https://maven.wagyourtail.xyz/snapshots'
+            name = 'RelativityMC'
+            url = 'https://repo.codemc.io/repository/relativitymc/'
         }
         maven {
             name = 'Fabric'
@@ -16,10 +12,6 @@ pluginManagement {
         maven {
             name = 'Forge'
             url = 'https://maven.minecraftforge.net/'
-        }
-        maven {
-            name = 'Unimined temporary'
-            url = 'https://repo.redlance.org/public'
         }
     }
 }

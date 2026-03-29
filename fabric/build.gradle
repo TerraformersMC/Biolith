@@ -1,20 +1,10 @@
-import groovy.xml.XmlSlurper
-
-unimined.minecraft {
-    // Combine with common, for identifying both together as one mod for dev runs
-    combineWith(project(":common").sourceSets.main)
-
-    fabric {
-        loader project.fabric_loader_version
-        accessWidener file("../common/src/main/resources/biolith.classtweaker")
-    }
+loom {
+    accessWidenerPath = project(":common").loom.accessWidenerPath
 }
 
 dependencies {
     implementation "net.fabricmc:fabric-loader:${rootProject.fabric_loader_version}"
-    api "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
-
-    compileOnly(project(path: ":common")) { transitive = false }
+    implementation "net.fabricmc.fabric-api:fabric-api:${rootProject.fabric_api_version}"
 
     // Terraform Surfaces API for OpenSimplexNoise
     //include(implementation("com.terraformersmc.terraform-api:terraform-surfaces-api-v1:${rootProject.terraform_surfaces_api_version}"))
@@ -34,71 +24,7 @@ processResources {
     }
 }
 
-tasks.withType(Jar).configureEach {
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-}
-
-sourcesJar {
-    def commonSources = project(":common").sourcesJar
-    dependsOn commonSources
-    from commonSources.archiveFile.map { zipTree(it) }
-}
-
 publish {
-    onlyIf {
-        enabled_platforms.split(',').contains(project.projectDir)
-    }
-    onlyIf {
-        checkVersion(project.base.archivesName.get(), version)
-    }
-
-    curseforge_game_versions = "${rootProject.curseforge_game_versions}, Fabric, Quilt"
-    modrinth_mod_loaders = "fabric, quilt"
-}
-
-publishing {
-    publications {
-        mavenJava(MavenPublication) {
-            artifact tasks.remapJar
-            artifact tasks.sourcesJar
-
-            groupId = "${rootProject.maven_group}"
-            artifactId = "${project.base.archivesName.get()}"
-            version = "${rootProject.version}"
-        }
-    }
-
-    setupRepositories(repositories)
-}
-
-static void setupRepositories(RepositoryHandler repositories) {
-    //repositories.mavenLocal() // uncomment for testing
-    def ENV = System.getenv()
-    if (ENV.MAVEN_URL) {
-        repositories.maven {
-            url ENV.MAVEN_URL
-            credentials {
-                username ENV.MAVEN_USERNAME
-                password ENV.MAVEN_PASSWORD
-            }
-        }
-    }
-}
-
-ext.checkVersion = { archivesBaseName, version ->
-    try {
-        def xml = new URI("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").toURL().text
-        def metadata = new XmlSlurper().parseText(xml)
-        def versions = metadata.versioning.versions.version*.text()
-        if (versions.contains(version)) {
-            println "$archivesBaseName version $version will not be published; already exists"
-            return false
-        } else {
-            println "$archivesBaseName version $version will be published"
-            return true
-        }
-    } catch (FileNotFoundException ignored) {
-        println "$archivesBaseName is not on maven yet"
-        return true
-    }
+    curseforge_game_versions = "${rootProject.curseforge_game_versions}, Fabric"
+    modrinth_mod_loaders = "fabric"
 }

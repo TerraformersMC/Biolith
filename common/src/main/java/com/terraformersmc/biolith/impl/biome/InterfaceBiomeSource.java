@@ -33,7 +33,7 @@ public interface InterfaceBiomeSource {
     default void biolith$setBypass(boolean value) {
     }
 
-    // Used to extend injected interface coverage to the forges
+    // Used to extend injected interface coverage to the forges (f.e. building with Unimined)
     static InterfaceBiomeSource cast(BiomeSource biomeSource) {
         return biomeSource;
     }

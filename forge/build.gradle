@@ -17,12 +17,6 @@ dependencies {
     compileOnly "com.github.glitchfiend:TerraBlender-forge:${rootProject.terrablender_version}"
 }
 
-configurations {
-    loomDevelopmentDependencies {
-        exclude group: "net.fabricmc", module: "fabric-log4j-util"
-    }
-}
-
 processResources {
     inputs.property "version", project.version
 

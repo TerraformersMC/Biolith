@@ -23,12 +23,6 @@ dependencies {
     compileOnly "maven.modrinth:moderner-beta:${rootProject.moderner_beta_version}-neoforge"
 }
 
-configurations {
-    loomDevelopmentDependencies {
-        exclude group: "net.fabricmc", module: "fabric-log4j-util"
-    }
-}
-
 processResources {
     inputs.property "version", project.version
 

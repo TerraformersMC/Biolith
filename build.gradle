@@ -1,7 +1,7 @@
 import groovy.xml.XmlSlurper
 
 plugins {
-    id 'org.relativitymc.neo-loom' version '1.16.0-alpha.2' apply false
+    id 'org.relativitymc.neo-loom' version '1.16.0-alpha.3' apply false
 }
 
 subprojects {
@@ -67,6 +67,9 @@ subprojects {
 
     // Hack to allow calling build via root project
     rootProject.tasks.build.dependsOn(it.tasks.build)
+
+    // For our package configurations
+    sourceSets.main.resources.srcDir file('src/main/generated')
 
     jar {
         from(rootProject.file('LICENSE'))

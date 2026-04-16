@@ -5,15 +5,15 @@
   "compatibilityLevel": "JAVA_17",
   "mixins": [
     "AccessorBiome",
+    "AccessorSurfaceRulesContext",
     "MixinBiomeSource",
     "MixinChunkGenerator",
     "MixinChunkGeneratorSettings",
+    "MixinClimateRTree",
     "MixinDimensionOptions",
-    "AccessorMaterialRuleContext",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
     "MixinPlacedFeatureIndexer",
-    "MixinClimateRTree",
     "MixinServerWorld",
     "MixinSurfaceBuilder",
     "MixinTheEndBiomeSource"

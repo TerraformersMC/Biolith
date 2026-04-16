@@ -8,9 +8,10 @@ import com.terraformersmc.biolith.impl.platform.Services;
 import java.util.List;
 
 import static com.mojang.brigadier.arguments.StringArgumentType.word;
-import static net.minecraft.command.argument.BlockPosArgumentType.blockPos;
-import static net.minecraft.command.argument.EntityArgumentType.entity;
-import static net.minecraft.server.command.CommandManager.*;
+import static net.minecraft.commands.Commands.argument;
+import static net.minecraft.commands.Commands.literal;
+import static net.minecraft.commands.arguments.EntityArgument.entity;
+import static net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos;
 
 public class BiolithCommands {
     protected static List<String> COMMANDS = List.of("help", "describe", "climate");
@@ -32,7 +33,7 @@ public class BiolithCommands {
                                 .then(argument("position", blockPos())
                                         .executes(BiolithDescribeCommand::atPosition)))
                         .executes(BiolithDescribeCommand::atCaller))
-                .executes(BiolithHelpCommand::noargs)
+                .executes(BiolithHelpCommand::noArgs)
                 .then(literal("climate")
                         .then(literal("at")
                                 .then(argument("entity", entity())

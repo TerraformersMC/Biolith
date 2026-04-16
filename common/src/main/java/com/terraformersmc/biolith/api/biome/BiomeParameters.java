@@ -2,7 +2,7 @@ package com.terraformersmc.biolith.api.biome;
 
 public class BiomeParameters {
 
-    // High numbers to account for rare instances of vanilla or worldgen projects going above / below typical noise ranges
+    // High numbers to account for rare instances of worldgen going above / below typical noise ranges, which happens rarely in vanilla and more often in certain mods
     public static final float MIN = -10F;
     public static final float MAX = 10F;
 

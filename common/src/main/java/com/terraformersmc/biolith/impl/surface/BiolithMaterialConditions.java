@@ -6,19 +6,19 @@ import com.terraformersmc.biolith.api.surface.rule.ClimateRules;
 import com.terraformersmc.biolith.api.surface.rule.MiscRules;
 import com.terraformersmc.biolith.api.surface.rule.NoiseRules;
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.registry.Registries;
-import net.minecraft.registry.Registry;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
+import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 
 import java.util.function.BiConsumer;
 
-public class BiolithSurfaceConditions {
+public class BiolithMaterialConditions {
 
 	public static void init() {
-		register((name, codec) -> register(Registries.MATERIAL_CONDITION, name, codec));
+		register((name, codec) -> register(BuiltInRegistries.MATERIAL_CONDITION, name, codec));
 	}
 
-	public static void register(BiConsumer<String, MapCodec<? extends MaterialRules.MaterialCondition>> consumer) {
+	public static void register(BiConsumer<String, MapCodec<? extends SurfaceRules.ConditionSource>> consumer) {
 		consumer.accept("configured", MiscRules.Configured.CODEC.codec());
         consumer.accept("biome_tag", BiomeRules.BiomeTag.CODEC.codec());
 		consumer.accept("heightmap_biome", BiomeRules.HeightmapBiome.CODEC.codec());
@@ -38,6 +38,6 @@ public class BiolithSurfaceConditions {
 	}
 
 	public static <T> void register(Registry<T> registry, String name, T object) {
-		Registry.register(registry, Biolith.key(registry.getKey(), name), object);
+		Registry.register(registry, Biolith.key(registry.key(), name), object);
 	}
 }

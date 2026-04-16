@@ -1,9 +1,9 @@
 package com.terraformersmc.biolith.impl.tag;
 
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.Identifier;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.Identifier;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.level.biome.Biome;
 
 public class CommonBiomeTags {
 
@@ -13,6 +13,6 @@ public class CommonBiomeTags {
     public static final TagKey<Biome> IS_CAVE = register("is_cave");
 
     private static TagKey<Biome> register(String path) {
-        return TagKey.of(RegistryKeys.BIOME, Identifier.of("c", path));
+        return TagKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("c", path));
     }
 }

@@ -2,14 +2,14 @@ package com.terraformersmc.biolith.api.surface.rule;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public class MiscRules {
 
-    public static class Configured implements MaterialRules.MaterialCondition {
+    public static class Configured implements SurfaceRules.ConditionSource {
 
-        public static final CodecHolder<Configured> CODEC = CodecHolder.of(
+        public static final KeyDispatchDataCodec<Configured> CODEC = KeyDispatchDataCodec.of(
                 RecordCodecBuilder.mapCodec(instance ->
                         instance.group(
                                 Codec.BOOL.fieldOf("pass").forGetter(r -> r.value)
@@ -24,11 +24,11 @@ public class MiscRules {
         }
 
         @Override
-        public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+        public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
             return new Condition(value);
         }
 
-        private static final class Condition implements MaterialRules.BooleanSupplier {
+        private static final class Condition implements SurfaceRules.Condition  {
 
             private final boolean value;
 
@@ -37,17 +37,17 @@ public class MiscRules {
             }
 
             @Override
-            public boolean get() {
+            public boolean test() {
                 return value;
             }
         }
 
-        public static MaterialRules.MaterialCondition pass(boolean value) {
+        public static SurfaceRules.ConditionSource pass(boolean value) {
             return new Configured(value);
         }
 
         @Override
-        public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+        public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
             return CODEC;
         }
     }

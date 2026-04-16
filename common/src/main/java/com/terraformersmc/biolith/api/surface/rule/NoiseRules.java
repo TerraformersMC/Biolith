@@ -2,12 +2,12 @@ package com.terraformersmc.biolith.api.surface.rule;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.impl.mixin.AccessorMaterialRuleContext;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.gen.densityfunction.DensityFunction;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
+import com.terraformersmc.biolith.impl.mixin.AccessorSurfaceRulesContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public class NoiseRules {
 
@@ -21,9 +21,9 @@ public class NoiseRules {
 		HEIGHTMAP_DEPTH
 	}
 
-	public static class Temperature implements MaterialRules.MaterialCondition {
+	public static class Temperature implements SurfaceRules.ConditionSource {
 
-		public static final CodecHolder<Temperature> CODEC = CodecHolder.of(
+		public static final KeyDispatchDataCodec<Temperature> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->
 				instance.group(
 					Codec.FLOAT.fieldOf("min").forGetter(r -> r.min),
@@ -41,27 +41,27 @@ public class NoiseRules {
 		}
 
 		@Override
-		public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+		public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
 			return new Condition(context);
 		}
 
-		private final class Condition implements MaterialRules.BooleanSupplier {
-			private final AccessorMaterialRuleContext accessor;
+		private final class Condition implements SurfaceRules.Condition  {
+			private final AccessorSurfaceRulesContext accessor;
 			private final int seaLevel;
 
 			private double cachedNoise;
 			private int cachedX;
 			private int cachedZ;
 
-			private final BlockPos.Mutable pos = new BlockPos.Mutable();
+			private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-			Condition(MaterialRules.MaterialRuleContext context) {
-				this.accessor = (AccessorMaterialRuleContext) (Object) context;
+			Condition(SurfaceRules.Context context) {
+				this.accessor = (AccessorSurfaceRulesContext) (Object) context;
 				this.seaLevel = accessor.getSystem().getSeaLevel();
 			}
 
 			@Override
-			public boolean get() {
+			public boolean test() {
 				int x = accessor.getBlockX();
 				int y = this.seaLevel;
 				int z = accessor.getBlockZ();
@@ -72,7 +72,7 @@ public class NoiseRules {
 					cachedX = x;
 					cachedZ = z;
 
-					this.cachedNoise = accessor.getRandomState().getNoiseRouter().temperature().sample(new DensityFunction.NoisePos() {
+					this.cachedNoise = accessor.getRandomState().router().temperature().compute(new DensityFunction.FunctionContext() {
 						@Override
 						public int blockX() {
 							return x;
@@ -94,23 +94,23 @@ public class NoiseRules {
 			}
 		}
 
-		public static MaterialRules.MaterialCondition point(float point) {
+		public static SurfaceRules.ConditionSource point(float point) {
 			return new NoiseRules.Temperature(point - 0.001F, point + 0.001F);
 		}
 
-		public static MaterialRules.MaterialCondition range(float min, float max) {
+		public static SurfaceRules.ConditionSource range(float min, float max) {
 			return new NoiseRules.Temperature(min, max);
 		}
 
 		@Override
-		public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+		public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
 			return CODEC;
 		}
 	}
 
-	public static class Humidity implements MaterialRules.MaterialCondition {
+	public static class Humidity implements SurfaceRules.ConditionSource {
 
-		public static final CodecHolder<NoiseRules.Humidity> CODEC = CodecHolder.of(
+		public static final KeyDispatchDataCodec<NoiseRules.Humidity> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->
 				instance.group(
 					Codec.FLOAT.fieldOf("min").forGetter(r -> r.min),
@@ -128,27 +128,27 @@ public class NoiseRules {
 		}
 
 		@Override
-		public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+		public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
 			return new Condition(context);
 		}
 
-		private final class Condition implements MaterialRules.BooleanSupplier {
-			private final AccessorMaterialRuleContext accessor;
+		private final class Condition implements SurfaceRules.Condition  {
+			private final AccessorSurfaceRulesContext accessor;
 			private final int seaLevel;
 
 			private double cachedNoise;
 			private int cachedX;
 			private int cachedZ;
 
-			private final BlockPos.Mutable pos = new BlockPos.Mutable();
+			private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-			Condition(MaterialRules.MaterialRuleContext context) {
-				this.accessor = (AccessorMaterialRuleContext) (Object) context;
+			Condition(SurfaceRules.Context context) {
+				this.accessor = (AccessorSurfaceRulesContext) (Object) context;
 				this.seaLevel = accessor.getSystem().getSeaLevel();
 			}
 
 			@Override
-			public boolean get() {
+			public boolean test() {
 				int x = accessor.getBlockX();
 				int y = this.seaLevel;
 				int z = accessor.getBlockZ();
@@ -159,7 +159,7 @@ public class NoiseRules {
 					cachedX = x;
 					cachedZ = z;
 
-					this.cachedNoise = accessor.getRandomState().getNoiseRouter().vegetation().sample(new DensityFunction.NoisePos() {
+					this.cachedNoise = accessor.getRandomState().router().vegetation().compute(new DensityFunction.FunctionContext() {
 						@Override
 						public int blockX() {
 							return x;
@@ -181,23 +181,23 @@ public class NoiseRules {
 			}
 		}
 
-		public static MaterialRules.MaterialCondition point(float point) {
+		public static SurfaceRules.ConditionSource point(float point) {
 			return new NoiseRules.Humidity(point - 0.001F, point + 0.001F);
 		}
 
-		public static MaterialRules.MaterialCondition range(float min, float max) {
+		public static SurfaceRules.ConditionSource range(float min, float max) {
 			return new NoiseRules.Humidity(min, max);
 		}
 
 		@Override
-		public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+		public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
 			return CODEC;
 		}
 	}
 
-	public static class Erosion implements MaterialRules.MaterialCondition {
+	public static class Erosion implements SurfaceRules.ConditionSource {
 
-		public static final CodecHolder<NoiseRules.Erosion> CODEC = CodecHolder.of(
+		public static final KeyDispatchDataCodec<NoiseRules.Erosion> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->
 				instance.group(
 					Codec.FLOAT.fieldOf("min").forGetter(r -> r.min),
@@ -215,27 +215,27 @@ public class NoiseRules {
 		}
 
 		@Override
-		public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+		public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
 			return new Condition(context);
 		}
 
-		private final class Condition implements MaterialRules.BooleanSupplier {
-			private final AccessorMaterialRuleContext accessor;
+		private final class Condition implements SurfaceRules.Condition  {
+			private final AccessorSurfaceRulesContext accessor;
 			private final int seaLevel;
 
 			private double cachedNoise;
 			private int cachedX;
 			private int cachedZ;
 
-			private final BlockPos.Mutable pos = new BlockPos.Mutable();
+			private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-			Condition(MaterialRules.MaterialRuleContext context) {
-				this.accessor = (AccessorMaterialRuleContext) (Object) context;
+			Condition(SurfaceRules.Context context) {
+				this.accessor = (AccessorSurfaceRulesContext) (Object) context;
 				this.seaLevel = accessor.getSystem().getSeaLevel();
 			}
 
 			@Override
-			public boolean get() {
+			public boolean test() {
 				int x = accessor.getBlockX();
 				int y = this.seaLevel;
 				int z = accessor.getBlockZ();
@@ -246,7 +246,7 @@ public class NoiseRules {
 					cachedX = x;
 					cachedZ = z;
 
-					this.cachedNoise = accessor.getRandomState().getNoiseRouter().erosion().sample(new DensityFunction.NoisePos() {
+					this.cachedNoise = accessor.getRandomState().router().erosion().compute(new DensityFunction.FunctionContext() {
 						@Override
 						public int blockX() {
 							return x;
@@ -268,23 +268,23 @@ public class NoiseRules {
 			}
 		}
 
-		public static MaterialRules.MaterialCondition point(float point) {
+		public static SurfaceRules.ConditionSource point(float point) {
 			return new NoiseRules.Erosion(point - 0.001F, point + 0.001F);
 		}
 
-		public static MaterialRules.MaterialCondition range(float min, float max) {
+		public static SurfaceRules.ConditionSource range(float min, float max) {
 			return new NoiseRules.Erosion(min, max);
 		}
 
 		@Override
-		public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+		public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
 			return CODEC;
 		}
 	}
 
-	public static class Continentalness implements MaterialRules.MaterialCondition {
+	public static class Continentalness implements SurfaceRules.ConditionSource {
 
-		public static final CodecHolder<NoiseRules.Continentalness> CODEC = CodecHolder.of(
+		public static final KeyDispatchDataCodec<NoiseRules.Continentalness> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->
 				instance.group(
 					Codec.FLOAT.fieldOf("min").forGetter(r -> r.min),
@@ -302,27 +302,27 @@ public class NoiseRules {
 		}
 
 		@Override
-		public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+		public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
 			return new Condition(context);
 		}
 
-		private final class Condition implements MaterialRules.BooleanSupplier {
-			private final AccessorMaterialRuleContext accessor;
+		private final class Condition implements SurfaceRules.Condition  {
+			private final AccessorSurfaceRulesContext accessor;
 			private final int seaLevel;
 
 			private double cachedNoise;
 			private int cachedX;
 			private int cachedZ;
 
-			private final BlockPos.Mutable pos = new BlockPos.Mutable();
+			private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-			Condition(MaterialRules.MaterialRuleContext context) {
-				this.accessor = (AccessorMaterialRuleContext) (Object) context;
+			Condition(SurfaceRules.Context context) {
+				this.accessor = (AccessorSurfaceRulesContext) (Object) context;
 				this.seaLevel = accessor.getSystem().getSeaLevel();
 			}
 
 			@Override
-			public boolean get() {
+			public boolean test() {
 				int x = accessor.getBlockX();
 				int y = this.seaLevel;
 				int z = accessor.getBlockZ();
@@ -333,7 +333,7 @@ public class NoiseRules {
 					cachedX = x;
 					cachedZ = z;
 
-					this.cachedNoise = accessor.getRandomState().getNoiseRouter().continents().sample(new DensityFunction.NoisePos() {
+					this.cachedNoise = accessor.getRandomState().router().continents().compute(new DensityFunction.FunctionContext() {
 						@Override
 						public int blockX() {
 							return x;
@@ -355,23 +355,23 @@ public class NoiseRules {
 			}
 		}
 
-		public static MaterialRules.MaterialCondition point(float point) {
+		public static SurfaceRules.ConditionSource point(float point) {
 			return new NoiseRules.Continentalness(point - 0.001F, point + 0.001F);
 		}
 
-		public static MaterialRules.MaterialCondition range(float min, float max) {
+		public static SurfaceRules.ConditionSource range(float min, float max) {
 			return new NoiseRules.Continentalness(min, max);
 		}
 
 		@Override
-		public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+		public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
 			return CODEC;
 		}
 	}
 
-	public static class Weirdness implements MaterialRules.MaterialCondition {
+	public static class Weirdness implements SurfaceRules.ConditionSource {
 
-		public static final CodecHolder<NoiseRules.Weirdness> CODEC = CodecHolder.of(
+		public static final KeyDispatchDataCodec<NoiseRules.Weirdness> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->
 				instance.group(
 					Codec.FLOAT.fieldOf("min").forGetter(r -> r.min),
@@ -389,27 +389,27 @@ public class NoiseRules {
 		}
 
 		@Override
-		public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+		public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
 			return new Condition(context);
 		}
 
-		private final class Condition implements MaterialRules.BooleanSupplier {
-			private final AccessorMaterialRuleContext accessor;
+		private final class Condition implements SurfaceRules.Condition  {
+			private final AccessorSurfaceRulesContext accessor;
 			private final int seaLevel;
 
 			private double cachedNoise;
 			private int cachedX;
 			private int cachedZ;
 
-			private final BlockPos.Mutable pos = new BlockPos.Mutable();
+			private final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
 
-			Condition(MaterialRules.MaterialRuleContext context) {
-				this.accessor = (AccessorMaterialRuleContext) (Object) context;
+			Condition(SurfaceRules.Context context) {
+				this.accessor = (AccessorSurfaceRulesContext) (Object) context;
 				this.seaLevel = accessor.getSystem().getSeaLevel();
 			}
 
 			@Override
-			public boolean get() {
+			public boolean test() {
 				int x = accessor.getBlockX();
 				int y = this.seaLevel;
 				int z = accessor.getBlockZ();
@@ -420,7 +420,7 @@ public class NoiseRules {
 					cachedX = x;
 					cachedZ = z;
 
-					this.cachedNoise = accessor.getRandomState().getNoiseRouter().ridges().sample(new DensityFunction.NoisePos() {
+					this.cachedNoise = accessor.getRandomState().router().ridges().compute(new DensityFunction.FunctionContext() {
 						@Override
 						public int blockX() {
 							return x;
@@ -442,23 +442,23 @@ public class NoiseRules {
 			}
 		}
 
-		public static MaterialRules.MaterialCondition point(float point) {
+		public static SurfaceRules.ConditionSource point(float point) {
 			return new NoiseRules.Weirdness(point - 0.001F, point + 0.001F);
 		}
 
-		public static MaterialRules.MaterialCondition range(float min, float max) {
+		public static SurfaceRules.ConditionSource range(float min, float max) {
 			return new NoiseRules.Weirdness(min, max);
 		}
 
 		@Override
-		public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+		public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
 			return CODEC;
 		}
 	}
 
-	public static class Depth implements MaterialRules.MaterialCondition {
+	public static class Depth implements SurfaceRules.ConditionSource {
 
-		public static final CodecHolder<NoiseRules.Depth> CODEC = CodecHolder.of(
+		public static final KeyDispatchDataCodec<NoiseRules.Depth> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->
 				instance.group(
 					Codec.FLOAT.fieldOf("min").forGetter(r -> r.min),
@@ -476,24 +476,24 @@ public class NoiseRules {
 		}
 
 		@Override
-		public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+		public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
 			return new Condition(context);
 		}
 
-		private final class Condition implements MaterialRules.BooleanSupplier {
-			private final AccessorMaterialRuleContext accessor;
+		private final class Condition implements SurfaceRules.Condition  {
+			private final AccessorSurfaceRulesContext accessor;
 
-			Condition(MaterialRules.MaterialRuleContext context) {
-				this.accessor = (AccessorMaterialRuleContext) (Object) context;
+			Condition(SurfaceRules.Context context) {
+				this.accessor = (AccessorSurfaceRulesContext) (Object) context;
 			}
 
 			@Override
-			public boolean get() {
+			public boolean test() {
 				int x = accessor.getBlockX();
 				int y = accessor.getBlockY();
 				int z = accessor.getBlockZ();
 
-				double noise = accessor.getRandomState().getNoiseRouter().depth().sample(new DensityFunction.NoisePos() {
+				double noise = accessor.getRandomState().router().depth().compute(new DensityFunction.FunctionContext() {
 					@Override
 					public int blockX() {
 						return x;
@@ -514,31 +514,31 @@ public class NoiseRules {
 			}
 		}
 
-		public static MaterialRules.MaterialCondition point(float point) {
+		public static SurfaceRules.ConditionSource point(float point) {
 			return new NoiseRules.Depth(point - 0.001F, point + 0.001F);
 		}
 
-		public static MaterialRules.MaterialCondition range(float min, float max) {
+		public static SurfaceRules.ConditionSource range(float min, float max) {
 			return new NoiseRules.Depth(min, max);
 		}
 
-		public static MaterialRules.MaterialCondition above(float above) {
+		public static SurfaceRules.ConditionSource above(float above) {
 			return new NoiseRules.Depth(above, Float.MAX_VALUE);
 		}
 
-		public static MaterialRules.MaterialCondition below(float below) {
+		public static SurfaceRules.ConditionSource below(float below) {
 			return new NoiseRules.Depth(Float.MIN_VALUE, below);
 		}
 
 		@Override
-		public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+		public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
 			return CODEC;
 		}
 	}
 
-	public static class HeightmapDepth implements MaterialRules.MaterialCondition {
+	public static class HeightmapDepth implements SurfaceRules.ConditionSource {
 
-		public static final CodecHolder<NoiseRules.HeightmapDepth> CODEC = CodecHolder.of(
+		public static final KeyDispatchDataCodec<NoiseRules.HeightmapDepth> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->
 				instance.group(
 					Codec.FLOAT.fieldOf("min").forGetter(r -> r.min),
@@ -556,24 +556,24 @@ public class NoiseRules {
 		}
 
 		@Override
-		public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+		public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
 			return new Condition(context);
 		}
 
-		private final class Condition implements MaterialRules.BooleanSupplier {
-			private final AccessorMaterialRuleContext accessor;
+		private final class Condition implements SurfaceRules.Condition  {
+			private final AccessorSurfaceRulesContext accessor;
 
 			private double cachedNoise;
 
 			private int cachedX = Integer.MIN_VALUE;
 			private int cachedZ = Integer.MIN_VALUE;
 
-			Condition(MaterialRules.MaterialRuleContext context) {
-				this.accessor = (AccessorMaterialRuleContext) (Object) context;
+			Condition(SurfaceRules.Context context) {
+				this.accessor = (AccessorSurfaceRulesContext) (Object) context;
 			}
 
 			@Override
-			public boolean get() {
+			public boolean test() {
 				int x = accessor.getBlockX();
 				int z = accessor.getBlockZ();
 
@@ -582,7 +582,7 @@ public class NoiseRules {
 					cachedX = x;
 					cachedZ = z;
 
-					cachedNoise = accessor.getRandomState().getNoiseRouter().depth().sample(new DensityFunction.NoisePos() {
+					cachedNoise = accessor.getRandomState().router().depth().compute(new DensityFunction.FunctionContext() {
 						@Override
 						public int blockX() {
 							return x;
@@ -590,7 +590,7 @@ public class NoiseRules {
 
 						@Override
 						public int blockY() {
-							return accessor.getChunk().sampleHeightmap(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
+							return accessor.getChunk().getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
 						}
 
 						@Override
@@ -604,24 +604,24 @@ public class NoiseRules {
 			}
 		}
 
-		public static MaterialRules.MaterialCondition point(float point) {
+		public static SurfaceRules.ConditionSource point(float point) {
 			return new NoiseRules.Depth(point - 0.001F, point + 0.001F);
 		}
 
-		public static MaterialRules.MaterialCondition range(float min, float max) {
+		public static SurfaceRules.ConditionSource range(float min, float max) {
 			return new NoiseRules.Depth(min, max);
 		}
 
-		public static MaterialRules.MaterialCondition above(float above) {
+		public static SurfaceRules.ConditionSource above(float above) {
 			return new NoiseRules.Depth(above, Float.MAX_VALUE);
 		}
 
-		public static MaterialRules.MaterialCondition below(float below) {
+		public static SurfaceRules.ConditionSource below(float below) {
 			return new NoiseRules.Depth(Float.MIN_VALUE, below);
 		}
 
 		@Override
-		public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+		public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
 			return CODEC;
 		}
 	}

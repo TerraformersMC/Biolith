@@ -1,17 +1,16 @@
 package com.terraformersmc.biolith.api.surface.rule;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import com.terraformersmc.biolith.impl.mixin.AccessorMaterialRuleContext;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.registry.RegistryKeys;
-import net.minecraft.registry.entry.RegistryEntry;
-import net.minecraft.registry.tag.TagKey;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.util.dynamic.CodecHolder;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.Heightmap;
-import net.minecraft.world.biome.Biome;
-import net.minecraft.world.gen.surfacebuilder.MaterialRules;
+import com.terraformersmc.biolith.impl.mixin.AccessorSurfaceRulesContext;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.tags.TagKey;
+import net.minecraft.util.KeyDispatchDataCodec;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public class BiomeRules {
 
@@ -21,11 +20,11 @@ public class BiomeRules {
 		HEIGHTMAP
 	}
 
-    public static class BiomeTag implements MaterialRules.MaterialCondition {
-        public static final CodecHolder<BiomeTag> CODEC = CodecHolder.of(
+    public static class BiomeTag implements SurfaceRules.ConditionSource {
+        public static final KeyDispatchDataCodec<BiomeTag> CODEC = KeyDispatchDataCodec.of(
                 RecordCodecBuilder.mapCodec(instance ->
                         instance.group(
-                                TagKey.codec(RegistryKeys.BIOME).fieldOf("tag").forGetter(r -> r.biomes)
+                                TagKey.codec(Registries.BIOME).fieldOf("tag").forGetter(r -> r.biomes)
                         ).apply(instance, BiomeTag::new)
                 )
         );
@@ -37,69 +36,69 @@ public class BiomeRules {
         }
 
         @Override
-        public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+        public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
             return new BiomeTag.Condition(context);
         }
 
-        private final class Condition implements MaterialRules.BooleanSupplier {
-            private final AccessorMaterialRuleContext accessor;
+        private final class Condition implements SurfaceRules.Condition  {
+            private final AccessorSurfaceRulesContext accessor;
 
-            Condition(MaterialRules.MaterialRuleContext context) {
-                this.accessor = (AccessorMaterialRuleContext) (Object) context;
+            Condition(SurfaceRules.Context context) {
+                this.accessor = (AccessorSurfaceRulesContext) (Object) context;
             }
 
             @Override
-            public boolean get() {
-                return accessor.getBiome().get().isIn(biomes);
+            public boolean test() {
+                return accessor.getBiome().get().is(biomes);
             }
         }
 
-        public static MaterialRules.MaterialCondition isBiomeTag(TagKey<Biome> biome) {
+        public static SurfaceRules.ConditionSource isBiomeTag(TagKey<Biome> biome) {
             return new BiomeTag(biome);
         }
 
         @Override
-        public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+        public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
             return CODEC;
         }
     }
 
-	public static class HeightmapBiome implements MaterialRules.MaterialCondition {
-		public static final CodecHolder<HeightmapBiome> CODEC = CodecHolder.of(
+	public static class HeightmapBiome implements SurfaceRules.ConditionSource {
+		public static final KeyDispatchDataCodec<HeightmapBiome> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->
 				instance.group(
-					RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("biome").forGetter(r -> r.biome)
+					ResourceKey.codec(Registries.BIOME).fieldOf("biome").forGetter(r -> r.biome)
 				).apply(instance, HeightmapBiome::new)
 			)
 		);
 
-        RegistryKey<Biome> biome;
+        ResourceKey<Biome> biome;
 
-		public HeightmapBiome(RegistryKey<Biome> biome) {
+		public HeightmapBiome(ResourceKey<Biome> biome) {
 			this.biome = biome;
 		}
 
 		@Override
-		public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
-			return new HeightmapBiome.MaterialCondition(context);
+		public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
+			return new HeightmapBiome.ConditionSource(context);
 		}
 
-		private final class MaterialCondition implements MaterialRules.BooleanSupplier {
-			private final AccessorMaterialRuleContext accessor;
+		private final class ConditionSource implements SurfaceRules.Condition  {
+			private final AccessorSurfaceRulesContext accessor;
 
-			private final BlockPos.Mutable currentPos = new BlockPos.Mutable();
-			private final BlockPos.Mutable surfacePos = new BlockPos.Mutable();
+			private final BlockPos.MutableBlockPos currentPos = new BlockPos.MutableBlockPos();
+			private final BlockPos.MutableBlockPos surfacePos = new BlockPos.MutableBlockPos();
 
-			private RegistryEntry<Biome> cachedHeightmapBiome = null;
+			private Holder<Biome> cachedHeightmapBiome = null;
 			private int cachedX = Integer.MIN_VALUE;
 			private int cachedZ = Integer.MIN_VALUE;
 
-			MaterialCondition(MaterialRules.MaterialRuleContext context) {
-				this.accessor = (AccessorMaterialRuleContext) (Object) context;
+			ConditionSource(SurfaceRules.Context context) {
+				this.accessor = (AccessorSurfaceRulesContext) (Object) context;
 			}
 
 			@Override
-			public boolean get() {
+			public boolean test() {
 				int x = accessor.getBlockX();
 				int y = accessor.getBlockY();
 				int z = accessor.getBlockZ();
@@ -110,30 +109,30 @@ public class BiomeRules {
 					cachedX = x;
 					cachedZ = z;
 
-					int surfaceY = accessor.getChunk().sampleHeightmap(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
+					int surfaceY = accessor.getChunk().getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
 					surfacePos.set(x, surfaceY, z);
 					cachedHeightmapBiome = accessor.getBiomeAtPos().apply(surfacePos);
 				}
 
-				return cachedHeightmapBiome.matchesKey(biome);
+				return cachedHeightmapBiome.is(biome);
 			}
         }
 
-		public static MaterialRules.MaterialCondition isBiome(RegistryKey<Biome> biome) {
+		public static SurfaceRules.ConditionSource isBiome(ResourceKey<Biome> biome) {
 			return new HeightmapBiome(biome);
 		}
 
 		@Override
-		public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+		public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
 			return CODEC;
 		}
 	}
 
-    public static class HeightmapBiomeTag implements MaterialRules.MaterialCondition {
-        public static final CodecHolder<HeightmapBiomeTag> CODEC = CodecHolder.of(
+    public static class HeightmapBiomeTag implements SurfaceRules.ConditionSource {
+        public static final KeyDispatchDataCodec<HeightmapBiomeTag> CODEC = KeyDispatchDataCodec.of(
                 RecordCodecBuilder.mapCodec(instance ->
                         instance.group(
-                                TagKey.codec(RegistryKeys.BIOME).fieldOf("tag").forGetter(r -> r.biomes)
+                                TagKey.codec(Registries.BIOME).fieldOf("tag").forGetter(r -> r.biomes)
                         ).apply(instance, HeightmapBiomeTag::new)
                 )
         );
@@ -145,26 +144,26 @@ public class BiomeRules {
         }
 
         @Override
-        public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+        public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
             return new HeightmapBiomeTag.Condition(context);
         }
 
-        private final class Condition implements MaterialRules.BooleanSupplier {
-            private final AccessorMaterialRuleContext accessor;
+        private final class Condition implements SurfaceRules.Condition  {
+            private final AccessorSurfaceRulesContext accessor;
 
-            private final BlockPos.Mutable currentPos = new BlockPos.Mutable();
-            private final BlockPos.Mutable surfacePos = new BlockPos.Mutable();
+            private final BlockPos.MutableBlockPos currentPos = new BlockPos.MutableBlockPos();
+            private final BlockPos.MutableBlockPos surfacePos = new BlockPos.MutableBlockPos();
 
-            private RegistryEntry<Biome> cachedHeightmapBiome = null;
+            private Holder<Biome> cachedHeightmapBiome = null;
             private int cachedX = Integer.MIN_VALUE;
             private int cachedZ = Integer.MIN_VALUE;
 
-            Condition(MaterialRules.MaterialRuleContext context) {
-                this.accessor = (AccessorMaterialRuleContext) (Object) context;
+            Condition(SurfaceRules.Context context) {
+                this.accessor = (AccessorSurfaceRulesContext) (Object) context;
             }
 
             @Override
-            public boolean get() {
+            public boolean test() {
                 int x = accessor.getBlockX();
                 int y = accessor.getBlockY();
                 int z = accessor.getBlockZ();
@@ -175,63 +174,63 @@ public class BiomeRules {
                     cachedX = x;
                     cachedZ = z;
 
-                    int surfaceY = accessor.getChunk().sampleHeightmap(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
+                    int surfaceY = accessor.getChunk().getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
                     surfacePos.set(x, surfaceY, z);
                     cachedHeightmapBiome = accessor.getBiomeAtPos().apply(surfacePos);
                 }
 
-                return cachedHeightmapBiome.isIn(biomes);
+                return cachedHeightmapBiome.is(biomes);
             }
         }
 
-        public static MaterialRules.MaterialCondition isBiomeTag(TagKey<Biome> biome) {
+        public static SurfaceRules.ConditionSource isBiomeTag(TagKey<Biome> biome) {
             return new HeightmapBiomeTag(biome);
         }
 
         @Override
-        public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+        public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
             return CODEC;
         }
     }
 
-    public static class SurfaceBiome implements MaterialRules.MaterialCondition {
-        public static final CodecHolder<SurfaceBiome> CODEC = CodecHolder.of(
+    public static class SurfaceBiome implements SurfaceRules.ConditionSource {
+        public static final KeyDispatchDataCodec<SurfaceBiome> CODEC = KeyDispatchDataCodec.of(
                 RecordCodecBuilder.mapCodec(instance ->
                         instance.group(
-                                RegistryKey.createCodec(RegistryKeys.BIOME).fieldOf("biome").forGetter(r -> r.biome)
+                                ResourceKey.codec(Registries.BIOME).fieldOf("biome").forGetter(r -> r.biome)
                         ).apply(instance, SurfaceBiome::new)
                 )
         );
 
-        RegistryKey<Biome> biome;
+        ResourceKey<Biome> biome;
 
-        public SurfaceBiome(RegistryKey<Biome> biome) {
+        public SurfaceBiome(ResourceKey<Biome> biome) {
             this.biome = biome;
         }
 
         @Override
-        public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+        public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
             return new SurfaceBiome.Condition(context);
         }
 
-        private final class Condition implements MaterialRules.BooleanSupplier {
-            private final AccessorMaterialRuleContext accessor;
+        private final class Condition implements SurfaceRules.Condition  {
+            private final AccessorSurfaceRulesContext accessor;
             private final int seaLevel;
 
-            private final BlockPos.Mutable currentPos = new BlockPos.Mutable();
-            private final BlockPos.Mutable surfacePos = new BlockPos.Mutable();
+            private final BlockPos.MutableBlockPos currentPos = new BlockPos.MutableBlockPos();
+            private final BlockPos.MutableBlockPos surfacePos = new BlockPos.MutableBlockPos();
 
-            private RegistryEntry<Biome> cachedSurfaceBiome = null;
+            private Holder<Biome> cachedSurfaceBiome = null;
             private int cachedX = Integer.MIN_VALUE;
             private int cachedZ = Integer.MIN_VALUE;
 
-            Condition(MaterialRules.MaterialRuleContext context) {
-                this.accessor = (AccessorMaterialRuleContext) (Object) context;
+            Condition(SurfaceRules.Context context) {
+                this.accessor = (AccessorSurfaceRulesContext) (Object) context;
                 this.seaLevel = accessor.getSystem().getSeaLevel();
             }
 
             @Override
-            public boolean get() {
+            public boolean test() {
                 int x = accessor.getBlockX();
                 int y = accessor.getBlockY();
                 int z = accessor.getBlockZ();
@@ -242,30 +241,30 @@ public class BiomeRules {
                     cachedX = x;
                     cachedZ = z;
 
-                    int surfaceY = accessor.getChunk().sampleHeightmap(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
+                    int surfaceY = accessor.getChunk().getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
                     surfacePos.set(x, Math.max(surfaceY, seaLevel), z);
                     cachedSurfaceBiome = accessor.getBiomeAtPos().apply(surfacePos);
                 }
 
-                return cachedSurfaceBiome.matchesKey(biome);
+                return cachedSurfaceBiome.is(biome);
             }
         }
 
-        public static MaterialRules.MaterialCondition isBiome(RegistryKey<Biome> biome) {
+        public static SurfaceRules.ConditionSource isBiome(ResourceKey<Biome> biome) {
             return new SurfaceBiome(biome);
         }
 
         @Override
-        public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+        public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
             return CODEC;
         }
     }
 
-    public static class SurfaceBiomeTag implements MaterialRules.MaterialCondition {
-        public static final CodecHolder<SurfaceBiomeTag> CODEC = CodecHolder.of(
+    public static class SurfaceBiomeTag implements SurfaceRules.ConditionSource {
+        public static final KeyDispatchDataCodec<SurfaceBiomeTag> CODEC = KeyDispatchDataCodec.of(
                 RecordCodecBuilder.mapCodec(instance ->
                         instance.group(
-                                TagKey.codec(RegistryKeys.BIOME).fieldOf("tag").forGetter(r -> r.biomes)
+                                TagKey.codec(Registries.BIOME).fieldOf("tag").forGetter(r -> r.biomes)
                         ).apply(instance, SurfaceBiomeTag::new)
                 )
         );
@@ -277,28 +276,28 @@ public class BiomeRules {
         }
 
         @Override
-        public MaterialRules.BooleanSupplier apply(MaterialRules.MaterialRuleContext context) {
+        public SurfaceRules.Condition  apply(SurfaceRules.Context context) {
             return new SurfaceBiomeTag.Condition(context);
         }
 
-        private final class Condition implements MaterialRules.BooleanSupplier {
-            private final AccessorMaterialRuleContext accessor;
+        private final class Condition implements SurfaceRules.Condition  {
+            private final AccessorSurfaceRulesContext accessor;
             private final int seaLevel;
 
-            private final BlockPos.Mutable currentPos = new BlockPos.Mutable();
-            private final BlockPos.Mutable surfacePos = new BlockPos.Mutable();
+            private final BlockPos.MutableBlockPos currentPos = new BlockPos.MutableBlockPos();
+            private final BlockPos.MutableBlockPos surfacePos = new BlockPos.MutableBlockPos();
 
-            private RegistryEntry<Biome> cachedSurfaceBiome = null;
+            private Holder<Biome> cachedSurfaceBiome = null;
             private int cachedX = Integer.MIN_VALUE;
             private int cachedZ = Integer.MIN_VALUE;
 
-            Condition(MaterialRules.MaterialRuleContext context) {
-                this.accessor = (AccessorMaterialRuleContext) (Object) context;
+            Condition(SurfaceRules.Context context) {
+                this.accessor = (AccessorSurfaceRulesContext) (Object) context;
                 this.seaLevel = accessor.getSystem().getSeaLevel();
             }
 
             @Override
-            public boolean get() {
+            public boolean test() {
                 int x = accessor.getBlockX();
                 int y = accessor.getBlockY();
                 int z = accessor.getBlockZ();
@@ -309,21 +308,21 @@ public class BiomeRules {
                     cachedX = x;
                     cachedZ = z;
 
-                    int surfaceY = accessor.getChunk().sampleHeightmap(Heightmap.Type.OCEAN_FLOOR_WG, x, z);
+                    int surfaceY = accessor.getChunk().getHeight(Heightmap.Types.OCEAN_FLOOR_WG, x, z);
                     surfacePos.set(x, Math.max(surfaceY, seaLevel), z);
                     cachedSurfaceBiome = accessor.getBiomeAtPos().apply(surfacePos);
                 }
 
-                return cachedSurfaceBiome.isIn(biomes);
+                return cachedSurfaceBiome.is(biomes);
             }
         }
 
-        public static MaterialRules.MaterialCondition isBiomeTag(TagKey<Biome> biome) {
+        public static SurfaceRules.ConditionSource isBiomeTag(TagKey<Biome> biome) {
             return new SurfaceBiomeTag(biome);
         }
 
         @Override
-        public CodecHolder<? extends MaterialRules.MaterialCondition> codec() {
+        public KeyDispatchDataCodec<? extends SurfaceRules.ConditionSource> codec() {
             return CODEC;
         }
     }

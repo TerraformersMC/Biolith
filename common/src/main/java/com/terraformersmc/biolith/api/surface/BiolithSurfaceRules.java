@@ -90,7 +90,7 @@ public class BiolithSurfaceRules {
     /**
      * These are improved methods for checking biomes.
      * Unlike vanilla, we accept both biomes or biome tags
-     * Furthermore, you can use the BiomeRules.Type enum in order to sample either the heightmap or surface biome, which is useful when trying to avoid near-surface cave biomes interfering with surface rule placement
+     * Furthermore, you can use the BiomeRuleTargets enum in order to sample either the heightmap or surface biome, which is useful when trying to avoid near-surface cave biomes interfering with surface rule placement
      */
 	public static SurfaceRules.ConditionSource isBiome(ResourceKey<Biome> biome) {
 		return isBiome(biome, BiomeRuleTargets.ACTUAL);

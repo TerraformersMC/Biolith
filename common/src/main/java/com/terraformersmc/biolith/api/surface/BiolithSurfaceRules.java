@@ -1,6 +1,8 @@
 package com.terraformersmc.biolith.api.surface;
 
 import com.terraformersmc.biolith.api.biome.BiomeParameters;
+import com.terraformersmc.biolith.api.surface.rule.BiomeRuleTargets;
+import com.terraformersmc.biolith.api.surface.rule.NoiseRuleTargets;
 import com.terraformersmc.biolith.impl.surface.rule.BiomeRules;
 import com.terraformersmc.biolith.impl.surface.rule.ClimateRules;
 import com.terraformersmc.biolith.impl.surface.rule.MiscRules;
@@ -91,10 +93,10 @@ public class BiolithSurfaceRules {
      * Furthermore, you can use the BiomeRules.Type enum in order to sample either the heightmap or surface biome, which is useful when trying to avoid near-surface cave biomes interfering with surface rule placement
      */
 	public static SurfaceRules.ConditionSource isBiome(ResourceKey<Biome> biome) {
-		return isBiome(biome, BiomeRules.Type.ACTUAL);
+		return isBiome(biome, BiomeRuleTargets.ACTUAL);
 	}
-	public static SurfaceRules.ConditionSource isBiome(ResourceKey<Biome> biome, BiomeRules.Type type) {
-		return switch (type) {
+	public static SurfaceRules.ConditionSource isBiome(ResourceKey<Biome> biome, BiomeRuleTargets target) {
+		return switch (target) {
 			case ACTUAL -> SurfaceRules.isBiome(biome);
 			case SURFACE -> BiomeRules.SurfaceBiome.isBiome(biome);
 			case HEIGHTMAP -> BiomeRules.HeightmapBiome.isBiome(biome);
@@ -102,10 +104,10 @@ public class BiolithSurfaceRules {
 	}
 
 	public static SurfaceRules.ConditionSource isBiomeTag(TagKey<Biome> biome) {
-		return isBiomeTag(biome, BiomeRules.Type.ACTUAL);
+		return isBiomeTag(biome, BiomeRuleTargets.ACTUAL);
 	}
-	public static SurfaceRules.ConditionSource isBiomeTag(TagKey<Biome> biome, BiomeRules.Type type) {
-		return switch (type) {
+	public static SurfaceRules.ConditionSource isBiomeTag(TagKey<Biome> biome, BiomeRuleTargets target) {
+		return switch (target) {
 			case ACTUAL -> BiomeRules.BiomeTag.isBiomeTag(biome);
 			case SURFACE -> BiomeRules.SurfaceBiomeTag.isBiomeTag(biome);
 			case HEIGHTMAP -> BiomeRules.HeightmapBiomeTag.isBiomeTag(biome);
@@ -117,8 +119,8 @@ public class BiolithSurfaceRules {
      * noise methods allow for placing surface rules based on biome placement noise
      * These share the same values with biome placement, including sub-biome BiomeParameterTargets
      */
-	public static SurfaceRules.ConditionSource noise(NoiseRules.Type type, float point) {
-		return switch (type) {
+	public static SurfaceRules.ConditionSource noise(NoiseRuleTargets target, float point) {
+		return switch (target) {
 			case TEMPERATURE -> NoiseRules.Temperature.point(point);
 			case HUMIDITY -> NoiseRules.Humidity.point(point);
 			case EROSION -> NoiseRules.Erosion.point(point);
@@ -128,8 +130,8 @@ public class BiolithSurfaceRules {
 			case HEIGHTMAP_DEPTH -> NoiseRules.HeightmapDepth.point(point);
 		};
 	}
-	public static SurfaceRules.ConditionSource noise(NoiseRules.Type type, float min, float max) {
-		return switch (type) {
+	public static SurfaceRules.ConditionSource noise(NoiseRuleTargets target, float min, float max) {
+		return switch (target) {
 			case TEMPERATURE -> NoiseRules.Temperature.range(min, max);
 			case HUMIDITY -> NoiseRules.Humidity.range(min, max);
 			case EROSION -> NoiseRules.Erosion.range(min, max);

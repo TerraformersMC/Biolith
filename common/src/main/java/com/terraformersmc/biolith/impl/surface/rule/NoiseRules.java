@@ -11,16 +11,6 @@ import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public class NoiseRules {
 
-	public enum Type {
-		HUMIDITY,
-		CONTINENTALNESS,
-		TEMPERATURE,
-		EROSION,
-		WEIRDNESS,
-		DEPTH,
-		HEIGHTMAP_DEPTH
-	}
-
 	public static class Temperature implements SurfaceRules.ConditionSource {
 
 		public static final KeyDispatchDataCodec<Temperature> CODEC = KeyDispatchDataCodec.of(

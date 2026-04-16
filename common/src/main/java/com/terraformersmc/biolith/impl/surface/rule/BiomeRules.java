@@ -14,12 +14,6 @@ import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public class BiomeRules {
 
-	public enum Type {
-		ACTUAL,
-		SURFACE,
-		HEIGHTMAP
-	}
-
     public static class BiomeTag implements SurfaceRules.ConditionSource {
         public static final KeyDispatchDataCodec<BiomeTag> CODEC = KeyDispatchDataCodec.of(
                 RecordCodecBuilder.mapCodec(instance ->

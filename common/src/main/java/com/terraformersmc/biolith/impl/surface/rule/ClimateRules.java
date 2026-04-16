@@ -13,6 +13,7 @@ import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 
 public class ClimateRules {
+
 	public static class Temperature implements SurfaceRules.ConditionSource {
 		public static final KeyDispatchDataCodec<Temperature> CODEC = KeyDispatchDataCodec.of(
 			RecordCodecBuilder.mapCodec(instance ->

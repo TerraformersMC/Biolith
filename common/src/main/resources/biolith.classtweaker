@@ -22,6 +22,10 @@ accessible  class   net/minecraft/world/level/biome/FeatureSorter$StepFeatureDat
 accessible  method  net/minecraft/world/level/biome/FeatureSorter$StepFeatureData <init> (Ljava/util/List;)V
 accessible  class   net/minecraft/world/level/levelgen/SurfaceRules$Context
 accessible  method  net/minecraft/world/level/levelgen/SurfaceRules$Context getMinSurfaceLevel ()I
+accessible class net/minecraft/world/level/biome/Biome$ClimateSettings
+accessible class net/minecraft/world/level/levelgen/SurfaceRules$Condition
+accessible method net/minecraft/world/level/biome/Biome getHeightAdjustedTemperature (Lnet/minecraft/core/BlockPos;I)F
+accessible field net/minecraft/world/level/biome/OverworldBiomeBuilder FULL_RANGE Lnet/minecraft/world/level/biome/Climate$Parameter;
 
 inject-interface  net/minecraft/world/level/biome/BiomeSource com/terraformersmc/biolith/impl/biome/InterfaceBiomeSource
 inject-interface  net/minecraft/world/level/biome/Climate$RTree com/terraformersmc/biolith/impl/biome/InterfaceClimateRTree

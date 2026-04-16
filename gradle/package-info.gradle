@@ -49,7 +49,7 @@ abstract class GeneratePackageInfos extends DefaultTask {
 	def run() {
 		def output = outputDir.get().asFile.toPath()
 		output.deleteDir()
-		def headerText = header.readLines().join("\n") // normalize line endings
+		def headerComponent = header.readLines().join("\n") // normalize line endings
 		def root = sourceRoot.get().asFile.toPath()
 
 		root.eachDirRecurse {
@@ -82,7 +82,7 @@ abstract class GeneratePackageInfos extends DefaultTask {
 
 			target.resolve('package-info.java').withWriter {
 				if (isImpl) {
-					it.write("""$headerText
+					it.write("""$headerComponent
 						|/**
 						| * Implementation code for ${projectName.get()}.
 						| */
@@ -94,7 +94,7 @@ abstract class GeneratePackageInfos extends DefaultTask {
 						|import org.jspecify.annotations.NullMarked;
 						|""".stripMargin())
 				} else {
-					it.write("""$headerText
+					it.write("""$headerComponent
 						|/**
 						| * API code for ${projectName.get()}.
 						| */

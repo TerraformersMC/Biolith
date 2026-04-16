@@ -4,14 +4,16 @@
   "package": "com.terraformersmc.biolith.impl.mixin",
   "compatibilityLevel": "JAVA_17",
   "mixins": [
+    "AccessorBiome",
+    "AccessorSurfaceRulesContext",
     "MixinBiomeSource",
     "MixinChunkGenerator",
     "MixinChunkGeneratorSettings",
+    "MixinClimateRTree",
     "MixinDimensionOptions",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
     "MixinPlacedFeatureIndexer",
-    "MixinClimateRTree",
     "MixinServerWorld",
     "MixinSurfaceBuilder",
     "MixinTheEndBiomeSource"

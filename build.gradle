@@ -157,7 +157,7 @@ static void setupRepositories(RepositoryHandler repositories) {
 ext.checkVersion = { archivesBaseName, version ->
     try {
         def xml = new URI("https://maven.terraformersmc.com/com/terraformersmc/$archivesBaseName/maven-metadata.xml").toURL().text
-        def metadata = new XmlSlurper().parseText(xml)
+        def metadata = new XmlSlurper().parseComponent(xml)
         def versions = metadata.versioning.versions.version*.text()
         if (versions.contains(version)) {
             println "$archivesBaseName version $version will not be published; already exists"

@@ -2,16 +2,22 @@ package com.terraformersmc.biolith.impl.platform;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import com.mojang.serialization.MapCodec;
+import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompat;
 import com.terraformersmc.biolith.impl.compat.TerraBlenderCompatForge;
 import com.terraformersmc.biolith.impl.platform.services.PlatformHelper;
 import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.level.levelgen.SurfaceRules;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLLoader;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.DeferredRegister;
 import org.apache.commons.lang3.function.TriFunction;
 
 import java.nio.file.Path;
@@ -47,5 +53,12 @@ public class ForgePlatformHelper implements PlatformHelper {
     @Override
     public void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<CommandSourceStack>, CommandBuildContext, Commands.CommandSelection, LiteralCommandNode<CommandSourceStack>> callback) {
         RegisterCommandsEvent.BUS.addListener(event -> callback.apply(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
+    }
+
+    public static final DeferredRegister<MapCodec<? extends SurfaceRules.ConditionSource>> MATERIAL_CONDITIONS = DeferredRegister.create(Registries.MATERIAL_CONDITION, Biolith.MOD_ID);
+
+    @Override
+    public void registerMaterialCondition(String name, MapCodec<? extends SurfaceRules.ConditionSource> codec) {
+        MATERIAL_CONDITIONS.register(name, () -> codec);
     }
 }

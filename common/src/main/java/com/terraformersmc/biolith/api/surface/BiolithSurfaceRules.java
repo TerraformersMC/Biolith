@@ -75,7 +75,7 @@ public class BiolithSurfaceRules {
 
     /**
      * This samples depth based on heightmap.
-     * It is preferrable to use heightmap depth over regular depth where applicable, as heightmap depth is able to cache the noise calculation per-column and is thus more performant
+     * It is preferable to use heightmap depth over regular depth where applicable, as heightmap depth is able to cache the noise calculation per-column and is thus more performant
      */
 	public static SurfaceRules.ConditionSource heightmapDepth(float min, float max) {
 		return NoiseRules.HeightmapDepth.range(min, max);

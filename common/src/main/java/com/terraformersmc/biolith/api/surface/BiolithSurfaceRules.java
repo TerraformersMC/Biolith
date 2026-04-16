@@ -1,10 +1,10 @@
 package com.terraformersmc.biolith.api.surface;
 
 import com.terraformersmc.biolith.api.biome.BiomeParameters;
-import com.terraformersmc.biolith.api.surface.rule.BiomeRules;
-import com.terraformersmc.biolith.api.surface.rule.ClimateRules;
-import com.terraformersmc.biolith.api.surface.rule.MiscRules;
-import com.terraformersmc.biolith.api.surface.rule.NoiseRules;
+import com.terraformersmc.biolith.impl.surface.rule.BiomeRules;
+import com.terraformersmc.biolith.impl.surface.rule.ClimateRules;
+import com.terraformersmc.biolith.impl.surface.rule.MiscRules;
+import com.terraformersmc.biolith.impl.surface.rule.NoiseRules;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.biome.Biome;

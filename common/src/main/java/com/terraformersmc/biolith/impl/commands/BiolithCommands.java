@@ -1,7 +1,5 @@
 package com.terraformersmc.biolith.impl.commands;
 
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.platform.Services;
 
@@ -22,25 +20,25 @@ public class BiolithCommands {
         }
 
         Services.PLATFORM.registerCommandRegistrationCallback((dispatcher, registryAccess, environment) -> dispatcher.register(literal("biolith")
-                .then(literal("help")
-                        .then(argument("command", word())
-                                .executes(BiolithHelpCommand::helpSpecific))
-                        .executes(BiolithHelpCommand::help))
-                .then(literal("describe")
-                        .then(literal("at")
-                                .then(argument("entity", entity())
-                                        .executes(BiolithDescribeCommand::atEntity))
-                                .then(argument("position", blockPos())
-                                        .executes(BiolithDescribeCommand::atPosition)))
-                        .executes(BiolithDescribeCommand::atCaller))
-                .executes(BiolithHelpCommand::noArgs)
-                .then(literal("climate")
-                        .then(literal("at")
-                                .then(argument("entity", entity())
-                                        .executes(BiolithClimateCommand::atEntity))
-                                .then(argument("position", blockPos())
-                                        .executes(BiolithClimateCommand::atPosition)))
-                        .executes(BiolithClimateCommand::atCaller))
+                        .then(literal("help")
+                                .then(argument("command", word())
+                                        .executes(BiolithHelpCommand::helpSpecific))
+                                .executes(BiolithHelpCommand::help))
+                        .executes(BiolithHelpCommand::noArgs)
+                        .then(literal("climate")
+                                .then(literal("at")
+                                        .then(argument("entity", entity())
+                                                .executes(BiolithClimateCommand::atEntity))
+                                        .then(argument("position", blockPos())
+                                                .executes(BiolithClimateCommand::atPosition)))
+                                .executes(BiolithClimateCommand::atCaller))
+                        .then(literal("describe")
+                                .then(literal("at")
+                                        .then(argument("entity", entity())
+                                                .executes(BiolithDescribeCommand::atEntity))
+                                        .then(argument("position", blockPos())
+                                                .executes(BiolithDescribeCommand::atPosition)))
+                                .executes(BiolithDescribeCommand::atCaller))
                 )
         );
     }

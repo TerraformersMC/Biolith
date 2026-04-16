@@ -1,4 +1,4 @@
-package com.terraformersmc.biolith.api.surface.rule;
+package com.terraformersmc.biolith.impl.surface.rule;
 
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.terraformersmc.biolith.impl.mixin.AccessorSurfaceRulesContext;

@@ -1,13 +1,11 @@
 package com.terraformersmc.biolith.impl.surface;
 
 import com.mojang.serialization.MapCodec;
-import com.terraformersmc.biolith.api.surface.rule.BiomeRules;
-import com.terraformersmc.biolith.api.surface.rule.ClimateRules;
-import com.terraformersmc.biolith.api.surface.rule.MiscRules;
-import com.terraformersmc.biolith.api.surface.rule.NoiseRules;
-import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.core.Registry;
-import net.minecraft.core.registries.BuiltInRegistries;
+import com.terraformersmc.biolith.impl.platform.Services;
+import com.terraformersmc.biolith.impl.surface.rule.BiomeRules;
+import com.terraformersmc.biolith.impl.surface.rule.ClimateRules;
+import com.terraformersmc.biolith.impl.surface.rule.MiscRules;
+import com.terraformersmc.biolith.impl.surface.rule.NoiseRules;
 import net.minecraft.world.level.levelgen.SurfaceRules;
 
 import java.util.function.BiConsumer;
@@ -15,7 +13,7 @@ import java.util.function.BiConsumer;
 public class BiolithMaterialConditions {
 
 	public static void init() {
-		register((name, codec) -> register(BuiltInRegistries.MATERIAL_CONDITION, name, codec));
+		register(BiolithMaterialConditions::register);
 	}
 
 	public static void register(BiConsumer<String, MapCodec<? extends SurfaceRules.ConditionSource>> consumer) {
@@ -37,7 +35,7 @@ public class BiolithMaterialConditions {
 		consumer.accept("noise_heightmap_depth", NoiseRules.HeightmapDepth.CODEC.codec());
 	}
 
-	public static <T> void register(Registry<T> registry, String name, T object) {
-		Registry.register(registry, Biolith.key(registry.key(), name), object);
+	public static void register(String name, MapCodec<? extends SurfaceRules.ConditionSource> codec) {
+		Services.PLATFORM.registerMaterialCondition(name, codec);
 	}
 }

@@ -74,7 +74,7 @@ public abstract class MixinMinecraftServer {
             if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseChunkGenerator) {
                 NoiseGeneratorSettings chunkGeneratorSettings = noiseChunkGenerator.generatorSettings().value();
 
-                ((MixinChunkGeneratorSettings)(Object) chunkGeneratorSettings).biolith$setSurfaceRule(
+                ((MixinNoiseGeneratorSettings)(Object) chunkGeneratorSettings).biolith$setSurfaceRule(
                         SurfaceRules.sequence(Streams.concat(
                                         Arrays.stream(surfaceRuleCollector.getAll()),
                                         Stream.of(chunkGeneratorSettings.surfaceRule()))

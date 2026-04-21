@@ -10,7 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(value = LevelStem.class, priority = 900)
-public class MixinDimensionOptions {
+public class MixinLevelStem {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void biolith$storeDimensionTypeToBiomeSource(Holder<DimensionType> dimensionTypeEntry, ChunkGenerator chunkGenerator, CallbackInfo ci) {
         chunkGenerator.getBiomeSource().biolith$setDimensionType(dimensionTypeEntry);

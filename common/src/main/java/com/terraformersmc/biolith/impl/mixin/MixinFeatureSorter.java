@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.function.Function;
 
 @Mixin(FeatureSorter.class)
-public class MixinPlacedFeatureIndexer {
+public class MixinFeatureSorter {
     @Unique
     private static final ThreadLocal<Boolean> BIOLITH_RECURSION = ThreadLocal.withInitial(() -> false);
 

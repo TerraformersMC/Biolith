@@ -2,11 +2,12 @@
   "required": true,
   "minVersion": "0.8",
   "package": "com.terraformersmc.biolith.impl.mixin",
-  "compatibilityLevel": "JAVA_17",
+  "compatibilityLevel": "JAVA_25",
   "plugin": "com.terraformersmc.biolith.impl.mixin.BiolithForgeMixinConfigPlugin",
   "mixins": [
-    "MixinSaveLoader",
-    "MixinTBTheEndBiomeSource"
+    "MixinLevelStem",
+    "MixinTBTheEndBiomeSource",
+    "MixinWorldStem"
   ],
   "client": [
   ],

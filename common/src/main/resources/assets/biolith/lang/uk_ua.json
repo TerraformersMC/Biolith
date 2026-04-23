@@ -1,0 +1,23 @@
+{
+  "modmenu.descriptionTranslation.biolith":       "Приладдя генерації світу від Terraformers.",
+  "fml.menu.mods.info.description.biolith":       "Приладдя генерації світу від Terraformers.",
+
+  "biolith.command.describe.header":              "значення біому",
+  "biolith.command.describe.biome.vanilla":       "Стандартний/керованний даними біом: ",
+  "biolith.command.describe.biome.terrablender":  "Біом TerraBlender: ",
+  "biolith.command.describe.biome.moderner_beta": "Біом Moderner Beta: ",
+  "biolith.command.describe.biome.replacement":   "Заміна біому: ",
+  "biolith.command.describe.biome.sub":           "Вибраний підбіом: ",
+  "biolith.command.describe.biome.nearest":       "найближчий: ",
+  "biolith.command.describe.biome.none":          "(нічого)",
+  "biolith.command.describe.biome.scale":         "розмір",
+  "biolith.command.describe.nonPlayer":           "Викликач не є гравцем; укажіть сутність або позицію.",
+  "biolith.command.describe.notOurs":             "Biolith не модифікував цільовий вимір.",
+  "biolith.command.help":                         "Доступні команди:\n  §9/biolith help§r — інформація команди Biolith\n  §9/biolith describe§r — інформація біому та шуму",
+  "biolith.command.help.missing":                 "§eНемає довідки для вказаної команди.",
+  "biolith.command.help.describe":                "§9/biolith describe [на (<сутність>|<позиція>)]§r — інформація про шум і вибір біома",
+  "biolith.command.hint":                         "§6(Спробуйте «§9/biolith help§6» для інформації комнади…)",
+  "biolith.world.minecraft.the_end":              "Енд",
+  "biolith.world.minecraft.the_nether":           "Незер",
+  "biolith.world.minecraft.overworld":            "Верхній світ"
+}

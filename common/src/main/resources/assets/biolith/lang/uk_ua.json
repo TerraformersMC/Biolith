@@ -15,8 +15,8 @@
   "biolith.command.describe.notOurs":             "Biolith не модифікував цільовий вимір.",
   "biolith.command.help":                         "Доступні команди:\n  §9/biolith help§r — інформація команди Biolith\n  §9/biolith describe§r — інформація біому та шуму",
   "biolith.command.help.missing":                 "§eНемає довідки для вказаної команди.",
-  "biolith.command.help.describe":                "§9/biolith describe [на (<сутність>|<позиція>)]§r — інформація про шум і вибір біома",
-  "biolith.command.hint":                         "§6(Спробуйте «§9/biolith help§6» для інформації комнади…)",
+  "biolith.command.help.describe":                "§9/biolith describe [на (<сутність>|<позиція>)]§r — інформація про шум і вибір біому",
+  "biolith.command.hint":                         "§6(Спробуйте «§9/biolith help§6» для інформації команди…)",
   "biolith.world.minecraft.the_end":              "Енд",
   "biolith.world.minecraft.the_nether":           "Незер",
   "biolith.world.minecraft.overworld":            "Верхній світ"

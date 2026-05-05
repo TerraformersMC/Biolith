@@ -48,6 +48,11 @@ public class NeoForgePlatformHelper implements PlatformHelper {
     }
 
     @Override
+    public void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<CommandSourceStack>, CommandBuildContext, Commands.CommandSelection, LiteralCommandNode<CommandSourceStack>> callback) {
+        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> callback.apply(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
+    }
+
+    @Override
     public int describeModernerBeta(CommandContext<CommandSourceStack> context, int biomeX, int biomeY, int biomeZ, ServerLevel world, BiomeSource biomeSource, Climate.ParameterList<Holder<Biome>> biomeEntries, Climate.Sampler noise) {
         return ModernerBetaCompatNeoForge.describe(context, biomeX, biomeY, biomeZ, world, biomeSource, biomeEntries, noise);
     }
@@ -55,10 +60,5 @@ public class NeoForgePlatformHelper implements PlatformHelper {
     @Override
     public TerraBlenderCompat getTerraBlenderCompat() {
         return COMPAT_TERRABLENDER;
-    }
-
-    @Override
-    public void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<CommandSourceStack>, CommandBuildContext, Commands.CommandSelection, LiteralCommandNode<CommandSourceStack>> callback) {
-        NeoForge.EVENT_BUS.addListener((RegisterCommandsEvent event) -> callback.apply(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
     }
 }

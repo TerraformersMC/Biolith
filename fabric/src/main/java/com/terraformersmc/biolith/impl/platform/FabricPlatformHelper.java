@@ -45,6 +45,11 @@ public class FabricPlatformHelper implements PlatformHelper {
     }
 
     @Override
+    public void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<CommandSourceStack>, CommandBuildContext, Commands.CommandSelection, LiteralCommandNode<CommandSourceStack>> callback) {
+        CommandRegistrationCallback.EVENT.register(callback::apply);
+    }
+
+    @Override
     public int describeModernerBeta(CommandContext<CommandSourceStack> context, int biomeX, int biomeY, int biomeZ, ServerLevel world, BiomeSource biomeSource, Climate.ParameterList<Holder<Biome>> biomeEntries, Climate.Sampler noise) {
         return ModernerBetaCompatFabric.describe(context, biomeX, biomeY, biomeZ, world, biomeSource, biomeEntries, noise);
     }
@@ -52,10 +57,5 @@ public class FabricPlatformHelper implements PlatformHelper {
     @Override
     public TerraBlenderCompat getTerraBlenderCompat() {
         return COMPAT_TERRABLENDER;
-    }
-
-    @Override
-    public void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<CommandSourceStack>, CommandBuildContext, Commands.CommandSelection, LiteralCommandNode<CommandSourceStack>> callback) {
-        CommandRegistrationCallback.EVENT.register(callback::apply);
     }
 }

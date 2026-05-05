@@ -23,6 +23,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.jspecify.annotations.Nullable;
 
@@ -35,15 +36,20 @@ import java.util.stream.Stream;
 public abstract class MixinTheEndBiomeSource extends BiomeSource {
     @Unique
     private static @Nullable HolderGetter<Biome> biolith$biomeLookup;
+
     @Unique
-    private static Climate.@Nullable ParameterList<Holder<Biome>> biolith$biomeEntries;
+    private Climate.@Nullable ParameterList<Holder<Biome>> biolith$biomeEntries;
 
     @Inject(method = "create", at = @At("HEAD"))
     private static void biolith$getRegistry(HolderGetter<Biome> biomeLookup, CallbackInfoReturnable<TheEndBiomeSource> cir) {
         if (!biomeLookup.equals(biolith$biomeLookup)) {
             biolith$biomeLookup = biomeLookup;
-            biolith$biomeEntries = null;
         }
+    }
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void biolith$resetEntries(Holder<Biome> end, Holder<Biome> highlands, Holder<Biome> midlands, Holder<Biome> islands, Holder<Biome> barrens, CallbackInfo cir) {
+        biolith$biomeEntries = null;
     }
 
     @ModifyReturnValue(method = "collectPossibleBiomes", at = @At("RETURN"))
@@ -130,5 +136,11 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
         }
 
         return biolith$biomeEntries;
+    }
+
+    @Override
+    public void biolith$refreshBiomeEntries() {
+        // Biome entries will be refreshed next time they are requested.
+        biolith$biomeEntries = null;
     }
 }

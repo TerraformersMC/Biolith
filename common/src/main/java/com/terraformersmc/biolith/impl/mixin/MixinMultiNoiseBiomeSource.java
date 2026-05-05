@@ -111,4 +111,10 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
     public Climate.@Nullable ParameterList<Holder<Biome>> biolith$getBiomeEntries() {
         return biolith$biomeEntries;
     }
+
+    @Override
+    public void biolith$refreshBiomeEntries() {
+        // Biome entries will be refreshed next time they are requested.
+        biolith$biomeEntries = null;
+    }
 }

@@ -7,6 +7,7 @@
   "mixins": [
     "MixinLevelStem",
     "MixinMBBiomeSource",
+    "MixinNeoChunkGenerator",
     "MixinTBTheEndBiomeSource",
     "MixinWorldStem"
   ],

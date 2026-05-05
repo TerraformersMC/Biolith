@@ -40,12 +40,12 @@ public class ForgePlatformHelper implements PlatformHelper {
     }
 
     @Override
-    public TerraBlenderCompat getTerraBlenderCompat() {
-        return COMPAT_TERRABLENDER;
+    public void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<CommandSourceStack>, CommandBuildContext, Commands.CommandSelection, LiteralCommandNode<CommandSourceStack>> callback) {
+        RegisterCommandsEvent.BUS.addListener(event -> callback.apply(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
     }
 
     @Override
-    public void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<CommandSourceStack>, CommandBuildContext, Commands.CommandSelection, LiteralCommandNode<CommandSourceStack>> callback) {
-        RegisterCommandsEvent.BUS.addListener(event -> callback.apply(event.getDispatcher(), event.getBuildContext(), event.getCommandSelection()));
+    public TerraBlenderCompat getTerraBlenderCompat() {
+        return COMPAT_TERRABLENDER;
     }
 }

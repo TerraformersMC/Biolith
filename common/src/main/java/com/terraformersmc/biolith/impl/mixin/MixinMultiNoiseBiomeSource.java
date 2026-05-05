@@ -114,4 +114,10 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
     public MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$getBiomeEntries() {
         return biolith$biomeEntries;
     }
+
+    @Override
+    public void biolith$refreshBiomeEntries() {
+        // Biome entries will be refreshed next time they are requested.
+        biolith$biomeEntries = null;
+    }
 }

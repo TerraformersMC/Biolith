@@ -24,6 +24,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.ArrayList;
@@ -35,15 +36,20 @@ import java.util.stream.Stream;
 public abstract class MixinTheEndBiomeSource extends BiomeSource {
     @Unique
     private static RegistryEntryLookup<Biome> biolith$biomeLookup;
+
     @Unique
-    private static MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$biomeEntries;
+    private MultiNoiseUtil.Entries<RegistryEntry<Biome>> biolith$biomeEntries;
 
     @Inject(method = "createVanilla", at = @At("HEAD"))
     private static void biolith$getRegistry(RegistryEntryLookup<Biome> biomeLookup, CallbackInfoReturnable<TheEndBiomeSource> cir) {
         if (!biomeLookup.equals(biolith$biomeLookup)) {
             biolith$biomeLookup = biomeLookup;
-            biolith$biomeEntries = null;
         }
+    }
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void biolith$resetEntries(RegistryEntry<Biome> end, RegistryEntry<Biome> highlands, RegistryEntry<Biome> midlands, RegistryEntry<Biome> islands, RegistryEntry<Biome> barrens, CallbackInfo cir) {
+        biolith$biomeEntries = null;
     }
 
     @ModifyReturnValue(method = "biomeStream", at = @At("RETURN"))
@@ -130,5 +136,11 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
         }
 
         return biolith$biomeEntries;
+    }
+
+    @Override
+    public void biolith$refreshBiomeEntries() {
+        // Biome entries will be refreshed next time they are requested.
+        biolith$biomeEntries = null;
     }
 }

@@ -10,24 +10,12 @@ import net.minecraft.world.gen.feature.PlacedFeature;
 import net.minecraft.world.gen.feature.util.PlacedFeatureIndexer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 import java.util.function.Function;
 
 @Mixin(value = ChunkGenerator.class, priority = 1100)
 public class MixinChunkGenerator {
-    /*
-     * NeoForge modifies the chunk generator feature list and their implementation
-     * breaks Biolith in the End by finalizing a partial list of features.  This
-     * mixin bypasses the method which finalizes the list too early.
-     */
-    @Inject(method = "initializeIndexedFeaturesList", at = @At("HEAD"), cancellable = true)
-    private void biolith$disableInitializeIndexedFeaturesList(CallbackInfo ci) {
-        ci.cancel();
-    }
-
     /*
      * This is the lambda inside the main ctor at the following location:
      * this.indexedFeaturesListSupplier = Suppliers.memoize( -> HERE <- );

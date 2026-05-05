@@ -25,6 +25,9 @@ public interface InterfaceBiomeSource {
         return null;
     }
 
+    default void biolith$refreshBiomeEntries() {
+    }
+
     default boolean biolith$getBypass() {
         return false;
     }

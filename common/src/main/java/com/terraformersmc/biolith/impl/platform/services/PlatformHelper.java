@@ -56,6 +56,13 @@ public interface PlatformHelper {
     Path getConfigDir();
 
     /**
+     * Registers a command registration callback with the platform's event system.
+     *
+     * @param callback {@code (dispatcher, registryAccess, environment) -> { dispatcher.register(COMMANDS) } }
+     */
+    void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<ServerCommandSource>, CommandRegistryAccess, CommandManager.RegistrationEnvironment, LiteralCommandNode<ServerCommandSource>> callback);
+
+    /**
      * Sends the biolith describe output for Moderner Beta biome sources.
      *
      * @param context Command context
@@ -74,14 +81,7 @@ public interface PlatformHelper {
     /**
      * Gets the current platform's implementation of TerraBlenderCompat.
      *
-     * @return The platform's implementation of TerraBlenderCompat.
+     * @return The platform's implementation of TerraBlenderCompat
      */
     TerraBlenderCompat getTerraBlenderCompat();
-
-    /**
-     * Registers a command registration callback with the platform's event system.
-     *
-     * @param callback {@code (dispatcher, registryAccess, environment) -> { dispatcher.register(COMMANDS) } }
-     */
-    void registerCommandRegistrationCallback(TriFunction<CommandDispatcher<ServerCommandSource>, CommandRegistryAccess, CommandManager.RegistrationEnvironment, LiteralCommandNode<ServerCommandSource>> callback);
 }

@@ -1,5 +1,6 @@
 {
   "modmenu.descriptionTranslation.biolith":       "Terraformers' world generation utilities",
+  "fml.menu.mods.info.description.biolith":       "Terraformers' world generation utilities",
 
   "biolith.command.describe.header":              "biome values",
   "biolith.command.describe.biome.vanilla":       "Vanilla/data biome: ",

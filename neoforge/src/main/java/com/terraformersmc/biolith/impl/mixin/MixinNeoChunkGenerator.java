@@ -21,7 +21,7 @@ public abstract class MixinNeoChunkGenerator {
     private void biolith$refreshFeatureCacheForNeo(CallbackInfo ci) {
         // Don't let the client request our biome stream during settings validation;
         // we are server-side and the server registries aren't ready yet.
-        if (FMLEnvironment.getDist() != Dist.CLIENT) {
+        if (FMLEnvironment.dist != Dist.CLIENT) {
             getBiomeSource().biolith$refreshBiomeEntries();
         }
     }

@@ -2,8 +2,7 @@ package com.terraformersmc.biolith.impl.mixin;
 
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.loading.FMLEnvironment;
+import net.neoforged.neoforge.server.ServerLifecycleHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,9 +18,9 @@ public abstract class MixinNeoChunkGenerator {
     // Biolith caches its version of biome entries, so we need to regenerate that as well when they invalidate.
     @Inject(method = "Lnet/minecraft/world/level/chunk/ChunkGenerator;refreshFeaturesPerStep()V", at = @At("HEAD"))
     private void biolith$refreshFeatureCacheForNeo(CallbackInfo ci) {
-        // Don't let the client request our biome stream during settings validation;
-        // we are server-side and the server registries aren't ready yet.
-        if (FMLEnvironment.getDist() != Dist.CLIENT) {
+        // We cannot refresh the biome entries without a running server.  For some incomprehensible reason,
+        // Neoforge demands we do this during world config selection long before the server starts.
+        if (ServerLifecycleHooks.getCurrentServer() != null) {
             getBiomeSource().biolith$refreshBiomeEntries();
         }
     }

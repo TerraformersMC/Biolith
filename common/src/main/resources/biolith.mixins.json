@@ -9,6 +9,7 @@
     "MixinDimensionOptions",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
+    "MixinMultiNoiseBiomeSourceParameterList",
     "MixinNoiseHypercube",
     "MixinParameterRange",
     "MixinPlacedFeatureIndexer",

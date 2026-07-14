@@ -37,7 +37,8 @@ allprojects {
         mavenCentral()
         maven {
             name = 'TerraformersMC'
-            url = 'https://maven.terraformersmc.com/'
+            //url = 'https://maven.terraformersmc.com/'
+            url = 'https://maven.gnomecraft.net/releases'
         }
 
         // for TerraBlender

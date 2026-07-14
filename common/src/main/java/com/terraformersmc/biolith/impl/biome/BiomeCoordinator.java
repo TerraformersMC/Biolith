@@ -8,6 +8,7 @@ import net.minecraft.registry.*;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.dimension.DimensionOptions;
 import net.minecraft.world.dimension.DimensionType;
 import net.minecraft.world.dimension.DimensionTypes;
 import org.jetbrains.annotations.Nullable;
@@ -18,34 +19,49 @@ public class BiomeCoordinator {
     public static final EndBiomePlacement END = new EndBiomePlacement();
     public static final NetherBiomePlacement NETHER = new NetherBiomePlacement();
     public static final OverworldBiomePlacement OVERWORLD = new OverworldBiomePlacement();
-    private static boolean registeredWithTerrablender = false;
 
     private static BiolithState END_STATE;
     private static BiolithState NETHER_STATE;
     private static BiolithState OVERWORLD_STATE;
 
     private static boolean serverStarted = false;
-    protected static DynamicRegistryManager.Immutable registryManager;
+    private static boolean registeredWithTerrablender = false;
+    private static DynamicRegistryManager.Immutable registryManager;
+    private static RegistryEntryLookup<DimensionOptions> dimensionLookup;
+    private static RegistryEntryLookup<Biome> biomeLookup;
 
     public static boolean isServerStarted() {
         return serverStarted;
     }
 
     public static void setRegistryManager(CombinedDynamicRegistries<ServerDynamicRegistryType> combinedDynamicRegistries) {
-        // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer and MixinServerLoader so we can set this really early.
+        // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer and MixinServerLoader
+        // so we can set this really early.
         registryManager = combinedDynamicRegistries.getCombinedRegistryManager();
+        dimensionLookup = registryManager.getOrThrow(RegistryKeys.DIMENSION);
+        biomeLookup = registryManager.getOrThrow(RegistryKeys.BIOME);
+    }
+
+    public static void setEarlyBiomeLookup(RegistryEntryLookup<Biome> earlyBiomeLookup) {
+        if (biomeLookup == null) {
+            biomeLookup = earlyBiomeLookup;
+        }
     }
 
     public static @Nullable DynamicRegistryManager.Immutable getRegistryManager() {
         return registryManager;
     }
 
-    public static Optional<Registry<Biome>> getBiomeLookup() {
-        if (registryManager == null) {
-            return Optional.empty();
+    public static Optional<? extends RegistryEntryLookup<Biome>> getBiomeLookup() {
+        if (biomeLookup != null) {
+            return Optional.of(biomeLookup);
         }
 
-        return registryManager.getOptional(RegistryKeys.BIOME);
+        if (registryManager != null) {
+            return registryManager.getOptional(RegistryKeys.BIOME);
+        }
+
+        return Optional.empty();
     }
 
     public static RegistryEntryLookup<Biome> getBiomeLookupOrThrow() {
@@ -53,8 +69,9 @@ public class BiomeCoordinator {
     }
 
     public static void handleServerStarting(MinecraftServer server) {
+        // This is the "right" way to do it, but in practice it should already be set.
         if (registryManager == null) {
-            registryManager = server.getCombinedDynamicRegistries().getCombinedRegistryManager();
+            setRegistryManager(server.getCombinedDynamicRegistries());
         }
 
         // When TerraBlender is present, it ignores our surface rules.
@@ -111,6 +128,8 @@ public class BiomeCoordinator {
     public static void handleServerStopped(MinecraftServer server) {
         serverStarted = false;
         registryManager = null;
+        dimensionLookup = null;
+        biomeLookup = null;
 
         END_STATE = null;
         NETHER_STATE = null;

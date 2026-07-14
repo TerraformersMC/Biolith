@@ -11,6 +11,7 @@
     "MixinFeatureSorter",
     "MixinMinecraftServer",
     "MixinMultiNoiseBiomeSource",
+    "MixinMultiNoiseBiomeSourceParameterList",
     "MixinNoiseGeneratorSettings",
     "MixinServerLevel",
     "MixinSurfaceSystem",

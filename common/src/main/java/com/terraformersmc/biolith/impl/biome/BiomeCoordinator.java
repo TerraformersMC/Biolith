@@ -4,10 +4,7 @@ import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.config.BiolithState;
 import com.terraformersmc.biolith.impl.platform.Services;
-import net.minecraft.core.HolderGetter;
-import net.minecraft.core.LayeredRegistryAccess;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.*;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -16,6 +13,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -24,34 +22,49 @@ public class BiomeCoordinator {
     public static final EndBiomePlacement END = new EndBiomePlacement();
     public static final NetherBiomePlacement NETHER = new NetherBiomePlacement();
     public static final OverworldBiomePlacement OVERWORLD = new OverworldBiomePlacement();
-    private static boolean registeredWithTerrablender = false;
 
     private static @Nullable BiolithState END_STATE;
     private static @Nullable BiolithState NETHER_STATE;
     private static @Nullable BiolithState OVERWORLD_STATE;
 
     private static boolean serverStarted = false;
-    protected static RegistryAccess.@Nullable Frozen registryManager;
+    private static boolean registeredWithTerrablender = false;
+    private static @Nullable RegistryAccess registryManager;
+    private static @Nullable HolderGetter<LevelStem> dimensionLookup;
+    private static @Nullable HolderGetter<Biome> biomeLookup;
 
     public static boolean isServerStarted() {
         return serverStarted;
     }
 
     public static void setRegistryManager(LayeredRegistryAccess<RegistryLayer> combinedDynamicRegistries) {
-        // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer and MixinServerLoader so we can set this really early.
+        // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer and MixinServerLoader
+        // so we can set this really early.
         registryManager = combinedDynamicRegistries.compositeAccess();
+        dimensionLookup = registryManager.lookupOrThrow(Registries.LEVEL_STEM);
+        biomeLookup = registryManager.lookupOrThrow(Registries.BIOME);
     }
 
-    public static RegistryAccess.@Nullable Frozen getRegistryManager() {
+    public static void setEarlyBiomeLookup(HolderGetter<Biome> earlyBiomeLookup) {
+        if (biomeLookup == null) {
+            biomeLookup = earlyBiomeLookup;
+        }
+    }
+
+    public static @Nullable RegistryAccess getRegistryManager() {
         return registryManager;
     }
 
-    public static Optional<Registry<Biome>> getBiomeLookup() {
-        if (registryManager == null) {
-            return Optional.empty();
+    public static Optional<? extends HolderGetter<Biome>> getBiomeLookup() {
+        if (biomeLookup != null) {
+            return Optional.of(biomeLookup);
         }
 
-        return registryManager.lookup(Registries.BIOME);
+        if (registryManager != null) {
+            return registryManager.lookup(Registries.BIOME);
+        }
+
+        return Optional.empty();
     }
 
     public static HolderGetter<Biome> getBiomeLookupOrThrow() {
@@ -59,8 +72,9 @@ public class BiomeCoordinator {
     }
 
     public static void handleServerStarting(MinecraftServer server) {
+        // This is the "right" way to do it, but in practice it should already be set.
         if (registryManager == null) {
-            registryManager = server.registries().compositeAccess();
+            setRegistryManager(server.registries());
         }
 
         // When TerraBlender is present, it ignores our surface rules.
@@ -118,6 +132,8 @@ public class BiomeCoordinator {
     public static void handleServerStopped(MinecraftServer server) {
         serverStarted = false;
         registryManager = null;
+        dimensionLookup = null;
+        biomeLookup = null;
 
         END_STATE = null;
         NETHER_STATE = null;

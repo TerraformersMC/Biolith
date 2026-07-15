@@ -1,8 +1,11 @@
 package com.terraformersmc.biolith.impl;
 
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
+import com.terraformersmc.biolith.impl.data.BiomePlacementLoader;
+import com.terraformersmc.biolith.impl.data.SurfaceGenerationLoader;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
+import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
 
@@ -14,6 +17,10 @@ public class BiolithInit {
         // Watch for server events so we can maintain our status data.
         NeoForge.EVENT_BUS.addListener((ServerAboutToStartEvent event) -> BiomeCoordinator.handleServerStarting(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> BiomeCoordinator.handleServerStopped(event.getServer()));
+
+        // Implement our resource reloaders.
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(new BiomePlacementLoader()));
+        NeoForge.EVENT_BUS.addListener((AddReloadListenerEvent event) -> event.addListener(new SurfaceGenerationLoader()));
 
         // Call loader-agnostic init.
         Biolith.init();

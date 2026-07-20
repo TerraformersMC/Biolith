@@ -1,6 +1,8 @@
 loom {
     accessWidenerPath = project(":common").loom.accessWidenerPath
     convertAw2At(tasks.named("jar", Jar), ["biolith.classtweaker"])
+    forgeExtraMixinConfigs.add("biolith.mixins.json")
+    forgeExtraMixinConfigs.add("biolith.forge.mixins.json")
 }
 
 dependencies {

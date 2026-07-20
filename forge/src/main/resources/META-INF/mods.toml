@@ -14,13 +14,7 @@ Terraformers' world generation utilities
 '''
 logoFile = "assets/biolith/logo.png"
 
-[[accessTransformers]]
-file = "accesstransformer.cfg"
-
-[[mixins]]
-config = "biolith.mixins.json"
-[[mixins]]
-config = "biolith.forge.mixins.json"
+accessTransformers = ["META-INF/accesstransformer.cfg"]
 
 [[dependencies.biolith]]
 modId = "forge"

@@ -40,6 +40,9 @@ the artifact ID is just `biolith`.
 
 Much like Terraform API, add the Terraformers maven repository to your `build.gradle`:
 
+NOTE: Terraformers' maven has issues.  Temporarily you can use mine instead:
+```url = 'https://maven.gnomecraft.net/releases'```
+
 ```
 repositories {
     maven {

@@ -1,16 +1,6 @@
 Quick list of important to-do items from the hell that was upgrading to 26.1.
 
-* forge/build.gradle
-* forge/biolith.accesswidener
-* neoforge/build.gradle
-* neoforge/biolith.accesswidener
-* settings.gradle mavenLocal()
-
 * Internal names to mojmap-esq
-* State file has changed *again*
-* Dev env has no translations
-
-* Consider refactoring project to avoid needing DuplicatesStrategy.EXCLUDE
 
 * Do Something about the unstable order of biome encounter when iterating the hashes at the top of DimensionBiomePlacement
   * New Random for every replacement request list?

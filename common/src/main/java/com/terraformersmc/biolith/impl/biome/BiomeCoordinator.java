@@ -71,18 +71,24 @@ public class BiomeCoordinator {
         return getBiomeLookup().orElseThrow();
     }
 
-    public static void handleServerStarting(MinecraftServer server) {
-        // This is the "right" way to do it, but in practice it should already be set.
+    // This event occurs prior to TerraBlender's LevelUtils.initializeOnServerStart()
+    public static void handleServerPreStart(LayeredRegistryAccess<RegistryLayer> registryAccess) {
         if (registryManager == null) {
-            setRegistryManager(server.registries());
+            setRegistryManager(registryAccess);
         }
 
         // When TerraBlender is present, it ignores our surface rules.
         // To avoid this, we submit a duplicate registration to TerraBlender (but only once).
-        // TODO: Pretty sure this breaks for datapack surface rules added after first startup...
         if (BiolithCompat.COMPAT_TERRABLENDER && !registeredWithTerrablender) {
             Services.PLATFORM.getTerraBlenderCompat().registerSurfaceRules();
             registeredWithTerrablender = true;
+        }
+    }
+
+    public static void handleServerStarting(MinecraftServer server) {
+        // This is the "right" way to do it, but in practice it should already be set.
+        if (registryManager == null) {
+            setRegistryManager(server.registries());
         }
 
         if (serverStarted) {

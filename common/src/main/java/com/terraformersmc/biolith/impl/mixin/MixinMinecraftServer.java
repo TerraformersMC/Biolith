@@ -42,8 +42,8 @@ public abstract class MixinMinecraftServer {
     ))
     @SuppressWarnings("unused")
     private RegistryAccess.Frozen biolith$earlyCaptureRegistries(LayeredRegistryAccess<RegistryLayer> instance, Operation<RegistryAccess.Frozen> original) {
-        // This capture updates any registry manager we scraped previously with the final version.
-        BiomeCoordinator.setRegistryManager(instance);
+        // This early event allows us to submit surface rules to TerraBlender before it finalizes them.
+        BiomeCoordinator.handleServerPreStart(instance);
 
         return original.call(instance);
     }

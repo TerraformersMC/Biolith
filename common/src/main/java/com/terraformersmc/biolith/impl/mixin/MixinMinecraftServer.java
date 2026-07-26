@@ -76,9 +76,10 @@ public abstract class MixinMinecraftServer {
 
                 ((MixinNoiseGeneratorSettings)(Object) chunkGeneratorSettings).biolith$setSurfaceRule(
                         SurfaceRules.sequence(Streams.concat(
-                                        Arrays.stream(surfaceRuleCollector.getAll()),
-                                        Stream.of(chunkGeneratorSettings.surfaceRule()))
-                                .toList().toArray(rulesType)));
+                                Arrays.stream(surfaceRuleCollector.getAllBootstrapped(BiomeCoordinator.getBiomeLookupOrThrow())),
+                                Stream.of(chunkGeneratorSettings.surfaceRule())
+                        ).toList().toArray(rulesType))
+                );
             }
         }
 

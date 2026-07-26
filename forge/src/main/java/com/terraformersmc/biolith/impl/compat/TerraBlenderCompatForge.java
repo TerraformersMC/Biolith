@@ -1,6 +1,7 @@
 package com.terraformersmc.biolith.impl.compat;
 
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
+import com.terraformersmc.biolith.api.surface.RuleSourceBootstrapper;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import terrablender.api.Region;
@@ -12,7 +13,6 @@ import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.levelgen.SurfaceRules;
 import org.jspecify.annotations.Nullable;
 
 public class TerraBlenderCompatForge implements TerraBlenderCompat {
@@ -63,7 +63,7 @@ public class TerraBlenderCompatForge implements TerraBlenderCompat {
             if (biolithRules.getRuleCount() > 0) {
                 for (Identifier ruleOwner : biolithRules.getRuleOwners()) {
                     String namespace = ruleOwner.getNamespace();
-                    SurfaceRules.RuleSource rule = biolithRules.get(ruleOwner);
+                    SurfaceRuleManager.RuleBuilder rule = getBootstrapperAsBuilder(biolithRules.get(ruleOwner));
                     if (rule != null) {
                         if (namespace.equals("minecraft")) {
                             SurfaceRuleManager.addToDefaultSurfaceRulesAtStage(terrablenderRuleCategory, SurfaceRuleManager.RuleStage.BEFORE_BEDROCK, 0, rule);
@@ -79,5 +79,13 @@ public class TerraBlenderCompatForge implements TerraBlenderCompat {
                 }
             }
         });
+    }
+
+    private static SurfaceRuleManager.@Nullable RuleBuilder getBootstrapperAsBuilder(@Nullable RuleSourceBootstrapper bootstrapper) {
+        if (bootstrapper == null) {
+            return null;
+        }
+
+        return bootstrapper::apply;
     }
 }

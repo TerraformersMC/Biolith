@@ -18,8 +18,10 @@ public class BiolithInit {
         ServerStoppedEvent.BUS.addListener(event -> BiomeCoordinator.handleServerStopped(event.getServer()));
 
         // Implement our resource reloaders The Forge Way (tm).
-        AddReloadListenerEvent.BUS.addListener(event -> event.addListener(new BiomePlacementLoader()));
-        AddReloadListenerEvent.BUS.addListener(event -> event.addListener(new SurfaceGenerationLoader()));
+        AddReloadListenerEvent.BUS.addListener(event -> {
+            event.addListener(new BiomePlacementLoader());
+            event.addListener(new SurfaceGenerationLoader(event.getRegistries()));
+        });
 
         // Call loader-agnostic init.
         Biolith.init();

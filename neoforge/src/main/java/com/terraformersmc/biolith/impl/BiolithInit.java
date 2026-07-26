@@ -9,6 +9,7 @@ import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.AddServerReloadListenersEvent;
 import net.neoforged.neoforge.event.server.ServerAboutToStartEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.neoforged.neoforge.resource.VanillaServerListeners;
 
 @Mod(Biolith.MOD_ID)
 public class BiolithInit {
@@ -19,9 +20,16 @@ public class BiolithInit {
         NeoForge.EVENT_BUS.addListener((ServerAboutToStartEvent event) -> BiomeCoordinator.handleServerStarting(event.getServer()));
         NeoForge.EVENT_BUS.addListener((ServerStoppedEvent event) -> BiomeCoordinator.handleServerStopped(event.getServer()));
 
+        Identifier biomePlacementLoaderId = Biolith.id("biome_placement_loader");
+        Identifier surfaceGenerationLoaderId = Biolith.id("surface_generation_loader");
+
         // Implement our resource reloaders The Neoforged Way (tm).
-        NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> event.addListener(Identifier.fromNamespaceAndPath(Biolith.MOD_ID, "biome_placement_loader"), new BiomePlacementLoader()));
-        NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> event.addListener(Identifier.fromNamespaceAndPath(Biolith.MOD_ID, "surface_generation_loader"), new SurfaceGenerationLoader()));
+        NeoForge.EVENT_BUS.addListener((AddServerReloadListenersEvent event) -> {
+            event.addListener(biomePlacementLoaderId, new BiomePlacementLoader());
+            event.addListener(surfaceGenerationLoaderId, new SurfaceGenerationLoader(event.getServerResources().getRegistryLookup()));
+            event.addDependency(VanillaServerListeners.LAST, biomePlacementLoaderId);
+            event.addDependency(VanillaServerListeners.LAST, surfaceGenerationLoaderId);
+        });
 
         // Call loader-agnostic init.
         Biolith.init();

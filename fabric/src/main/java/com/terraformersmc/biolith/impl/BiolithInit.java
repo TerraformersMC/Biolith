@@ -6,8 +6,9 @@ import com.terraformersmc.biolith.impl.data.BiomePlacementLoader;
 import com.terraformersmc.biolith.impl.data.SurfaceGenerationLoader;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.event.lifecycle.v1.ServerLifecycleEvents;
-import net.fabricmc.fabric.api.resource.v1.ResourceLoader;
-import net.minecraft.server.packs.PackType;
+import net.fabricmc.fabric.api.resource.v1.DataResourceLoader;
+import net.fabricmc.fabric.api.resource.v1.reloader.ResourceReloaderKeys;
+import net.minecraft.resources.Identifier;
 
 public class BiolithInit implements ModInitializer {
     @Override
@@ -22,10 +23,15 @@ public class BiolithInit implements ModInitializer {
             ServerLifecycleEvents.SERVER_STARTING.register(BiomeCoordinator::handleServerStarting);
             ServerLifecycleEvents.SERVER_STOPPED.register(BiomeCoordinator::handleServerStopped);
 
+            Identifier biomePlacementLoaderId = Biolith.id("biome_placement_loader");
+            Identifier surfaceGenerationLoaderId = Biolith.id("surface_generation_loader");
+
             // Implement our resource reloaders The Fabric Way (tm).
-            ResourceLoader serverDataLoader = ResourceLoader.get(PackType.SERVER_DATA);
-            serverDataLoader.registerReloadListener(Biolith.id("biome_placement_loader"), new BiomePlacementLoader());
-            serverDataLoader.registerReloadListener(Biolith.id("surface_generation_loader"), new SurfaceGenerationLoader());
+            DataResourceLoader serverDataLoader = DataResourceLoader.get();
+            serverDataLoader.registerReloadListener(biomePlacementLoaderId, new BiomePlacementLoader());
+            serverDataLoader.registerReloadListener(surfaceGenerationLoaderId, SurfaceGenerationLoader::new);
+            serverDataLoader.addListenerOrdering(ResourceReloaderKeys.AFTER_VANILLA, biomePlacementLoaderId);
+            serverDataLoader.addListenerOrdering(ResourceReloaderKeys.AFTER_VANILLA, surfaceGenerationLoaderId);
 
             // Call loader-agnostic init.
             Biolith.init();

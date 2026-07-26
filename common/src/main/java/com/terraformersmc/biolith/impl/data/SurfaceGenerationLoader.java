@@ -8,8 +8,10 @@ import com.mojang.serialization.JsonOps;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.FileToIdConverter;
 import net.minecraft.resources.Identifier;
+import net.minecraft.resources.RegistryOps;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -19,16 +21,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class SurfaceGenerationLoader extends SimplePreparableReloadListener<List<SurfaceGenerationMarshaller>> {
     public static final FileToIdConverter SURFACE_GENERATION_FINDER = FileToIdConverter.json("biolith/surface_generation");
 
+    private final HolderLookup.Provider registryLookup;
+
+    public SurfaceGenerationLoader(HolderLookup.Provider registryLookup) {
+        this.registryLookup = registryLookup;
+    }
+
     @Override
     protected List<SurfaceGenerationMarshaller> prepare(ResourceManager manager, ProfilerFiller profiler) {
         profiler.startTick();
+        RegistryOps<JsonElement> registryOps = RegistryOps.create(JsonOps.INSTANCE, this.registryLookup);
         List<SurfaceGenerationMarshaller> marshallers = new ArrayList<>();
 
         profiler.push("biolith/surface_generation");
@@ -44,7 +51,7 @@ public class SurfaceGenerationLoader extends SimplePreparableReloadListener<List
                         try {
                             profiler.push("parse");
                             JsonObject jsonObject = JsonParser.parseReader(reader).getAsJsonObject();
-                            SurfaceGenerationMarshaller marshaller = get(SurfaceGenerationMarshaller.CODEC, jsonObject);
+                            SurfaceGenerationMarshaller marshaller = get(SurfaceGenerationMarshaller.CODEC, registryOps, jsonObject);
                             marshallers.add(marshaller);
                             profiler.pop();
                         } catch (Throwable throwable) {
@@ -99,7 +106,7 @@ public class SurfaceGenerationLoader extends SimplePreparableReloadListener<List
         }
     }
 
-    public static <R> R get(Decoder<R> decoder, JsonElement jsonElement) throws NullPointerException {
-        return decoder.parse(JsonOps.INSTANCE, jsonElement).result().orElseThrow();
+    public static <R> R get(Decoder<R> decoder, RegistryOps<JsonElement> ops, JsonElement jsonElement) throws NoSuchElementException {
+        return decoder.parse(ops, jsonElement).result().orElseThrow();
     }
 }

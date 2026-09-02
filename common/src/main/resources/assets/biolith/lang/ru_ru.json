@@ -1,6 +1,6 @@
 {
   "modmenu.descriptionTranslation.biolith":       "Инструменты генерации мира от Terraformers.",
-  "fml.menu.mods.info.description.biolith":       "Инструменты генерации мира от Terraformers.",
+  "neoforge.screen.mods.info.description.biolith":"Инструменты генерации мира от Terraformers.",
 
   "biolith.command.describe.header":              "значения биома",
   "biolith.command.describe.biome.vanilla":       "Исходный/управляемый данными биом: ",

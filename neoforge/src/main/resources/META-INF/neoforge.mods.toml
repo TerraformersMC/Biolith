@@ -12,7 +12,7 @@ authors = "TerraformersMC, gniftygnome"
 description = '''
 Terraformers' world generation utilities
 '''
-iconFile = "assets/biolith/logo.png"
+iconFile = "assets/biolith/icon.png"
 bannerFile = "assets/biolith/logo.png"
 
 [[accessTransformers]]

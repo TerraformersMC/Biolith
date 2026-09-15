@@ -23,9 +23,11 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.BiomeResolver;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import org.jspecify.annotations.Nullable;
 
 public class BiolithDescribeCommand {
@@ -60,7 +62,7 @@ public class BiolithDescribeCommand {
 
             return -1;
         }
-        Climate.Sampler noise = world.getChunkSource().randomState().sampler();
+        Climate.Sampler noise = world.getChunkSource().randomState().createClimateSampler(SamplerContext.EMPTY_UNCACHED);
 
         // Describe Moderner Beta worldgen if it's active.
         if (BiolithCompat.COMPAT_MODERNER_BETA) {
@@ -117,10 +119,11 @@ public class BiolithDescribeCommand {
             noisePoint = BiomeCoordinator.END.sampleEndNoise(biomeX, biomeY, biomeZ, noise, original);
             vanillaFittestNodes = VanillaCompat.getEndBiome(noisePoint, biomeEntries, original);
             if (BiolithCompat.COMPAT_TERRABLENDER) {
+                BiomeResolver biomeResolver = biomeSource.createUncachedResolver(world.getChunkSource().randomState());
                 biomeSource.biolith$setBypass(true);
                 fittestNodes = terrablenderFittestNodes = new BiolithFittestNodes<>(
                         new Climate.RTree.Leaf<>(DimensionBiomePlacement.OUT_OF_RANGE,
-                                biomeSource.getNoiseBiome(biomeX, biomeY, biomeZ, noise)), 0L);
+                                biomeResolver.getNoiseBiome(biomeX, biomeY, biomeZ)), 0L);
                 biomeSource.biolith$setBypass(false);
             }
             if (fittestNodes == null) {

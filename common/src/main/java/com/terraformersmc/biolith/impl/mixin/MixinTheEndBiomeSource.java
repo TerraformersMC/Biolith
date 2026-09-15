@@ -4,6 +4,7 @@ import com.google.common.collect.Streams;
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
+import com.llamalad7.mixinextras.sugar.Local;
 import com.mojang.datafixers.util.Pair;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
@@ -12,13 +13,12 @@ import com.terraformersmc.biolith.impl.compat.BiolithCompat;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderGetter;
-import net.minecraft.core.QuartPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
-import net.minecraft.world.level.levelgen.DensityFunction;
+import net.minecraft.world.level.levelgen.densityfunction.DensitySampler;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
@@ -115,13 +115,15 @@ public abstract class MixinTheEndBiomeSource extends BiomeSource {
 
     @WrapOperation(method = "getNoiseBiome",
             at = @At(
-                    value = "NEW",
-                    target = "net/minecraft/world/level/levelgen/DensityFunction$SinglePointContext"
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/levelgen/densityfunction/DensitySampler$Bound;sampleValue(III)F"
             )
     )
     @SuppressWarnings("unused")
-    private DensityFunction.SinglePointContext biolith$smoothEndNoise(int blockX, int blockY, int blockZ, Operation<DensityFunction.SinglePointContext> original, int x, int y, int z) {
-        return (new DensityFunction.SinglePointContext(QuartPos.toBlock(x), QuartPos.toBlock(y), QuartPos.toBlock(z)));
+    private float biolith$smoothEndNoise(DensitySampler.Bound instance, int x, int y, int z, Operation<Float> original, @Local(name = "blockX") int blockX, @Local(name = "blockY") int blockY, @Local(name = "blockZ") int blockZ) {
+        // Substitute the block-converted biome quad coordinates for the section-scoped ones.
+        // This preserves more of the original variation in the least significant bits.
+        return original.call(instance, blockX, blockY, blockZ);
     }
 
     @Override

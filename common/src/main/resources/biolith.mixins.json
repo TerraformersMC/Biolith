@@ -13,7 +13,7 @@
     "MixinMultiNoiseBiomeSourceParameterList",
     "MixinNoiseGeneratorSettings",
     "MixinServerLevel",
-    "MixinSurfaceSystem",
+    "MixinMaterialSystem",
     "MixinTheEndBiomeSource"
   ],
   "client": [

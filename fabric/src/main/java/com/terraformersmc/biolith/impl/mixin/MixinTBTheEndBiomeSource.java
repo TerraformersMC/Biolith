@@ -9,6 +9,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,6 +41,11 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
     @Override
     public void biolith$setBypass(boolean value) {
         bypass.set(value);
+    }
+
+    @Shadow
+    private Holder<Biome> getNoiseBiome(final int quartX, final int quartY, final int quartZ, final Climate.Sampler sampler) {
+        throw new UnsupportedOperationException();
     }
 
     @Inject(method = "getNoiseBiome", at = @At("HEAD"), cancellable = true)

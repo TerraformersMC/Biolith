@@ -11,9 +11,9 @@ import java.util.List;
  * Code API methods for surface generation strategies:
  *
  * <ul>
- * <li>{@linkplain #addEndSurfaceRules} - Prepend surface rules for End biomes</li>
- * <li>{@linkplain #addNetherSurfaceRules} - Prepend surface rules for Nether biomes</li>
- * <li>{@linkplain #addOverworldSurfaceRules} - Prepend surface rules for Overworld biomes</li>
+ * <li>{@linkplain #addEndSurfaceRules} - Prepend material rules for End biomes</li>
+ * <li>{@linkplain #addNetherSurfaceRules} - Prepend material rules for Nether biomes</li>
+ * <li>{@linkplain #addOverworldSurfaceRules} - Prepend material rules for Overworld biomes</li>
  * <li>{@linkplain #addSurfaceBuilder} - Add a traditional surface builder (selected by biome)</li>
  * </ul>
  */
@@ -24,12 +24,12 @@ public final class SurfaceGeneration {
     }
 
     /**
-     * Add surface rules to The End.  Rules may optionally be pre-sequenced,
+     * Add material rules to The End.  Rules may optionally be pre-sequenced,
      * or Biolith will sequence rules together grouped by rulesOwner, prior to injection.
      * <p/>
      * Rule instantiation since 26.2 requires registry access; rules must be provided wrapped in an
-     * implementation of the RuleSourceBootstrapper interface.  The minimum implementation is something
-     * like this:
+     * implementation of the {@linkplain MaterialRuleBootstrapper} interface.  The minimum implementation
+     * is something like this:
      * <pre>{@code biomeGetter -> ifTrue(SurfaceRules.isBiome(biomeGetter, Biomes.PLAINS), ...)}</pre>
      * <p/>
      * Note: The End's only vanilla rule is {@code block(Blocks.END_STONE.getDefaultState()) }
@@ -37,27 +37,27 @@ public final class SurfaceGeneration {
      * @param rulesOwner    Rules will be grouped by rulesOwner during sequencing
      * @param materialRules The surface rules to be injected
      */
-    public static void addEndSurfaceRules(Identifier rulesOwner, RuleSourceBootstrapper... materialRules) {
+    public static void addEndSurfaceRules(Identifier rulesOwner, MaterialRuleBootstrapper... materialRules) {
         SurfaceRuleCollector.END.addFromMods(rulesOwner, materialRules);
     }
 
     /**
-     * Remove all surface rules owned by rulesOwner from The End.
+     * Remove all material rules owned by rulesOwner from The End.
      *
      * @param rulesOwner Rules with the specified owner will be removed
      * @return A list containing the removed rules, or null if there were none
      */
-    public static @Nullable List<RuleSourceBootstrapper> removeEndSurfaceRules(Identifier rulesOwner) {
+    public static @Nullable List<MaterialRuleBootstrapper> removeEndSurfaceRules(Identifier rulesOwner) {
         return SurfaceRuleCollector.END.clearFromMod(rulesOwner);
     }
 
     /**
-     * Add surface rules to The Nether.  Rules may optionally be pre-sequenced,
+     * Add material rules to The Nether.  Rules may optionally be pre-sequenced,
      * or Biolith will sequence rules together grouped by rulesOwner, prior to injection.
      * <p/>
      * Rule instantiation since 26.2 requires registry access; rules must be provided wrapped in an
-     * implementation of the RuleSourceBootstrapper interface.  The minimum implementation is something
-     * like this:
+     * implementation of the {@linkplain MaterialRuleBootstrapper} interface.  The minimum implementation
+     * is something like this:
      * <pre>{@code biomeGetter -> ifTrue(SurfaceRules.isBiome(biomeGetter, Biomes.PLAINS), ...)}</pre>
      * <p/>
      * For TerraBlender compatibility, it is important the rulesOwner's namespace
@@ -66,27 +66,27 @@ public final class SurfaceGeneration {
      * @param rulesOwner    Rules will be grouped by rulesOwner during sequencing
      * @param materialRules The surface rules to be injected
      */
-    public static void addNetherSurfaceRules(Identifier rulesOwner, RuleSourceBootstrapper... materialRules) {
+    public static void addNetherSurfaceRules(Identifier rulesOwner, MaterialRuleBootstrapper... materialRules) {
         SurfaceRuleCollector.NETHER.addFromMods(rulesOwner, materialRules);
     }
 
     /**
-     * Remove all surface rules owned by rulesOwner from The Nether.
+     * Remove all material rules owned by rulesOwner from The Nether.
      *
      * @param rulesOwner Rules with the specified owner will be removed
      * @return A list containing the removed rules, or null if there were none
      */
-    public static @Nullable List<RuleSourceBootstrapper> removeNetherSurfaceRules(Identifier rulesOwner) {
+    public static @Nullable List<MaterialRuleBootstrapper> removeNetherSurfaceRules(Identifier rulesOwner) {
         return SurfaceRuleCollector.NETHER.clearFromMod(rulesOwner);
     }
 
     /**
-     * Add surface rules to the Overworld.  Rules may optionally be pre-sequenced,
+     * Add material rules to the Overworld.  Rules may optionally be pre-sequenced,
      * or Biolith will sequence rules together grouped by rulesOwner, prior to injection.
      * <p/>
      * Rule instantiation since 26.2 requires registry access; rules must be provided wrapped in an
-     * implementation of the RuleSourceBootstrapper interface.  The minimum implementation is something
-     * like this:
+     * implementation of the {@linkplain MaterialRuleBootstrapper} interface.  The minimum implementation
+     * is something like this:
      * <pre>{@code biomeGetter -> ifTrue(SurfaceRules.isBiome(biomeGetter, Biomes.PLAINS), ...)}</pre>
      * <p/>
      * For TerraBlender compatibility, it is important the rulesOwner's namespace
@@ -95,17 +95,17 @@ public final class SurfaceGeneration {
      * @param rulesOwner    Rules will be grouped by rulesOwner during sequencing
      * @param materialRules The rules to be injected
      */
-    public static void addOverworldSurfaceRules(Identifier rulesOwner, RuleSourceBootstrapper... materialRules) {
+    public static void addOverworldSurfaceRules(Identifier rulesOwner, MaterialRuleBootstrapper... materialRules) {
         SurfaceRuleCollector.OVERWORLD.addFromMods(rulesOwner, materialRules);
     }
 
     /**
-     * Remove all surface rules owned by rulesOwner from the Overworld.
+     * Remove all material rules owned by rulesOwner from the Overworld.
      *
      * @param rulesOwner Rules with the specified owner will be removed
      * @return A list containing the removed rules, or null if there were none
      */
-    public static @Nullable List<RuleSourceBootstrapper> removeOverworldSurfaceRules(Identifier rulesOwner) {
+    public static @Nullable List<MaterialRuleBootstrapper> removeOverworldSurfaceRules(Identifier rulesOwner) {
         return SurfaceRuleCollector.OVERWORLD.clearFromMod(rulesOwner);
     }
 

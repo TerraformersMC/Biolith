@@ -12,6 +12,8 @@ import com.terraformersmc.biolith.impl.platform.Services;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.*;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
+import net.minecraft.world.level.levelgen.densityfunction.DensityBuffer;
+import net.minecraft.world.level.levelgen.densityfunction.DensityVolume;
 import org.jspecify.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +38,10 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
     // Inject noise points the first time somebody requests them.
     @WrapOperation(
             method = "parameters",
-            at = @At(value = "INVOKE", target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;")
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lcom/mojang/datafixers/util/Either;map(Ljava/util/function/Function;Ljava/util/function/Function;)Ljava/lang/Object;"
+            )
     )
     @SuppressWarnings("unused")
     private Object biolith$injectEntries(Either<Climate.ParameterList<Holder<Biome>>, Holder<MultiNoiseBiomeSourceParameterList>> instance, Function<Climate.ParameterList<Holder<Biome>>, Climate.ParameterList<Holder<Biome>>> leftMap, Function<Holder<MultiNoiseBiomeSourceParameterList>, Climate.ParameterList<Holder<Biome>>> rightMap, Operation<Object> original) {
@@ -81,27 +86,57 @@ public abstract class MixinMultiNoiseBiomeSource extends BiomeSource {
         return biolith$biomeEntries;
     }
 
+    // Replicate how vanilla constructs the target point, then apply our biome selection.
+    @Inject(
+            method = "lambda$createResolver$0",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void biolith$biomeResolver(Climate.Sampler sampler, int quartX, int quartY, int quartZ, CallbackInfoReturnable<Holder<Biome>> cir) {
+        Climate.TargetPoint target = sampler.sample(quartX, quartY, quartZ);
+
+        biolith$getBiome(quartX, quartY, quartZ, target, cir);
+    }
+
+    // Replicate how vanilla constructs the target point, then apply our biome selection.
+    @Inject(
+            method = "lambda$createResolverForChunk$0",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private void biolith$biomeResolverForChunk(DensityVolume volume, int minQuartX, int minQuartY, int minQuartZ, DensityBuffer temperature, DensityBuffer vegetation, DensityBuffer continents, DensityBuffer erosion, DensityBuffer depth, DensityBuffer ridges, int quartX, int quartY, int quartZ, CallbackInfoReturnable<Holder<Biome>> cir) {
+        int index = volume.indexUnchecked(quartX - minQuartX, quartY - minQuartY, quartZ - minQuartZ);
+        Climate.TargetPoint target = Climate.target(
+                temperature.get(index),
+                vegetation.get(index),
+                continents.get(index),
+                erosion.get(index),
+                depth.get(index),
+                ridges.get(index));
+
+        biolith$getBiome(quartX, quartY, quartZ, target, cir);
+    }
+
     // We calculate the vanilla/datapack biome, then we apply any overlays.
-    @Inject(method = "getNoiseBiome(IIILnet/minecraft/world/level/biome/Climate$Sampler;)Lnet/minecraft/core/Holder;", at = @At("HEAD"), cancellable = true)
-    private void biolith$getBiome(int x, int y, int z, Climate.Sampler noise, CallbackInfoReturnable<Holder<Biome>> cir) {
-        Climate.TargetPoint noisePoint = noise.sample(x, y, z);
+    @Unique
+    private void biolith$getBiome(int x, int y, int z, Climate.TargetPoint target, CallbackInfoReturnable<Holder<Biome>> cir) {
         BiolithFittestNodes<Holder<Biome>> fittestNodes = null;
 
         // Find the biome via TerraBlender if available.
         if (BiolithCompat.COMPAT_TERRABLENDER) {
-            fittestNodes = Services.PLATFORM.getTerraBlenderCompat().getBiome(x, y, z, noisePoint, parameters());
+            fittestNodes = Services.PLATFORM.getTerraBlenderCompat().getBiome(x, y, z, target, parameters());
         }
 
         // Find the biome via Vanilla (including datapacks) if none was provided by TerraBlender.
         if (fittestNodes == null) {
-            fittestNodes = VanillaCompat.getBiome(noisePoint, parameters());
+            fittestNodes = VanillaCompat.getBiome(target, parameters());
         }
 
         // Apply biome overlays.
         if (this.biolith$getDimensionType().identifier().equals(BuiltinDimensionTypes.OVERWORLD.identifier())) {
-            cir.setReturnValue(BiomeCoordinator.OVERWORLD.getReplacement(x, y, z, noisePoint, fittestNodes));
+            cir.setReturnValue(BiomeCoordinator.OVERWORLD.getReplacement(x, y, z, target, fittestNodes));
         } else if (this.biolith$getDimensionType().identifier().equals(BuiltinDimensionTypes.NETHER.identifier())) {
-            cir.setReturnValue(BiomeCoordinator.NETHER.getReplacement(x, y, z, noisePoint, fittestNodes));
+            cir.setReturnValue(BiomeCoordinator.NETHER.getReplacement(x, y, z, target, fittestNodes));
         } else {
             cir.setReturnValue(fittestNodes.ultimate().value);
         }

@@ -1,14 +1,17 @@
 package com.terraformersmc.biolith.impl.compat;
 
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
-import com.terraformersmc.biolith.api.surface.RuleSourceBootstrapper;
+import com.terraformersmc.biolith.api.surface.MaterialRuleBootstrapper;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
+import net.minecraft.core.HolderGetter;
 import terrablender.api.Region;
 import terrablender.api.SurfaceRuleManager;
 import terrablender.worldgen.IExtendedParameterList;
 
 import java.util.Map;
+import java.util.function.Function;
+
 import net.minecraft.core.Holder;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
@@ -81,11 +84,15 @@ public class TerraBlenderCompatFabric implements TerraBlenderCompat {
         });
     }
 
-    private static SurfaceRuleManager.@Nullable RuleBuilder getBootstrapperAsBuilder(@Nullable RuleSourceBootstrapper bootstrapper) {
+    private static SurfaceRuleManager.@Nullable RuleBuilder getBootstrapperAsBuilder(@Nullable MaterialRuleBootstrapper bootstrapper) {
         if (bootstrapper == null) {
             return null;
         }
 
-        return bootstrapper::apply;
+// TODO: I have no way of testing this hack until TerraBlender is available for 26.3.
+//       Maybe it will work...  I'd like to somehow support TB out of the box if it's possible.
+//
+//        return bootstrapper::apply;
+        return (SurfaceRuleManager.RuleBuilder)(Function<HolderGetter<Biome>, ?>) bootstrapper;
     }
 }

@@ -13,7 +13,6 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.levelgen.DensityFunction;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
@@ -122,11 +121,11 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
         Objects.requireNonNull(temperatureNoise);
         Objects.requireNonNull(weirdnessNoise);
 
-        double erosion = originalNoise.erosion().compute(new DensityFunction.SinglePointContext(
+        double erosion = originalNoise.erosion().sampleValue(
                 QuartPos.toBlock(x),
                 QuartPos.toBlock(y),
                 QuartPos.toBlock(z)
-        ));
+        );
 
         return new Climate.TargetPoint(
                 Climate.quantizeCoord(temperatureNoise.sample(x / 576d, z / 576d)),

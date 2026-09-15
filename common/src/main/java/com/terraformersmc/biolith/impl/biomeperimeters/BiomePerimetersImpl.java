@@ -17,8 +17,8 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import org.jspecify.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.Hashtable;
-import java.util.concurrent.TimeUnit;
 import java.util.function.Function;
 
 /**
@@ -34,6 +34,7 @@ import java.util.function.Function;
  * to call getPerimeterDistance() for every individual block column during generation, but on the other hand,
  * minor discontinuities and variations may occasionally occur in the distance values.
  */
+@SuppressWarnings("unused")
 public class BiomePerimetersImpl implements BiomePerimeters {
 	private static final Hashtable<Biome, BiomePerimetersImpl> instances = new Hashtable<>(4);
 
@@ -47,7 +48,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 	private final LoadingCache<ChunkPos, CacheRecord> caches =
 			CacheBuilder.newBuilder()
 					.maximumSize(4096)
-					.expireAfterAccess(300, TimeUnit.SECONDS)
+					.expireAfterAccess(Duration.ofSeconds(300))
 					.weakValues()
 					.build(new CacheLoader<>() {
 						@Override
@@ -134,7 +135,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		}
 
 		// If we are on the perimeter, avoid some difficult "edge" cases (har har) by short-circuiting.
-		for (Direction8 direction : Direction8.values()) {
+		for (CompositeDirection.Direction8 direction : CompositeDirection.Direction8.values()) {
 			if (!checkBiome(getBiomeFunction, pos.offset(direction.getStepX(), 0, direction.getStepZ()), threadLocalCache)) {
 				return 0;
 			}
@@ -153,7 +154,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		}
 
 		// Try to find our closest perimeter point.
-		for (Direction8 direction : Direction8.values()) {
+		for (CompositeDirection.Direction8 direction : CompositeDirection.Direction8.values()) {
 			horizon = (direction.ordinal() % 2 == 0) ? cardinalHorizon : ordinalHorizon;
 			dx = direction.getStepX();
 			dz = direction.getStepZ();
@@ -183,9 +184,9 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		return rationalizeDistance(pos, minimum, threadLocalCache);
 	}
 
-	private int checkPerimeter(Function<BlockPos, Holder<Biome>> getBiomeFunction, BlockPos centerPos, BlockPos perimeterPos, Direction8 direction, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
+	private int checkPerimeter(Function<BlockPos, Holder<Biome>> getBiomeFunction, BlockPos centerPos, BlockPos perimeterPos, CompositeDirection.Direction8 direction, Object2ObjectLinkedOpenHashMap<ChunkPos, CacheRecord> threadLocalCache) {
 		BiomePerimeterPoint current;
-		Direction8 orientation;
+		CompositeDirection.Direction8 orientation;
 		double minimum;
 		int localCheckDistance;
 
@@ -289,31 +290,31 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		return (int) minimum;
 	}
 
-	private Direction8 getEightWayClockwiseRotation(Direction8 direction, int increment) {
+	private CompositeDirection.Direction8 getEightWayClockwiseRotation(CompositeDirection.Direction8 direction, int increment) {
 		assert (increment >= -8);
-		return Direction8.values()[(direction.ordinal() + increment + 8) % 8];
+		return CompositeDirection.Direction8.values()[(direction.ordinal() + increment + 8) % 8];
 	}
 
-	private Direction8 getEightWayRelation(BlockPos posA, BlockPos posB) {
+	private CompositeDirection.Direction8 getEightWayRelation(BlockPos posA, BlockPos posB) {
 		BlockPos diff = posA.subtract(posB);
 		if (diff.getX() < 0) {
 			if (diff.getZ() < 0) {
-				return Direction8.NORTH_WEST;
+				return CompositeDirection.Direction8.NORTH_WEST;
 			} else if (diff.getZ() > 0) {
-				return Direction8.SOUTH_WEST;
+				return CompositeDirection.Direction8.SOUTH_WEST;
 			} else {
-				return Direction8.WEST;
+				return CompositeDirection.Direction8.WEST;
 			}
 		} else if (diff.getX() > 0) {
 			if (diff.getZ() < 0) {
-				return Direction8.NORTH_EAST;
+				return CompositeDirection.Direction8.NORTH_EAST;
 			} else if (diff.getZ() > 0) {
-				return Direction8.SOUTH_EAST;
+				return CompositeDirection.Direction8.SOUTH_EAST;
 			} else {
-				return Direction8.EAST;
+				return CompositeDirection.Direction8.EAST;
 			}
 		} else {
-			return diff.getZ() < 0 ? Direction8.NORTH : Direction8.SOUTH;
+			return diff.getZ() < 0 ? CompositeDirection.Direction8.NORTH : CompositeDirection.Direction8.SOUTH;
 		}
 	}
 
@@ -331,7 +332,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		float lower = 0;
 		float upper = MAX_HORIZON;
 
-		for (Direction8 direction : Direction8.values()) {
+		for (CompositeDirection.Direction8 direction : CompositeDirection.Direction8.values()) {
 			final BlockPos neighborPos = pos.offset(direction.getStepX(), 0, direction.getStepZ());
 			int neighbor = getCache(threadLocalCache, ChunkPos.containing(neighborPos)).biomeCache.getOrDefault(CacheRecord.getIndex(neighborPos), -1);
 

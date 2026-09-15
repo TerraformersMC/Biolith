@@ -9,7 +9,7 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 
 import java.util.List;
 
@@ -27,25 +27,25 @@ public record SurfaceGenerationMarshaller(List<SurfaceRuleMarshaller> surfaceRul
         }
     }
 
-    public record SurfaceRuleMarshaller(ResourceKey<DimensionType> dimension, Identifier rulesOwner, List<SurfaceRules.RuleSource> materialRules) {
+    public record SurfaceRuleMarshaller(ResourceKey<DimensionType> dimension, Identifier rulesOwner, List<MaterialRule> materialRules) {
         public static Codec<SurfaceRuleMarshaller> CODEC = RecordCodecBuilder.create(
             (instance) -> instance.group(
                             ResourceKey.codec(Registries.DIMENSION_TYPE).fieldOf("dimension")
                                     .forGetter(SurfaceRuleMarshaller::dimension),
                             Identifier.CODEC.fieldOf("rules_owner")
                                     .forGetter(SurfaceRuleMarshaller::rulesOwner),
-                            SurfaceRules.RuleSource.CODEC.listOf().optionalFieldOf("material_rules", List.of())
+                            MaterialRule.CODEC.listOf().optionalFieldOf("material_rules", List.of())
                                     .forGetter(SurfaceRuleMarshaller::materialRules)
                     )
                     .apply(instance, SurfaceRuleMarshaller::new));
 
         public void unmarshall() {
             if (dimension.equals(BuiltinDimensionTypes.OVERWORLD)) {
-                SurfaceRuleCollector.OVERWORLD.addFromData(rulesOwner, materialRules.toArray(new SurfaceRules.RuleSource[0]));
+                SurfaceRuleCollector.OVERWORLD.addFromData(rulesOwner, materialRules.toArray(new MaterialRule[0]));
             } else if (dimension.equals(BuiltinDimensionTypes.NETHER)) {
-                SurfaceRuleCollector.NETHER.addFromData(rulesOwner, materialRules.toArray(new SurfaceRules.RuleSource[0]));
+                SurfaceRuleCollector.NETHER.addFromData(rulesOwner, materialRules.toArray(new MaterialRule[0]));
             } else if (dimension.equals(BuiltinDimensionTypes.END)) {
-                SurfaceRuleCollector.END.addFromData(rulesOwner, materialRules.toArray(new SurfaceRules.RuleSource[0]));
+                SurfaceRuleCollector.END.addFromData(rulesOwner, materialRules.toArray(new MaterialRule[0]));
             } else {
                 Biolith.LOGGER.warn("Ignored unknown dimension type '{}' while serializing surface generation.", dimension.identifier());
             }

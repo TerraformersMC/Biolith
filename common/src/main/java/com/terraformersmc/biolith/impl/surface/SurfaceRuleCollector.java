@@ -1,12 +1,13 @@
 package com.terraformersmc.biolith.impl.surface;
 
 import com.google.common.collect.Sets;
-import com.terraformersmc.biolith.api.surface.RuleSourceBootstrapper;
+import com.terraformersmc.biolith.api.surface.MaterialRuleBootstrapper;
 import com.terraformersmc.biolith.impl.Biolith;
 import net.minecraft.core.HolderGetter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.material.MaterialRules;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import org.jspecify.annotations.Nullable;
 
 import java.util.*;
@@ -16,10 +17,10 @@ public class SurfaceRuleCollector {
     public static final SurfaceRuleCollector NETHER = new SurfaceRuleCollector();
     public static final SurfaceRuleCollector OVERWORLD = new SurfaceRuleCollector();
 
-    private final HashMap<Identifier, List<SurfaceRules.RuleSource>> MATERIAL_RULES_DATA = new HashMap<>(16);
-    private final HashMap<Identifier, List<RuleSourceBootstrapper>> MATERIAL_RULES_MODS = new HashMap<>(16);
+    private final HashMap<Identifier, List<MaterialRule>> MATERIAL_RULES_DATA = new HashMap<>(16);
+    private final HashMap<Identifier, List<MaterialRuleBootstrapper>> MATERIAL_RULES_MODS = new HashMap<>(16);
 
-    public void addFromData(Identifier ruleOwner, SurfaceRules.RuleSource... materialRules) {
+    public void addFromData(Identifier ruleOwner, MaterialRule... materialRules) {
         if (materialRules.length > 0) {
             MATERIAL_RULES_DATA.computeIfAbsent(ruleOwner, ignored -> new ArrayList<>(4))
                     .addAll(Arrays.stream(materialRules).toList());
@@ -28,7 +29,7 @@ public class SurfaceRuleCollector {
         }
     }
 
-    public void addFromMods(Identifier ruleOwner, RuleSourceBootstrapper... materialRules) {
+    public void addFromMods(Identifier ruleOwner, MaterialRuleBootstrapper... materialRules) {
         if (materialRules.length > 0) {
             MATERIAL_RULES_MODS.computeIfAbsent(ruleOwner, ignored -> new ArrayList<>(4))
                     .addAll(Arrays.stream(materialRules).toList());
@@ -45,23 +46,23 @@ public class SurfaceRuleCollector {
         MATERIAL_RULES_MODS.clear();
     }
 
-    public @Nullable List<RuleSourceBootstrapper> clearFromMod(Identifier ruleOwner) {
+    public @Nullable List<MaterialRuleBootstrapper> clearFromMod(Identifier ruleOwner) {
         return MATERIAL_RULES_MODS.remove(ruleOwner);
     }
 
-    public @Nullable RuleSourceBootstrapper get(Identifier ruleOwner) {
+    public @Nullable MaterialRuleBootstrapper get(Identifier ruleOwner) {
         if (MATERIAL_RULES_DATA.containsKey(ruleOwner)) {
             if (MATERIAL_RULES_DATA.get(ruleOwner).size() > 1) {
-                return new SequencedRuleSourceBootstrapper(MATERIAL_RULES_DATA.get(ruleOwner).stream()
-                        .map(rule -> RuleSourceBootstrapper.cast((_) -> rule))
-                        .toArray(RuleSourceBootstrapper[]::new));
+                return new SequencedMaterialRuleBootstrapper(MATERIAL_RULES_DATA.get(ruleOwner).stream()
+                        .map(rule -> MaterialRuleBootstrapper.cast((_) -> rule))
+                        .toArray(MaterialRuleBootstrapper[]::new));
             } else {
                 return (_) -> MATERIAL_RULES_DATA.get(ruleOwner).getFirst();
             }
         } else if (MATERIAL_RULES_MODS.containsKey(ruleOwner)) {
             if (MATERIAL_RULES_MODS.get(ruleOwner).size() > 1) {
-                return new SequencedRuleSourceBootstrapper(MATERIAL_RULES_MODS.get(ruleOwner)
-                        .toArray(RuleSourceBootstrapper[]::new));
+                return new SequencedMaterialRuleBootstrapper(MATERIAL_RULES_MODS.get(ruleOwner)
+                        .toArray(MaterialRuleBootstrapper[]::new));
             } else {
                 return MATERIAL_RULES_MODS.get(ruleOwner).getFirst();
             }
@@ -70,36 +71,36 @@ public class SurfaceRuleCollector {
         return null;
     }
 
-    private SurfaceRules.RuleSource getFromData(Identifier ruleOwner) {
+    private MaterialRule getFromData(Identifier ruleOwner) {
         if (MATERIAL_RULES_DATA.get(ruleOwner).size() > 1) {
-            return SurfaceRules.sequence(MATERIAL_RULES_DATA.get(ruleOwner)
-                    .toArray(SurfaceRules.RuleSource[]::new));
+            return MaterialRules.sequence(MATERIAL_RULES_DATA.get(ruleOwner)
+                    .toArray(MaterialRule[]::new));
         }
 
         return MATERIAL_RULES_DATA.get(ruleOwner).getFirst();
     }
 
-    private RuleSourceBootstrapper getFromMods(Identifier ruleOwner) {
+    private MaterialRuleBootstrapper getFromMods(Identifier ruleOwner) {
         if (MATERIAL_RULES_MODS.get(ruleOwner).size() > 1) {
-            return new SequencedRuleSourceBootstrapper(MATERIAL_RULES_MODS.get(ruleOwner)
-                    .toArray(RuleSourceBootstrapper[]::new));
+            return new SequencedMaterialRuleBootstrapper(MATERIAL_RULES_MODS.get(ruleOwner)
+                    .toArray(MaterialRuleBootstrapper[]::new));
         }
 
         return MATERIAL_RULES_MODS.get(ruleOwner).getFirst();
     }
 
     // Get all wrapped rule sources
-    public RuleSourceBootstrapper[] getAll() {
+    public MaterialRuleBootstrapper[] getAll() {
         return getRuleOwners().stream()
-                .map((key) -> MATERIAL_RULES_DATA.containsKey(key) ? RuleSourceBootstrapper.cast((_) -> getFromData(key)) : getFromMods(key))
-                .toArray(RuleSourceBootstrapper[]::new);
+                .map((key) -> MATERIAL_RULES_DATA.containsKey(key) ? MaterialRuleBootstrapper.cast((_) -> getFromData(key)) : getFromMods(key))
+                .toArray(MaterialRuleBootstrapper[]::new);
     }
 
     // Get all finalized rule sources
-    public SurfaceRules.RuleSource[] getAllBootstrapped(HolderGetter<Biome> biomeGetter) {
+    public MaterialRule[] getAllBootstrapped(HolderGetter<Biome> biomeGetter) {
         return getRuleOwners().stream()
                 .map((key) -> MATERIAL_RULES_DATA.containsKey(key) ? getFromData(key) : getFromMods(key).apply(biomeGetter))
-                .toArray(SurfaceRules.RuleSource[]::new);
+                .toArray(MaterialRule[]::new);
     }
 
     public Set<Identifier> getRuleOwners() {

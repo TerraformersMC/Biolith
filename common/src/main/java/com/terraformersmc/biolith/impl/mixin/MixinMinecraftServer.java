@@ -5,6 +5,7 @@ import com.llamalad7.mixinextras.injector.wrapoperation.Operation;
 import com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
+import net.minecraft.core.Holder;
 import net.minecraft.core.LayeredRegistryAccess;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
@@ -19,7 +20,8 @@ import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.SurfaceRules;
+import net.minecraft.world.level.levelgen.material.MaterialRules;
+import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.objectweb.asm.Opcodes;
@@ -53,9 +55,9 @@ public abstract class MixinMinecraftServer {
             target = "net/minecraft/server/level/ServerLevel"
     ))
     @SuppressWarnings("unused")
-    private ServerLevel biolith$prependSurfaceRules(MinecraftServer server, Executor executor, LevelStorageSource.LevelStorageAccess levelStorage, ServerLevelData levelData, ResourceKey<Level> dimension, LevelStem levelStem, boolean isDebug, long biomeZoomSeed, List<CustomSpawner> customSpawners, boolean tickTime, Operation<ServerLevel> operation) {
+    private ServerLevel biolith$prependMaterialRules(MinecraftServer server, Executor executor, LevelStorageSource.LevelStorageAccess levelStorage, ServerLevelData levelData, ResourceKey<Level> dimension, LevelStem levelStem, boolean isDebug, long biomeZoomSeed, List<CustomSpawner> customSpawners, boolean tickTime, Operation<ServerLevel> operation) {
         Optional<ResourceKey<DimensionType>> dimensionKey = levelStem.type().unwrapKey();
-        SurfaceRules.RuleSource[] rulesType = new SurfaceRules.RuleSource[0];
+        MaterialRule[] rulesType = new MaterialRule[0];
         SurfaceRuleCollector surfaceRuleCollector = null;
 
         if (dimensionKey.isPresent()) {
@@ -74,11 +76,11 @@ public abstract class MixinMinecraftServer {
             if (chunkGenerator instanceof NoiseBasedChunkGenerator noiseChunkGenerator) {
                 NoiseGeneratorSettings chunkGeneratorSettings = noiseChunkGenerator.generatorSettings().value();
 
-                ((MixinNoiseGeneratorSettings)(Object) chunkGeneratorSettings).biolith$setSurfaceRule(
-                        SurfaceRules.sequence(Streams.concat(
+                ((MixinNoiseGeneratorSettings)(Object) chunkGeneratorSettings).biolith$setMaterialRule(
+                        Holder.direct(MaterialRules.sequence(Streams.concat(
                                 Arrays.stream(surfaceRuleCollector.getAllBootstrapped(BiomeCoordinator.getBiomeLookupOrThrow())),
-                                Stream.of(chunkGeneratorSettings.surfaceRule())
-                        ).toList().toArray(rulesType))
+                                Stream.of(chunkGeneratorSettings.materialRule().value())
+                        ).toList().toArray(rulesType)))
                 );
             }
         }

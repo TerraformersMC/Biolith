@@ -11,7 +11,6 @@ import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
-import net.minecraft.world.level.levelgen.DensityFunction;
 import org.apache.commons.lang3.function.TriFunction;
 
 public class VanillaCompat {
@@ -84,7 +83,7 @@ public class VanillaCompat {
                 Mth.square((long) SectionPos.blockToSectionCoord(z)) <= 4096L) {
             biomeEntry = BiomeCoordinator.END.nodeTheEnd.value;
         } else {
-            double erosion = noise.erosion().compute(new DensityFunction.SinglePointContext(x, y, z));
+            double erosion = noise.erosion().sampleValue(x, y, z);
             if (erosion > 0.25) {
                 biomeEntry = BiomeCoordinator.END.nodeEndHighlands.value;
             } else if (erosion >= -0.0625) {

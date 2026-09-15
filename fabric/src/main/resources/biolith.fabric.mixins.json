@@ -1,8 +1,10 @@
 {
   "required": true,
-  "minVersion": "0.8",
-  "package": "com.terraformersmc.biolith.impl.mixin",
   "compatibilityLevel": "JAVA_25",
+  "mixinextras" : {
+    "minVersion" : "0.5.5"
+  },
+  "package": "com.terraformersmc.biolith.impl.mixin",
   "plugin": "com.terraformersmc.biolith.impl.mixin.BiolithFabricMixinConfigPlugin",
   "mixins": [
     "MixinFapiTheEndBiomeDataOverrides",

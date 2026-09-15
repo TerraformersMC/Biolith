@@ -9,6 +9,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -30,29 +31,34 @@ import java.util.Objects;
 @Mixin(value = TheEndBiomeSource.class, priority = 900)
 public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
     @Unique
-    private static final ThreadLocal<Boolean> bypass = ThreadLocal.withInitial(() -> false);
+    private static final ThreadLocal<Boolean> biolith$bypass = ThreadLocal.withInitial(() -> false);
 
     @Override
     public boolean biolith$getBypass() {
-        return bypass.get();
+        return biolith$bypass.get();
     }
 
     @Override
     public void biolith$setBypass(boolean value) {
-        bypass.set(value);
+        biolith$bypass.set(value);
+    }
+
+    @Shadow
+    private Holder<Biome> getNoiseBiome(int quartX, int quartY, int quartZ, Climate.Sampler sampler) {
+        throw new UnsupportedOperationException();
     }
 
     @Inject(method = "getNoiseBiome", at = @At("HEAD"), cancellable = true)
     private void biolith$getBiome(int x, int y, int z, Climate.Sampler noise, CallbackInfoReturnable<Holder<Biome>> cir) {
         // Allows us to call unmodified (by us) getBiome() to get TerraBlender values.
-        if (bypass.get()) {
+        if (biolith$bypass.get()) {
             return;
         }
 
         // Fetch whatever TerraBlender thinks the biome should be, which we will call the original biome.
-        bypass.set(true);
+        biolith$bypass.set(true);
         Holder<Biome> original = this.getNoiseBiome(x, y, z, noise);
-        bypass.set(false);
+        biolith$bypass.set(false);
 
         // Fake up a noise point for sub biome placement.
         Climate.TargetPoint noisePoint = BiomeCoordinator.END.sampleEndNoise(x, y, z, noise, original);
@@ -71,7 +77,7 @@ public abstract class MixinTBTheEndBiomeSource extends BiomeSource {
     @Inject(method = "getNoiseBiome", at = @At("RETURN"), cancellable = true)
     private void biolith$cancelGetBiome(int x, int y, int z, Climate.Sampler noise, CallbackInfoReturnable<Holder<Biome>> cir) {
         // Allows us to call unmodified (by us) getBiome() to get TerraBlender values.
-        if (bypass.get()) {
+        if (biolith$bypass.get()) {
             cir.setReturnValue(cir.getReturnValue());
         }
     }

@@ -3,9 +3,8 @@ package com.terraformersmc.biolith.impl.surface;
 import com.google.common.collect.Sets;
 import com.terraformersmc.biolith.api.surface.MaterialRuleBootstrapper;
 import com.terraformersmc.biolith.impl.Biolith;
-import net.minecraft.core.HolderGetter;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.Identifier;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.levelgen.material.MaterialRules;
 import net.minecraft.world.level.levelgen.material.rule.MaterialRule;
 import org.jspecify.annotations.Nullable;
@@ -97,9 +96,9 @@ public class SurfaceRuleCollector {
     }
 
     // Get all finalized rule sources
-    public MaterialRule[] getAllBootstrapped(HolderGetter<Biome> biomeGetter) {
+    public MaterialRule[] getAllBootstrapped(RegistryAccess registryAccess) {
         return getRuleOwners().stream()
-                .map((key) -> MATERIAL_RULES_DATA.containsKey(key) ? getFromData(key) : getFromMods(key).apply(biomeGetter))
+                .map((key) -> MATERIAL_RULES_DATA.containsKey(key) ? getFromData(key) : getFromMods(key).apply(registryAccess))
                 .toArray(MaterialRule[]::new);
     }
 

@@ -18,6 +18,6 @@ public class MixinWorldStem {
     private void biolith$earlyCaptureRegistries(CloseableResourceManager resourceManager, ReloadableServerResources dataPackResources, LayeredRegistryAccess<RegistryLayer> registries, LevelDataAndDimensions.WorldDataAndGenSettings worldDataAndGenSettings, CallbackInfo ci) {
         // Capture the registries ridiculously early on Fabric because BClib does,
         // and immediately forces us to provide biome entries...
-        BiomeCoordinator.setRegistryManager(registries);
+        BiomeCoordinator.setRegistryAccess(registries);
     }
 }

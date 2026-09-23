@@ -29,7 +29,7 @@ public class BiomeCoordinator {
 
     private static boolean serverStarted = false;
     private static boolean registeredWithTerrablender = false;
-    private static @Nullable RegistryAccess registryManager;
+    private static @Nullable RegistryAccess registryAccess;
     private static @Nullable HolderGetter<LevelStem> dimensionLookup;
     private static @Nullable HolderGetter<Biome> biomeLookup;
 
@@ -37,12 +37,12 @@ public class BiomeCoordinator {
         return serverStarted;
     }
 
-    public static void setRegistryManager(LayeredRegistryAccess<RegistryLayer> combinedDynamicRegistries) {
+    public static void setRegistryAccess(LayeredRegistryAccess<RegistryLayer> combinedDynamicRegistries) {
         // Called by biolith$earlyCaptureRegistries() in MixinMinecraftServer and MixinServerLoader
         // so we can set this really early.
-        registryManager = combinedDynamicRegistries.compositeAccess();
-        dimensionLookup = registryManager.lookupOrThrow(Registries.LEVEL_STEM);
-        biomeLookup = registryManager.lookupOrThrow(Registries.BIOME);
+        registryAccess = combinedDynamicRegistries.compositeAccess();
+        dimensionLookup = registryAccess.lookupOrThrow(Registries.LEVEL_STEM);
+        biomeLookup = registryAccess.lookupOrThrow(Registries.BIOME);
     }
 
     public static void setEarlyBiomeLookup(HolderGetter<Biome> earlyBiomeLookup) {
@@ -51,8 +51,12 @@ public class BiomeCoordinator {
         }
     }
 
-    public static @Nullable RegistryAccess getRegistryManager() {
-        return registryManager;
+    public static Optional<RegistryAccess> getRegistryAccess() {
+        return Optional.ofNullable(registryAccess);
+    }
+
+    public static RegistryAccess getRegistryAccessOrThrow() {
+        return getRegistryAccess().orElseThrow();
     }
 
     public static Optional<? extends HolderGetter<Biome>> getBiomeLookup() {
@@ -60,8 +64,8 @@ public class BiomeCoordinator {
             return Optional.of(biomeLookup);
         }
 
-        if (registryManager != null) {
-            return registryManager.lookup(Registries.BIOME);
+        if (registryAccess != null) {
+            return registryAccess.lookup(Registries.BIOME);
         }
 
         return Optional.empty();
@@ -73,8 +77,8 @@ public class BiomeCoordinator {
 
     // This event occurs prior to TerraBlender's LevelUtils.initializeOnServerStart()
     public static void handleServerPreStart(LayeredRegistryAccess<RegistryLayer> registryAccess) {
-        if (registryManager == null) {
-            setRegistryManager(registryAccess);
+        if (BiomeCoordinator.registryAccess == null) {
+            setRegistryAccess(registryAccess);
         }
 
         // When TerraBlender is present, it ignores our surface rules.
@@ -87,8 +91,8 @@ public class BiomeCoordinator {
 
     public static void handleServerStarting(MinecraftServer server) {
         // This is the "right" way to do it, but in practice it should already be set.
-        if (registryManager == null) {
-            setRegistryManager(server.registries());
+        if (registryAccess == null) {
+            setRegistryAccess(server.registries());
         }
 
         if (serverStarted) {
@@ -137,7 +141,7 @@ public class BiomeCoordinator {
 
     public static void handleServerStopped(MinecraftServer server) {
         serverStarted = false;
-        registryManager = null;
+        registryAccess = null;
         dimensionLookup = null;
         biomeLookup = null;
 

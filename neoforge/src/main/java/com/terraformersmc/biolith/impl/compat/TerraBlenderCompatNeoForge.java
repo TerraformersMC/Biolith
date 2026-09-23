@@ -5,17 +5,15 @@ import com.terraformersmc.biolith.api.surface.MaterialRuleBootstrapper;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.surface.SurfaceRuleCollector;
 import net.minecraft.core.Holder;
-import net.minecraft.core.HolderGetter;
 import net.minecraft.resources.Identifier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import org.jspecify.annotations.Nullable;
 import terrablender.api.Region;
-import terrablender.api.SurfaceRuleManager;
+import terrablender.api.MaterialRuleManager;
 import terrablender.worldgen.IExtendedParameterList;
 
 import java.util.Map;
-import java.util.function.Function;
 
 public class TerraBlenderCompatNeoForge implements TerraBlenderCompat {
     @Override
@@ -58,21 +56,21 @@ public class TerraBlenderCompatNeoForge implements TerraBlenderCompat {
     @Override
     public void registerSurfaceRules() {
         Map.of(
-                SurfaceRuleCollector.OVERWORLD, SurfaceRuleManager.RuleCategory.OVERWORLD,
-                SurfaceRuleCollector.NETHER,    SurfaceRuleManager.RuleCategory.NETHER,
-                SurfaceRuleCollector.END,       SurfaceRuleManager.RuleCategory.END
+                SurfaceRuleCollector.OVERWORLD, MaterialRuleManager.RuleCategory.OVERWORLD,
+                SurfaceRuleCollector.NETHER,    MaterialRuleManager.RuleCategory.NETHER,
+                SurfaceRuleCollector.END,       MaterialRuleManager.RuleCategory.END
         ).forEach((biolithRules, terrablenderRuleCategory) -> {
             if (biolithRules.getRuleCount() > 0) {
                 for (Identifier ruleOwner : biolithRules.getRuleOwners()) {
                     String namespace = ruleOwner.getNamespace();
-                    SurfaceRuleManager.RuleBuilder rule = getBootstrapperAsBuilder(biolithRules.get(ruleOwner));
+                    MaterialRuleManager.RuleBuilder rule = getBootstrapperAsBuilder(biolithRules.get(ruleOwner));
                     if (rule != null) {
                         if (namespace.equals("minecraft")) {
-                            SurfaceRuleManager.addToDefaultSurfaceRulesAtStage(terrablenderRuleCategory, SurfaceRuleManager.RuleStage.BEFORE_BEDROCK, 0, rule);
+                            MaterialRuleManager.addToDefaultRulesAtStage(terrablenderRuleCategory, MaterialRuleManager.RuleStage.BEFORE_BEDROCK, 0, rule);
                             continue;
                         }
                         try {
-                            SurfaceRuleManager.addSurfaceRules(terrablenderRuleCategory, namespace, rule);
+                            MaterialRuleManager.addRules(terrablenderRuleCategory, namespace, rule);
                         } catch (IllegalArgumentException e) {
                             Biolith.LOGGER.debug("Exception: {}", e.getMessage());
                             Biolith.LOGGER.warn("Only one surface rule set per namespace can be registered with TerraBlender; dropping: {}", ruleOwner);
@@ -83,15 +81,11 @@ public class TerraBlenderCompatNeoForge implements TerraBlenderCompat {
         });
     }
 
-    private static SurfaceRuleManager.@Nullable RuleBuilder getBootstrapperAsBuilder(@Nullable MaterialRuleBootstrapper bootstrapper) {
+    private static MaterialRuleManager.@Nullable RuleBuilder getBootstrapperAsBuilder(@Nullable MaterialRuleBootstrapper bootstrapper) {
         if (bootstrapper == null) {
             return null;
         }
 
-// TODO: I have no way of testing this hack until TerraBlender is available for 26.3.
-//       Maybe it will work...  I'd like to somehow support TB out of the box if it's possible.
-//
-//        return bootstrapper::apply;
-        return (SurfaceRuleManager.RuleBuilder)(Function<HolderGetter<Biome>, ?>) bootstrapper;
+        return bootstrapper::apply;
     }
 }

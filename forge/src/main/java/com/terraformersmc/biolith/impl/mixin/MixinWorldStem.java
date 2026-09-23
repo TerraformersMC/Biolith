@@ -16,6 +16,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 public class MixinWorldStem {
     @Inject(method = "<init>", at = @At("TAIL"))
     private void biolith$earlyCaptureRegistries(CloseableResourceManager lifecycledResourceManager, ReloadableServerResources dataPackContents, LayeredRegistryAccess<RegistryLayer> combinedDynamicRegistries, LevelDataAndDimensions.WorldDataAndGenSettings saveProperties, CallbackInfo ci) {
-        BiomeCoordinator.setRegistryManager(combinedDynamicRegistries);
+        BiomeCoordinator.setRegistryAccess(combinedDynamicRegistries);
     }
 }

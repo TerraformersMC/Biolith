@@ -2,7 +2,6 @@ package com.terraformersmc.biolith.impl.mixin;
 
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.biome.BiomeCoordinator;
-import com.terraformersmc.biolith.impl.biome.InterfaceBiomeSource;
 import com.terraformersmc.biolith.impl.compat.VanillaCompat;
 import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
@@ -10,6 +9,7 @@ import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.Climate;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;

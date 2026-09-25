@@ -55,7 +55,7 @@ public abstract class MixinMinecraftServer {
             target = "net/minecraft/server/level/ServerLevel"
     ))
     @SuppressWarnings("unused")
-    private ServerLevel biolith$prependMaterialRules(MinecraftServer server, Executor executor, LevelStorageSource.LevelStorageAccess levelStorage, ServerLevelData levelData, ResourceKey<Level> dimension, LevelStem levelStem, boolean isDebug, long biomeZoomSeed, List<CustomSpawner> customSpawners, boolean tickTime, Operation<ServerLevel> operation) {
+    private ServerLevel biolith$prependMaterialRules(MinecraftServer server, Executor executor, LevelStorageSource.LevelStorageAccess levelStorage, ServerLevelData levelData, ResourceKey<Level> dimension, LevelStem levelStem, boolean isDebug, List<CustomSpawner> customSpawners, boolean tickTime, Operation<ServerLevel> operation) {
         Optional<ResourceKey<DimensionType>> dimensionKey = levelStem.type().unwrapKey();
         MaterialRule[] rulesType = new MaterialRule[0];
         SurfaceRuleCollector surfaceRuleCollector = null;
@@ -85,6 +85,6 @@ public abstract class MixinMinecraftServer {
             }
         }
 
-        return operation.call(server, executor, levelStorage, levelData, dimension, levelStem, isDebug, biomeZoomSeed, customSpawners, tickTime);
+        return operation.call(server, executor, levelStorage, levelData, dimension, levelStem, isDebug, customSpawners, tickTime);
     }
 }

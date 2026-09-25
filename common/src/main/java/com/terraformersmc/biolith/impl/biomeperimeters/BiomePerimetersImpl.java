@@ -127,7 +127,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		Function<BlockPos, Holder<Biome>> getBiomeFunction = biomeManager::getBiome;
 		if (biomeManager.noiseBiomeSource instanceof WorldGenRegion chunkRegion) {
 			ServerLevel world = chunkRegion.level;
-			getBiomeFunction = (blockPos) -> world.getUncachedNoiseBiome(
+			getBiomeFunction = (blockPos) -> world.getUncachedBiome(
 					QuartPos.fromBlock(blockPos.getX()),
 					QuartPos.fromBlock(blockPos.getY()),
 					QuartPos.fromBlock(blockPos.getZ())
@@ -358,7 +358,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		if (biomeAccess.noiseBiomeSource instanceof WorldGenRegion chunkRegion) {
 			ServerLevel world = chunkRegion.level;
 
-			return (pos) -> VanillaCompat.callFunctionWithSmoothedBiomeCoords(world::getUncachedNoiseBiome, pos, world.getSeed());
+			return (pos) -> VanillaCompat.callFunctionWithSmoothedBiomeCoords(world::getUncachedBiome, pos, world.getSeed());
 		}
 
 		// Fall back to the vanilla getBiome, which may work with some other biome access implementations...

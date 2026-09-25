@@ -2,7 +2,7 @@ classTweaker v1 official
 
 accessible  field   net/minecraft/server/level/WorldGenRegion level Lnet/minecraft/server/level/ServerLevel;
 accessible  method  net/minecraft/world/level/biome/BiomeManager getFiddledDistance (JIIIDDD)D
-accessible  field   net/minecraft/world/level/biome/BiomeManager noiseBiomeSource Lnet/minecraft/world/level/biome/BiomeResolver;
+accessible  field   net/minecraft/world/level/biome/BiomeManager noiseBiomeSource Lnet/minecraft/world/level/biome/NoiseBiomeResolver;
 accessible  class   net/minecraft/world/level/biome/Climate$DistanceMetric
 accessible  method  net/minecraft/world/level/biome/Climate$DistanceMetric distance (Lnet/minecraft/world/level/biome/Climate$RTree$Node;[J)J
 accessible  class   net/minecraft/world/level/biome/Climate$ParameterList

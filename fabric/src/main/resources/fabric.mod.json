@@ -39,7 +39,7 @@
     "depends": {
         "fabricloader": ">=0.19.5",
         "fabric-api": "*",
-        "minecraft": ">=26.3 <26.4",
+        "minecraft": ">=26.4- <27.1",
         "mixinextras" : ">=0.5.5"
     }
 }

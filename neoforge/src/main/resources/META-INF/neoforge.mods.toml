@@ -33,6 +33,6 @@ side = "BOTH"
 [[dependencies.biolith]]
 modId = "minecraft"
 type = "required"
-versionRange = "[26.3,26.4)"
+versionRange = "[26.4,27.1)"
 ordering = "NONE"
 side = "BOTH"

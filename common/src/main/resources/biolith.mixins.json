@@ -15,7 +15,7 @@
     "MixinMultiNoiseBiomeSourceParameterList",
     "MixinNoiseGeneratorSettings",
     "MixinServerLevel",
-    "MixinMaterialSystem",
+    "MixinChunkTerrainBuilder",
     "MixinTheEndBiomeSource"
   ],
   "client": [

@@ -22,10 +22,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.InclusiveRange;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.BiomeResolver;
-import net.minecraft.world.level.biome.BiomeSource;
-import net.minecraft.world.level.biome.Climate;
+import net.minecraft.world.level.biome.*;
 import net.minecraft.world.level.dimension.BuiltinDimensionTypes;
 import net.minecraft.world.level.levelgen.densityfunction.SamplerContext;
 import org.jspecify.annotations.Nullable;
@@ -119,7 +116,7 @@ public class BiolithDescribeCommand {
             noisePoint = BiomeCoordinator.END.sampleEndNoise(biomeX, biomeY, biomeZ, noise, original);
             vanillaFittestNodes = VanillaCompat.getEndBiome(noisePoint, biomeEntries, original);
             if (BiolithCompat.COMPAT_TERRABLENDER) {
-                BiomeResolver biomeResolver = biomeSource.createUncachedResolver(world.getChunkSource().randomState());
+                NoiseBiomeResolver biomeResolver = biomeSource.createUncachedResolver(world.getChunkSource().randomState());
                 biomeSource.biolith$setBypass(true);
                 fittestNodes = terrablenderFittestNodes = new BiolithFittestNodes<>(
                         new Climate.RTree.Leaf<>(DimensionBiomePlacement.OUT_OF_RANGE,

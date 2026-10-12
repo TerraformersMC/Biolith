@@ -11,7 +11,6 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.minecraft.core.*;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.WorldGenRegion;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
@@ -343,7 +342,7 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 			}
 		}
 
-		distance = Math.round(Mth.clamp(proposed, lower, upper));
+		distance = Math.round(Math.clamp(proposed, lower, upper));
 		getCache(threadLocalCache, ChunkPos.containing(pos)).biomeCache.put(CacheRecord.getIndex(pos), distance);
 
 		return distance;

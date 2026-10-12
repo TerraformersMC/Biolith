@@ -15,7 +15,6 @@ import net.minecraft.resources.Identifier;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.InclusiveRange;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Climate;
 import org.jspecify.annotations.Nullable;
@@ -336,7 +335,7 @@ public abstract class DimensionBiomePlacement {
     // Approximation of normalizing K.jpg OpenSimplex2(F) values in [-1,1] to unbiased values in [0,1).
     // It's pretty close but values dip a bit near the edges and 1% at the +1 edge is a bit high.
     protected double normalize(double value) {
-        return Mth.clamp(value * 0.5375D + 0.5D, 0D, 1D - Double.MIN_NORMAL);
+        return Math.clamp(value * 0.5375D + 0.5D, 0D, 1D - Double.MIN_NORMAL);
     }
 
     protected record PlacementRequest(Climate.ParameterPoint hypercube, ResourceKey<Biome> biome, boolean fromData) {
@@ -350,7 +349,7 @@ public abstract class DimensionBiomePlacement {
 
     protected record ReplacementRequest(ResourceKey<Biome> biome, double rate, @Nullable Holder<Biome> biomeEntry, double start, double end, boolean fromData) {
         public ReplacementRequest {
-            rate = Mth.clamp(rate, 0D, 1D);
+            rate = Math.clamp(rate, 0D, 1D);
         }
 
         static ReplacementRequest of(ResourceKey<Biome> biome, double rate, boolean fromData) {
@@ -439,7 +438,7 @@ public abstract class DimensionBiomePlacement {
                     maxRate = request.rate;
                 }
             }
-            vanilla = Mth.clamp(1D - maxRate, 0D, 1D);
+            vanilla = Math.clamp(1D - maxRate, 0D, 1D);
             scale = locus + vanilla;
 
             // Add a special request with a place-holder for the vanilla biome, if/when it still generates.

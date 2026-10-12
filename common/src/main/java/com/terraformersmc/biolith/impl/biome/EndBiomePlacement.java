@@ -9,7 +9,6 @@ import net.minecraft.core.HolderGetter;
 import net.minecraft.core.QuartPos;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.Biomes;
 import net.minecraft.world.level.biome.Climate;
@@ -130,7 +129,7 @@ public class EndBiomePlacement extends DimensionBiomePlacement {
         return new Climate.TargetPoint(
                 Climate.quantizeCoord(temperatureNoise.sample(x / 576d, z / 576d)),
                 Climate.quantizeCoord(humidityNoise.sample(x / 448d, z / 448d)),
-                originalBiome.is(Biomes.THE_END) ? 0L : Climate.quantizeCoord(Mth.clamp((float) erosion + 0.0625f, -1f, 1f)),
+                originalBiome.is(Biomes.THE_END) ? 0L : Climate.quantizeCoord(Math.clamp((float) erosion + 0.0625f, -1f, 1f)),
                 Climate.quantizeCoord((float) erosion),
                 156L * (56 - y),
                 Climate.quantizeCoord(weirdnessNoise.sample(x / 192d, z / 192d))

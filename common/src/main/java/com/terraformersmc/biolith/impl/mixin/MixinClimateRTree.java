@@ -3,7 +3,7 @@ package com.terraformersmc.biolith.impl.mixin;
 import com.terraformersmc.biolith.api.biome.BiolithFittestNodes;
 import com.terraformersmc.biolith.impl.Biolith;
 import com.terraformersmc.biolith.impl.biome.InterfaceClimateRTree;
-import com.terraformersmc.biolith.impl.biome.SimpleArrayIterator;
+import com.terraformersmc.biolith.impl.util.RTreeSearchState;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.Identifier;
@@ -15,18 +15,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 
-import java.util.Iterator;
-
 @Mixin(Climate.RTree.class)
 public class MixinClimateRTree<T> implements InterfaceClimateRTree<T> {
+    @Unique
+    private static final ResourceKey<?> BIOLITH_NULL_KEY = ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath("biolith", "null"));
+
+    @Unique
+    private final ThreadLocal<RTreeSearchState<T>> biolith$rTreeSearchState = ThreadLocal.withInitial(RTreeSearchState::new);
+
     @Shadow
     @Final
     private Climate.RTree.Node<T> root;
-
-    @Unique
-    private final ThreadLocal<Climate.RTree.Leaf<T>> previousUltimateNode = new ThreadLocal<>();
-    @Unique
-    private final ThreadLocal<Climate.RTree.Leaf<T>> previousPenultimateNode = new ThreadLocal<>();
 
     /*
      * This is a flattened, stack-based implementation of Mojang's recursive RTree search.
@@ -35,22 +34,20 @@ public class MixinClimateRTree<T> implements InterfaceClimateRTree<T> {
      */
     @Override
     public BiolithFittestNodes<T> biolith$searchTreeGet(Climate.TargetPoint point, Climate.DistanceMetric<T> distanceFunction) {
-        long[] otherParameters = point.toParameterArray();
+        RTreeSearchState<T> searchState = biolith$rTreeSearchState.get();
+        long[] candidate = point.toParameterArray();
         Climate.RTree.Node<T> node = root;
         long nodeDistance = Long.MAX_VALUE;
 
-        @SuppressWarnings("unchecked") // local array of non-reifiable type
-        Iterator<Climate.RTree.Node<T>>[] stack = new SimpleArrayIterator[64];
-        int stackDepth = 0;
+        Climate.RTree.Node<T>[][] children = searchState.children;
+        int[] next = searchState.next;
+        int depth = 0;
 
-        Climate.RTree.@Nullable Leaf<T> ultimate = previousUltimateNode.get();
-        Climate.RTree.@Nullable Leaf<T> penultimate = previousPenultimateNode.get();
+        Climate.RTree.@Nullable Leaf<T> ultimate = searchState.previousUltimateNode;
+        Climate.RTree.@Nullable Leaf<T> penultimate = searchState.previousPenultimateNode;
 
-        // Something causes an incorrect @NotNull inference on ThreadLocal.get(), which can return null by design...
-        //noinspection ConstantConditions
-        long ultimateDistance = ultimate != null ? distanceFunction.distance(ultimate, otherParameters) : Long.MAX_VALUE;
-        //noinspection ConstantConditions
-        long penultimateDistance = penultimate != null ? distanceFunction.distance(penultimate, otherParameters) : Long.MAX_VALUE;
+        long ultimateDistance = ultimate != null ? distanceFunction.distance(ultimate, candidate) : Long.MAX_VALUE;
+        long penultimateDistance = penultimate != null ? distanceFunction.distance(penultimate, candidate) : Long.MAX_VALUE;
 
         // It's possible for the best and next-best fit to have switched places
         if (ultimateDistance > penultimateDistance) {
@@ -67,30 +64,37 @@ public class MixinClimateRTree<T> implements InterfaceClimateRTree<T> {
         // Enclosing braces are to force the compiler not to leak the pattern variables out of scope
         {
             if (node instanceof Climate.RTree.SubTree<T> branchNode) {
-                stack[stackDepth] = new SimpleArrayIterator<>(branchNode.children);
+                children[0] = branchNode.children;
+                next[0] = 0;
             } else if (node instanceof Climate.RTree.Leaf<T> leafNode) {
                 // TODO:  Turns out this is actually a thing.  Consider the implications.
                 //        Maybe implement some system to warn exactly once.
                 //Biolith.LOGGER.warn("Only one biome is available in MultiNoiseBiomeSource!");
-                return new BiolithFittestNodes<>(leafNode, distanceFunction.distance(leafNode, otherParameters));
+
+                return new BiolithFittestNodes<>(leafNode, distanceFunction.distance(leafNode, candidate));
             } else {
                 // This should not occur; it would imply there are no biomes available
                 Biolith.LOGGER.error("No biomes are available in MultiNoiseBiomeSource!");
+
+                // Mojang's implementation will return null under the same conditions
+                //noinspection ConstantConditions
                 return new BiolithFittestNodes<>(ultimate, ultimateDistance);
             }
         }
 
-        // Iteratively search the tree using a stack of simple array iterators to track our position
-        while (stack[stackDepth].hasNext()) {
+        // Iteratively depth-first search the tree by tracking our position moving through 2D state arrays
+        // This no longer uses an actual stack, for performance reasons, but the behavior is identical
+        while (next[depth] < children[depth].length) {
             // Advance to the next available branch node
-            node = stack[stackDepth].next();
-            nodeDistance = distanceFunction.distance(node, otherParameters);
+            node = children[depth][next[depth]++];
+            nodeDistance = distanceFunction.distance(node, candidate);
 
             // Descend the branch until we find a leaf or the branch is no longer fitter
             while (node instanceof Climate.RTree.SubTree<T> branchNode && penultimateDistance > nodeDistance) {
-                stack[++stackDepth] = new SimpleArrayIterator<>(branchNode.children);
-                node = stack[stackDepth].next();
-                nodeDistance = distanceFunction.distance(node, otherParameters);
+                children[++depth] = branchNode.children;
+                node = children[depth][0];
+                next[depth] = 1;
+                nodeDistance = distanceFunction.distance(node, candidate);
             }
 
             // If we're at a leaf, it may be fitter
@@ -109,18 +113,20 @@ public class MixinClimateRTree<T> implements InterfaceClimateRTree<T> {
             }
 
             // Ascend the branch until we have something to consume (or we're all done).
-            while (stackDepth > 0 && !stack[stackDepth].hasNext()) {
-                --stackDepth;
+            while (depth > 0 && next[depth] >= children[depth].length) {
+                --depth;
             }
         }
 
+        // It is no longer possible for ultimate to be null (the tree is known to have values at this point)
+        // (However, the compiler is not sophisticated enough to discern this fact, so we assert it)
+        assert ultimate != null;
+
         // Store the first- and (if any) second-best fits we found to use as our search fallback
-        previousUltimateNode.set(ultimate);
-        previousPenultimateNode.set(penultimate);
+        searchState.previousUltimateNode = ultimate;
+        searchState.previousPenultimateNode = penultimate;
 
         // Return the first- and second-best fit nodes, as well as their fitness (squared n-dimensional distance)
-        // Yes, it's still possible for penultimate to be null.
-        //noinspection ConstantConditions
         if (penultimate == null) {
             return new BiolithFittestNodes<>(ultimate, ultimateDistance);
         } else {
@@ -131,7 +137,9 @@ public class MixinClimateRTree<T> implements InterfaceClimateRTree<T> {
     @Unique
     private ResourceKey<?> biolith$keyOf(Climate.RTree.@Nullable Leaf<T> leafNode) {
         if (leafNode == null) {
-            return ResourceKey.create(Registries.BIOME, Identifier.fromNamespaceAndPath(Biolith.MOD_ID, "null"));
+            return BIOLITH_NULL_KEY;
+        } else if (leafNode.value instanceof Holder.Reference<?> reference) {
+            return reference.key();
         } else {
             return ((Holder<?>) leafNode.value).unwrapKey().orElseThrow();
         }

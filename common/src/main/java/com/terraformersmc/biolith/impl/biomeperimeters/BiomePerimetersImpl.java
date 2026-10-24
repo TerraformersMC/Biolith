@@ -22,8 +22,6 @@ import java.util.Hashtable;
 import java.util.function.Function;
 
 /**
- * BiomePerimetersImpl
- * <p></p>
  * This class builds a bidirectional hashed list of the points (voxels) on the perimeter of a biome instance.
  * The points are used to provide an estimate of how far "in-biome" a given biome voxel is.  This can allow
  * biome generation (f.e. surface builders) to blend with surrounding biomes or generate context-sensitive
@@ -84,12 +82,10 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 	}
 
 	/**
-	 * new BiomePerimetersImpl()
-	 * <p></p>
 	 * Construct a new BiomePerimetersImpl instance for the given Biome.
 	 *
-	 * @param biome   Biome - The Biome for which this BiomePerimetersImpl will compute perimeter distances.
-	 * @param horizon int - The maximum distance to search for perimeter points for this Biome.
+	 * @param biome   The Biome for which this BiomePerimetersImpl will compute perimeter distances.
+	 * @param horizon The maximum distance to search for perimeter points for this Biome.
 	 */
 	BiomePerimetersImpl(Biome biome, int horizon) {
 		if (horizon < 1 || horizon > MAX_HORIZON) {
@@ -104,25 +100,15 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 	}
 
 	/**
-	 * BiomePerimeteres.getPerimeterDistance()
-	 * <p></p>
 	 * Call this method when you need to know how far in-biome a block column is.  The returned int will give the
 	 * distance to the perimeter if it is less than the instance's configured horizon, and a value greater than or
 	 * equal to the configured horizon if it is not.
 	 *
-	 * @param biomeManager BiomeAccess - Biome access used to determine whether neighboring voxels are in-biome.
-	 * @param pos         BlockPos - The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
+	 * @param biomeManager Biome manager or access used to determine whether neighboring voxels are in-biome.
+	 * @param pos          The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
 	 * @return int - The perimeter distance value resolved for the target voxel.
 	 */
 	public int getPerimeterDistance(BiomeManager biomeManager, BlockPos pos) {
-		float minimum = cardinalHorizon + 1;
-		BlockPos iterPos;
-		int horizon;
-		int dx;
-		int dz;
-
-		final var threadLocalCache = threadLocalCaches.get();
-
 		// Work around Mojang making it illegal to access nascent chunks for biome lookup.
 		Function<BlockPos, Holder<Biome>> getBiomeFunction = biomeManager::getBiome;
 		if (biomeManager.noiseBiomeSource instanceof WorldGenRegion chunkRegion) {
@@ -133,6 +119,27 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 					QuartPos.fromBlock(blockPos.getZ())
 			);
 		}
+
+		return getPerimeterDistance(getBiomeFunction, pos);
+	}
+
+	/**
+	 * Call this method when you need to know how far in-biome a block column is.  The returned int will give the
+	 * distance to the perimeter if it is less than the instance's configured horizon, and a value greater than or
+	 * equal to the configured horizon if it is not.
+	 *
+	 * @param getBiomeFunction A function which converts BlockPos to Biome for the world being evaluated.
+	 * @param pos              The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
+	 * @return int - The perimeter distance value resolved for the target voxel.
+	 */
+	public int getPerimeterDistance(Function<BlockPos, Holder<Biome>> getBiomeFunction, BlockPos pos) {
+		float minimum = cardinalHorizon + 1;
+		BlockPos iterPos;
+		int horizon;
+		int dx;
+		int dz;
+
+		final var threadLocalCache = threadLocalCaches.get();
 
 		// If we are on the perimeter, avoid some difficult "edge" cases (har har) by short-circuiting.
 		for (CompositeDirection.Direction8 direction : CompositeDirection.Direction8.values()) {
@@ -366,14 +373,12 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 	}
 
 	/**
-	 * BiomePerimetersImpl.getOrCreateInstance()
-	 * <p></p>
 	 * Each Biome must have a separate instance of BiomePerimetersImpl.  An instance of BiomePerimetersImpl
 	 * will be created if one does not already exist, and subsequently the same instance will always
 	 * be returned for the given Biome during the same game session.
 	 *
-	 * @param biome   - The Biome for which we are maybe-adding and fetching the BiomePerimetersImpl instance
-	 * @param horizon - Max distance to check for biome edge; range [1 - 256]
+	 * @param biome   The Biome for which we are maybe-adding and fetching the BiomePerimetersImpl instance
+	 * @param horizon Max distance to check for biome edge; range [1 - 256]
 	 */
 	public static synchronized BiomePerimetersImpl getOrCreateInstance(Biome biome, int horizon) {
 		return instances.computeIfAbsent(biome, (key) -> new BiomePerimetersImpl(key, horizon));
@@ -381,8 +386,6 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 
 
 	/**
-	 * BiomePerimetersImpl.BiomePerimeterPoint
-	 * <p></p>
 	 * This class essentially defines a mutable record we use to store data about the perimeter of a Biome.
 	 * A future implementation of BiomePerimetersImpl may expose BiomePerimeterPoints in some manner if useful.
 	 */
@@ -453,25 +456,21 @@ public class BiomePerimetersImpl implements BiomePerimeters {
 		}
 
 		/**
-		 * BiomePerimetersImpl.BiomePerimeterPoint.getDistance()
-		 * <p></p>
 		 * Calculate the straight-line distance between a biome perimeter point and another position.
 		 *
-		 * @param pos BlockPos - The position to calculate the distance to
-		 * @return double - The distance "as the crow flies" between this BiomePerimeterPoint and pos
+		 * @param pos The position to calculate the distance to
+		 * @return The distance "as the crow flies" between this BiomePerimeterPoint and pos
 		 */
 		public double getDistance(BlockPos pos) {
 			return Math.sqrt(this.pos.distSqr(pos));
 		}
 
 		/**
-		 * BiomePerimetersImpl.BiomePerimeterPoint.getTaxicab()
-		 * <p></p>
 		 * Calculate the taxi-cab (or "Manhattan") distance between a biome perimeter point and another position.
 		 * This is the sum of the difference between the X and Z coordinates of the two points.
 		 *
-		 * @param pos Vec3i - The position to calculate the taxi-cab distance to
-		 * @return int - The distance "as a taxi drives" between this BiomePerimeterPoint and pos
+		 * @param pos The position to calculate the taxi-cab distance to
+		 * @return The distance "as a taxi drives" between this BiomePerimeterPoint and pos
 		 */
 		public int getTaxicab(Vec3i pos) {
 			return this.pos.distManhattan(pos);

@@ -2,9 +2,12 @@ package com.terraformersmc.biolith.api.biomeperimeters;
 
 import com.terraformersmc.biolith.impl.biomeperimeters.BiomePerimetersImpl;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeManager;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.function.Function;
 
 /**
  * This class builds a bidirectional hashed list of the points (voxels) on the perimeter of a biome instance.
@@ -24,11 +27,22 @@ public interface BiomePerimeters {
 	 * distance to the perimeter if it is less than the instance's configured horizon, and a value greater than or
 	 * equal to the configured horizon if it is not.
 	 *
-	 * @param biomeManager Biome access used to determine whether neighboring voxels are in-biome.
-	 * @param pos         The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
-	 * @return            The perimeter distance value resolved for the target voxel.
+	 * @param biomeManager Biome manager or access used to determine whether neighboring voxels are in-biome.
+	 * @param pos          The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
+	 * @return             The perimeter distance value resolved for the target voxel.
 	 */
 	int getPerimeterDistance(BiomeManager biomeManager, BlockPos pos);
+
+	/**
+	 * Call this method when you need to know how far in-biome a block column is.  The returned int will give the
+	 * distance to the perimeter if it is less than the instance's configured horizon, and a value greater than or
+	 * equal to the configured horizon if it is not.
+	 *
+	 * @param getBiomeFunction A function which converts BlockPos to Biome for the world being evaluated.
+	 * @param pos              The voxel being evaluated for perimeter distance; the Y value is used for biome checks.
+	 * @return                 The perimeter distance value resolved for the target voxel.
+	 */
+	int getPerimeterDistance(Function<BlockPos, Holder<Biome>> getBiomeFunction, BlockPos pos);
 
 	/**
 	 * Each Biome must have a separate instance of BiomePerimeters.  An instance of BiomePerimeters

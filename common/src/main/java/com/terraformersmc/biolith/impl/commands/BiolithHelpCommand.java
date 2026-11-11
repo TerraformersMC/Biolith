@@ -1,8 +1,8 @@
 package com.terraformersmc.biolith.impl.commands;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.StringArgument;
 import net.minecraft.network.chat.Component;
 
 public class BiolithHelpCommand {
@@ -19,7 +19,7 @@ public class BiolithHelpCommand {
     }
 
     protected static int helpSpecific(CommandContext<CommandSourceStack> context) {
-        String subcommand = StringArgumentType.getString(context, "command");
+        String subcommand = StringArgument.getString(context, "command");
 
         if (subcommand.compareTo("help") == 0) {
             // Very Funny

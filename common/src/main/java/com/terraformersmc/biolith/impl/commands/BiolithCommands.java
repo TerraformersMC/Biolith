@@ -5,10 +5,10 @@ import com.terraformersmc.biolith.impl.platform.Services;
 
 import java.util.List;
 
-import static com.mojang.brigadier.arguments.StringArgumentType.word;
 import static net.minecraft.commands.Commands.argument;
 import static net.minecraft.commands.Commands.literal;
 import static net.minecraft.commands.arguments.EntityArgument.entity;
+import static net.minecraft.commands.arguments.StringArgument.word;
 import static net.minecraft.commands.arguments.coordinates.BlockPosArgument.blockPos;
 
 public class BiolithCommands {
